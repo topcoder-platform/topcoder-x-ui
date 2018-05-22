@@ -22,7 +22,7 @@
         "test:fe": "gulp protractor",
         "lint": "gulp lint",
         "serve:dist": "gulp serve:dist",
-        "heroku-postbuild": "gulp build"
+        "heroku-postbuild": "gulp build:fe"
     },
     "dependencies": {
         "angular": "~1.4.4",
