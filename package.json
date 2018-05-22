@@ -5,7 +5,7 @@
     "author": "TCSCODER",
     "license": "ISC",
     "private": true,
-    "main": "app.js",
+    "main": "src/app.js",
     "engines": {
         "node": "8",
         "npm": "5"
