@@ -1,0 +1,38 @@
+<div class="row border-bottom">
+  <nav class="navbar navbar-static-top white-bg" role="navigation" style="margin-bottom: 0">
+    <div ng-controller="MainController" style="margin-right: 50px;">
+      <ul class="nav navbar-top-links navbar-right">
+        <li ng-show="authorized()">
+          <div class="dropdown">
+            <span class="block m-t-xs pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              <strong class="font-bold">{{$root.currentUser.handle}}</strong>
+              <span class="caret"></span>
+            </span>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+              <li>
+                <a href="javascript:;" ui-sref="app.settings">
+                  <i class="fa fa-cog"></i>
+                  <small>Settings</small>
+                </a>
+              </li>
+              <li>
+                <a href="javasript:;" ng-click="logout()">
+                  <i class="fa fa-sign-out"></i>
+                  <small>Sign Out</small>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+        <li ng-show="!authorized()">
+          <span class="clear">
+            <a href="" ng-click="login()">
+              <i class="fa fa-sign-in"></i>
+              <small>Log in</small>
+            </a>
+          </span>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</div>

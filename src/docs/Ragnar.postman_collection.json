@@ -1,0 +1,177 @@
+{
+	"id": "f5dcf1c2-3219-93c6-cde5-4fc63a4c354b",
+	"name": "Topcoder X",
+	"description": "",
+	"order": [
+		"9d5c2794-9c44-9fbc-0e54-471759947b53",
+		"397156c8-1886-3efc-681f-aaf1820999ad",
+		"eaac9e87-e702-4994-a912-6e05ff7f28d3",
+		"a458c410-78cf-2614-0628-bd0d8cb4256e"
+	],
+	"folders": [],
+	"folders_order": [],
+	"timestamp": 0,
+	"owner": 0,
+	"public": false,
+	"requests": [
+		{
+			"id": "397156c8-1886-3efc-681f-aaf1820999ad",
+			"headers": "Content-Type: application/json\nAuthorization: Bearer {{ADMIN-TOKEN}}\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Bearer {{ADMIN-TOKEN}}",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{URL}}/api/v1/admin/users",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1505327033984,
+			"name": "Save GitHub User",
+			"description": "",
+			"collectionId": "f5dcf1c2-3219-93c6-cde5-4fc63a4c354b",
+			"responses": [],
+			"rawModeData": "{\n\t\"username\": \"your-github-username\",\n\t\"role\": \"owner\",\n\t\"type\": \"github\"\n}",
+			"collection_id": "f5dcf1c2-3219-93c6-cde5-4fc63a4c354b"
+		},
+		{
+			"id": "9d5c2794-9c44-9fbc-0e54-471759947b53",
+			"headers": "Content-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{URL}}/api/v1/admin/login",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": "var jsonData = JSON.parse(responseBody);\npostman.setEnvironmentVariable(\"ADMIN-TOKEN\", jsonData.token);",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1504306539581,
+			"name": "Admin Login",
+			"description": "",
+			"collectionId": "f5dcf1c2-3219-93c6-cde5-4fc63a4c354b",
+			"responses": [],
+			"rawModeData": "{\n    \"username\": \"admin\",\n    \"password\": \"password\"\n}",
+			"collection_id": "f5dcf1c2-3219-93c6-cde5-4fc63a4c354b"
+		},
+		{
+			"id": "a458c410-78cf-2614-0628-bd0d8cb4256e",
+			"headers": "Content-Type: application/json\nAuthorization: Bearer {{ADMIN-TOKEN}}\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Bearer {{ADMIN-TOKEN}}",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{URL}}/api/v1/admin/tcuser?gitlabUsername=guanpeiyong",
+			"queryParams": [
+				{
+					"key": "topcoderUsername",
+					"value": "mess",
+					"equals": true,
+					"description": "",
+					"enabled": false
+				},
+				{
+					"key": "githubUsername",
+					"value": "guanpeiyong",
+					"equals": true,
+					"description": "",
+					"enabled": false
+				},
+				{
+					"key": "gitlabUsername",
+					"value": "guanpeiyong",
+					"equals": true,
+					"description": "",
+					"enabled": true
+				}
+			],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "GET",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1509717985521,
+			"name": "Get User Mapping",
+			"description": "",
+			"collectionId": "f5dcf1c2-3219-93c6-cde5-4fc63a4c354b",
+			"responses": [],
+			"rawModeData": ""
+		},
+		{
+			"id": "eaac9e87-e702-4994-a912-6e05ff7f28d3",
+			"headers": "Content-Type: application/json\nAuthorization: Bearer {{ADMIN-TOKEN}}\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Authorization",
+					"value": "Bearer {{ADMIN-TOKEN}}",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "{{URL}}/api/v1/admin/users",
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1505327045199,
+			"name": "Save GitLab User",
+			"description": "",
+			"collectionId": "f5dcf1c2-3219-93c6-cde5-4fc63a4c354b",
+			"responses": [],
+			"rawModeData": "{\n\t\"username\": \"your-gitlab-username\",\n\t\"role\": \"owner\",\n\t\"type\": \"gitlab\"\n}",
+			"collection_id": "f5dcf1c2-3219-93c6-cde5-4fc63a4c354b"
+		}
+	]
+}

@@ -1,0 +1,109 @@
+<div>
+    <div class="col-md-10 col-md-offset-1" ng-include src="'components/alert/alert.html'"></div>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-6">
+            <h2>Git Access Control</h2>
+        </div>
+    </div>
+
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row" ng-if="isLoaded">
+            <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-content">
+                        <div>
+                            <h3> Github Projects:</h3>
+                            <div ng-if="settings.github==true">
+                                <table ng-if="githubItems.teams.length!=0" class="footable table table-stripped" data-page-navigation=".pagination"
+                                    data-page-size="10" ng-init="init()">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-lg-2">Team Name</th>
+                                            <th class="col-lg-2">Get Link</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in githubItems.teams">
+                                            <td class="col-lg-2">{{item.name}}</td>
+                                            <td class="col-lg-2">
+                                                <button class="btn btn-sm btn-success" ng-click="getSharableLink(item, 'github')">
+                                                    <strong>Get Link</strong>
+                                                </button>
+                                                <div ng-if="item.showLink"><br>
+                                                    <p>{{item.accessLink}}</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="4">
+                                                <ul class="pagination pull-right"></ul>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <div ng-if="githubItems.teams.length==0">
+                                    You don't appear to have any Github teams available to manage through Topcoder X. Topcoder X is used to give Topcoder members
+                                    access to specific teams using your ownership credentials. If you don't have
+                                    any teams, Topcoder X won't be able to manage access for you. Please see this link
+                                    for information on Github teams:
+                                    <a href="https://help.github.com/articles/organizing-members-into-teams/" target="_blank">here</a>
+                                </div>
+                            </div>
+                            <div ng-if="settings.github==false">
+                                <h3>Your Github account isn't registered in the Topcoder X tool. Please setup in setting.</h3>
+                                <button class="btn btn-primary" ui-sref="app.settings">Go To Setting</button>
+                            </div>
+                        </div>
+                        <br>
+                        <div>
+                            <h3> Gitlab Project:</h3>
+                            <div ng-if="settings.gitlab==true">
+                                <table ng-if="gitlabItems.groups.length!=0" class="footable table table-stripped" data-page-size="10" ng-init="init()">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-lg-2">Group Name</th>
+                                            <th class="col-lg-2">Get Link</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in gitlabItems.groups">
+                                            <td class="col-lg-2">{{item.name}}</td>
+                                            <td class="col-lg-2">
+                                                <button class="btn btn-sm btn-success" ng-click="getSharableLink(item, 'gitlab')">
+                                                    <strong>Get Link</strong>
+                                                </button>
+                                                <div ng-if="item.showLink"><br>
+                                                    <p>{{item.accessLink}}</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="4">
+                                                <ul class="pagination pull-right"></ul>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <div ng-if="gitlabItems.groups.length==0">
+                                    You don't appear to have any Gitlab groups available to manage through Topcoder X. Topcoder X is used to give Topcoder
+                                    members access to specific group using your ownership credentials. If you don't
+                                    have any group, Topcoder X won't be able to manage access for you. Please see this
+                                    link for information on Gitlab group:
+                                    <a href="https://docs.gitlab.com/ee/user/group/" target="_blank">here</a>
+                                </div>
+                            </div>
+                            <div ng-if="settings.gitlab==false">
+                                <h3>Your Gitlab account isn't registered in the Topcoder X tool. Please setup in setting.</h3>
+                                <button class="btn btn-primary" ui-sref="app.settings">Go To Setting</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

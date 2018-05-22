@@ -1,0 +1,52 @@
+<nav class="navbar-default navbar-static-side" role="navigation" ng-controller="NavController">
+    <div class="sidebar-collapse">
+        <a href="" ng-click="menuOpen()" class="m-menu" ng-class="{'menu-open':menuList}">
+            <i class="fa fa-reorder"></i>
+        </a>
+        <ul side-navigation class="nav metismenu" id="side-menu" ng-class="{'menu-open':menuList}">
+            <li class="nav-header">
+                <img src="assets/images/logo.png" />
+            </li>
+            <li ui-sref-active="active">
+                <a ui-sref="app.main">
+                    <i class="fa fa-laptop"></i>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+            </li>
+            <li ui-sref-active="active" id="projectsManagement">
+                <a ui-sref="app.projects">
+                    <i class="fa fa-tasks"></i>
+                    <span class="nav-label">Project Management</span>
+                </a>
+            </li>
+            <li ui-sref-active="active" id="gitAccessControl">
+                <a ui-sref="app.gitAccessControl">
+                    <i class="fa fa-tasks"></i>
+                    <span class="nav-label">Git access control</span>
+                </a>
+            </li>
+            
+            <li ui-sref-active="active">
+                <a href="#">
+                    <i class="fa fa-code"></i>
+                    <span class="nav-label">My Challenges</span>
+                    <span class="fa arrow"></span>
+                </a>
+                <ul class="nav nav-second-level collapse">
+                    <li>
+                        <a ui-sref="app.challenges">Topcoder platform</a>
+                    </li>
+                    <li>
+                        <a ui-sref="app.tickets">Git tickets</a>
+                    </li>
+                </ul>
+            </li>
+            <li ui-sref-active="active">
+                <a ui-sref="app.changelog">
+                    <i class="fa fa-history"></i>
+                    <span class="nav-label">Changelog</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>

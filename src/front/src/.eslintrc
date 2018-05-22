@@ -1,0 +1,35 @@
+{
+  "extends": [
+    "angular"
+  ],
+  "rules": {
+    "angular/no-service-method": 0,
+    "angular/window-service": 0,
+    "angular/di": [2, "array"],
+    "angular/angularelement": 0,
+    "angular/timeout-service": 0,
+    "max-params": 0,
+    "angular/document-service": 0,
+    "angular/controller-as": 0,
+    "valid-jsdoc": 0,
+    "require-jsdoc": 0,
+    "no-magic-numbers": 0,
+    "no-invalid-this" : 0,
+    "no-nested-ternary" : 0,
+    "no-void" : 0,
+    "consistent-return" : 0,
+    "lodash/prefer-includes" : 0,
+    "one-var" : 0,
+    "no-restricted-syntax" : 0,
+    "func-style" : 0,
+    "vars-on-top" : 0,
+    "func-names" : 0,
+    "prefer-rest-params" : 0
+  },
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true,
+    "jquery": true
+  }
+}

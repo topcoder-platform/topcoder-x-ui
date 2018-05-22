@@ -1,0 +1,60 @@
+<div>
+  <div class="col-md-10 col-md-offset-1" ng-include src="'components/alert/alert.html'"></div>
+  <div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-4">
+      <h2>{{title}}</h2>
+    </div>
+    <div class="col-lg-2 with-button" ng-show="editing">
+      <button class="btn btn-sm btn-info" ng-click="addLabels()">
+        <strong>Add Labels</strong>
+      </button>
+    </div>
+    <div class="col-lg-2 with-button" ng-show="editing">
+      <button class="btn btn-sm btn-info" ng-click="addHooks()">
+        <strong>
+          Add Webhooks
+        </strong>
+      </button>
+    </div>
+  </div>
+
+  <div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="text-center m-t-lg">
+          <form name="projectForm">
+            <label class="form-label">Project Name:</label>
+            <input class="form-control" type="text" ng-model="project.title" required/>
+            <span ng-show="projectForm.project.title.$touched && projectForm.project.title.$invalid">The project Title is required.</span>
+            <br />
+            <label class="form-label">Direct ID:</label>
+            <input class="form-control" type="number" ng-model="project.tcDirectId" ng-disabled="editing" required/>
+            <span ng-show="projectForm.project.tcDirectId.$touched && projectForm.project.tcDirectId.$invalid">The TC Direct ID is required.</span>
+            <br />
+            <label class="form-label">Repo URL:</label>
+            <input class="form-control" type="url" ng-model="project.repoUrl" required />
+            <span ng-show="projectForm.project.repoUrl.$touched && projectForm.project.repoUrl.$invalid">The TC Repo URL is required.</span>
+            <br />
+            <label class="form-label">Rocket.chat Webhook URL:</label>
+            <input class="form-control" type="url" ng-model="project.rocketChatWebhook" required/>
+            <span ng-show="projectForm.project.rocketChatWebhook.$touched && projectForm.project.rocketChatWebhook.$invalid">The Rocket Chat Webhook is required.</span>
+            <br />
+            <label class="form-label">Rocket.chat Channel Name:</label>
+            <input class="form-control" type="text" ng-model="project.rocketChatChannelName" required/>
+            <span ng-show="projectForm.project.rocketChatChannelName.$touched && projectForm.project.rocketChatChannelName.$invalid">The Rocket Chat Channel Name is required.</span>
+            <br />
+            <label class="form-label">Archived:</label>
+            <input class="checkbox-control" type="checkbox" ng-model="project.archived" ng-checked="project.archived === 'true'"
+              ng-model="project.archived" ng-true-value="'true'" ng-false-value="'false'" />
+            <br/>
+            <button class="with-button btn btn-sm btn-info" ng-click="projectForm.$valid && save()">
+              <strong>
+                Save
+              </strong>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

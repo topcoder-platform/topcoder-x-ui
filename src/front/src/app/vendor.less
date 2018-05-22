@@ -1,0 +1,77 @@
+@import '../../../../node_modules/font-awesome/less/font-awesome.less';
+@import '../../../../node_modules/bootstrap/less/bootstrap.less';
+
+// SERVE
+@icon-font-path: '/node_modules/bootstrap/fonts/';
+@fa-font-path: '/node_modules/font-awesome/fonts';
+
+// SERVE:DIST
+//@icon-font-path: '/fonts/';
+//@fa-font-path: '/fonts';
+
+.login-box {
+	width: 300px;
+	text-align: center;
+	background-color: #fff;
+	
+	.logo-header {
+		padding: 13px;
+		border: solid 2px #fff;
+		background-color: #3e3e3e
+	}
+	
+	h3 {
+		color: #4a4a4a;
+		font-weight: 200;
+		font-family: 'sofia-pro';
+		text-transform: uppercase;
+	}
+	
+	form {
+		padding: 20px;
+	}
+	
+	button {
+		text-transform: uppercase;
+	}
+}
+
+
+.animate-repeat.ng-move,
+.animate-repeat.ng-enter,
+.animate-repeat.ng-leave {
+  -webkit-transition:all linear 0.5s;
+  transition:all linear 0.5s;
+}
+.animate-repeat.ng-leave.ng-leave-active,
+.animate-repeat.ng-move,
+.animate-repeat.ng-enter {
+  opacity:0;
+  max-height:0;
+}
+.animate-repeat.ng-leave,
+.animate-repeat.ng-move.ng-move-active,
+.animate-repeat.ng-enter.ng-enter-active {
+  opacity:1;
+  max-height:40px;
+}
+
+multiselect{
+    display: block;
+	font-size: 14px;
+}
+multiselect .btn-group, multiselect ul{
+	width: 100%;
+}
+multiselect .btn-default {
+	 width: 100%;
+	 background-color: #FFFFFF;
+	 color: inherit;
+	 border: 1px solid #e5e6e7;
+ }
+
+
+.table-responsive {
+  overflow-x: visible;
+  min-height: 0.01%;
+}
