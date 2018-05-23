@@ -5,7 +5,7 @@
 - Nodejs 8 is required
 - MongoDB 3.2
 - kafka
-
+- nodemon (for local development)
 
 ## Install dependencies
 

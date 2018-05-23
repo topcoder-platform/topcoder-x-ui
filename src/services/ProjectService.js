@@ -19,6 +19,7 @@ const Project = require('../models').Project;
 
 const projectSchema = {
   project: {
+    id: Joi.string().required(),
     title: Joi.string().required(),
     tcDirectId: Joi.number().required(),
     repoUrl: Joi.string().required(),
@@ -141,17 +142,19 @@ async function createLabel(body) {
       description: body.description,
     });
   }
+  return;
 }
 
 createLabel.schema = Joi.object().keys({
-  repoType: Joi.string().required(),
-  repoToken: Joi.string().required(),
-  repoOwner: Joi.string().required(),
-  repoName: Joi.string().required(),
-  label: Joi.string().required(),
-  description: Joi.string().required(),
-  color: Joi.string().required(),
-  baseUrl: Joi.string().required(),
+  body: Joi.object().keys({
+    repoType: Joi.string().required(),
+    repoToken: Joi.string().required(),
+    repoOwner: Joi.string().required(),
+    repoName: Joi.string().required(),
+    label: Joi.string().required(),
+    description: Joi.string().required(),
+    color: Joi.string().required(),
+  }),
 });
 
 /**
@@ -159,7 +162,7 @@ createLabel.schema = Joi.object().keys({
  * @param {Object} body the request body
  */
 async function createHook(body) {
-  const projectDetail = await helper.ensureExists(Project, body.challengeId);
+  const projectDetail = await helper.ensureExists(Project, body.projectId);
   if (body.repoType === 'github') {
     const client = gitHubApi.client(body.repoToken);
     const ghrepo = client.repo(`${body.repoOwner}/${body.repoName}`);
@@ -201,15 +204,18 @@ async function createHook(body) {
       }
     );
   }
+  return;
 }
 
 createHook.schema = Joi.object().keys({
-  challengeId: Joi.string().required(),
-  repoType: Joi.string().required(),
-  repoOwner: Joi.string().required(),
-  repoToken: Joi.string().required(),
-  repoName: Joi.string().required(),
-  baseUrl: Joi.string().required(),
+  body: Joi.object().keys({
+    projectId: Joi.string().required(),
+    repoType: Joi.string().required(),
+    repoOwner: Joi.string().required(),
+    repoToken: Joi.string().required(),
+    repoName: Joi.string().required(),
+    baseUrl: Joi.string().required(),
+  }),
 });
 
 module.exports = {

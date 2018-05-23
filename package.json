@@ -16,7 +16,7 @@
         "start:be": "nodemon src/app.js",
         "start:fe": "gulp build:watch",
         "build:fe": "gulp build",
-        "build":"gulp build",
+        "build": "gulp build",
         "test": "node ./node_modules/mocha/bin/mocha --recursive --timeout 999999 --colors tests/*.test.js --bail",
         "clean": "gulp clean",
         "publish": "gulp publish",
