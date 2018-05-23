@@ -20,7 +20,7 @@ module.exports = {
   GITLAB_CLIENT_ID: process.env.GITLAB_CLIENT_ID || '',
   GITLAB_CLIENT_SECRET: process.env.GITLAB_CLIENT_SECRET || '',
   // used as base to construct various URLs
-  WEBSITE: process.env.WEBSITE || 'http://topcoderx.topcoder.com',
+  WEBSITE: process.env.WEBSITE || 'http://topcoderx.topcoder-dev.com',
 
   GITHUB_OWNER_CALLBACK_URL: '/api/v1/github/owneruser/callback',
   GITLAB_OWNER_CALLBACK_URL: '/api/v1/gitlab/owneruser/callback',
@@ -29,9 +29,9 @@ module.exports = {
   USER_ADDED_TO_TEAM_SUCCESS_URL: '/#/app/members',
 
   GITLAB_API_BASE_URL: process.env.GITLAB_API_BASE_URL || 'https://gitlab.com/api/v4',
-  TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts.topcoder.com/member',
+  TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts.topcoder-dev.com/member',
   TC_LOGIN_CALLBACK_URL: '/api/v1/tclogin',
-  TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || 'http://api.topcoder.com/v2/user/profile',
+  TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || 'http://api.topcoder-dev.com/v2/user/profile',
 
   // kafka configuration
   TOPIC: process.env.TOPIC || 'tc-x-events',

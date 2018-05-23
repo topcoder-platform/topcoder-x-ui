@@ -67,12 +67,12 @@ The following config parameters are supported, they are defined in `config.js` a
 | GITHUB_CLIENT_SECRET                   | the GitHub client secret                   |                                  |
 | GITLAB_CLIENT_ID                       | the GitLab client id                       |                                  |
 | GITLAB_CLIENT_SECRET                   | the GitLab client secret                   |                                  |
-| WEBSITE                                | used as base to construct various URLs     | http://topcoderx.topcoder.com/ |
+| WEBSITE                                | used as base to construct various URLs     | http://topcoderx.topcoder-dev.com/ |
 
 | GITLAB_API_BASE_URL                    | The Gitlab API base URL                    | https://gitlab.com/api/v4        |
 
 | TC_LOGIN_URL                           | URL to do TopCoder login |                      |
-| TC_USER_PROFILE_URL                    | URL to to call TopCoder API to get profile from token    | https://accounts.topcoder.com/member?retUrl=http:%2F%2Ftopcoderx.topcoder.com%2Fapi%2Fv1%2Ftclogin |
+| TC_USER_PROFILE_URL                    | URL to to call TopCoder API to get profile from token    | https://accounts.topcoder-dev.com/member?retUrl=http:%2F%2Ftopcoderx.topcoder-dev.com%2Fapi%2Fv1%2Ftclogin |
 |TOPIC | kafka topic| |
 |KAFKA_OPTIONS | kafka options| |
 
@@ -102,7 +102,7 @@ The frontend config file contains following variables to be configured in `src/f
 - click the left panel --> Developer settings --> OAuth Apps
 - click the `Register a new application`, fill in the fields,
   note that the `Authorization callback URL` should be the deployed web site,
-  for local deployment, it should be `http://topcoderx.topcoder.com`
+  for local deployment, it should be `http://topcoderx.topcoder-dev.com`
 - after creating the OAuth app, you can see its client id and client secret,
   these should be set to GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET environment variables
 
@@ -113,8 +113,8 @@ The frontend config file contains following variables to be configured in `src/f
 - click the `Applications` tab
 - enter application name, e.g. `Topcoder-x`
 - for Redirect URI, enter two callback URLs, one callback URL per line, so there are two lines:
-  http://topcoderx.topcoder.com/api/v1/gitlab/owneruser/callback
-  http://topcoderx.topcoder.com/api/v1/gitlab/normaluser/callback
+  http://topcoderx.topcoder-dev.com/api/v1/gitlab/owneruser/callback
+  http://topcoderx.topcoder-dev.com/api/v1/gitlab/normaluser/callback
 - for Scopes, check the `api` and `read_user`, the `api` is for owner user, the `read_user` is for normal user
 - finally click `Save application` to save the OAuth app, then you will see its generated Application Id and Secret,
   these should be set to GITLAB_CLIENT_ID and GITLAB_CLIENT_SECRET environment variables
@@ -134,12 +134,12 @@ Import docs/Ragnar.postman_collection.json and docs/Ragnar.postman_environment.j
 After admin login, the admin token is automatically set to ADMIN-TOKEN environment variable,
 then you may run the `Save GitHub User` and `Save GitLab User` tests to create owner user of your GitHub/GitLab usernames,
 note that you must modify the request body username to use your GitHub/GitLab user names.
-For the `Get User Mapping` test, you may quety mapping by providing either topcoderUsername, githubUsername or gitlabUsername.
+For the `Get User Mapping` test, you may query mapping by providing either topcoderUsername, githubUsername or gitlabUsername.
 
 ## Verification
 
 - run `npm serve` to start the app
-- go to topcoderx.topcoder.com and it will redirect to Topcoder login page, after successful login it will redirect back to Topcoder x app.
+- go to topcoderx.topcoder-dev.com and it will redirect to Topcoder login page, after successful login it will redirect back to Topcoder x app.
 - go to settings by clicking username at top right corner
 - setup both git provider to authorize topcoder-x to manage your repo on behalf of you
 - go to project management and create/edit projects, create hook and label
@@ -149,10 +149,11 @@ For the `Get User Mapping` test, you may quety mapping by providing either topco
 ## Heroku Deployment
 Follow the below steps to deploy the app to heroku
 1. `heroku login`
-2. `heroku create`
-3. `heroku config:set NPM_CONFIG_PRODUCTION=false` so that heroku will install dev dependencies
-5. `git push heroku master` or `git push heroku develop:master` to deploy develop branch
-6. `heroku open` to load the app on browser
+1. `heroku create`
+1. `heroku addons:create mongolab`
+1. `heroku config:set NPM_CONFIG_PRODUCTION=false` so that heroku will install dev dependencies
+1. `git push heroku master` or `git push heroku develop:master` to deploy develop branch
+1. `heroku open` to load the app on browser
 
 NOTE: Once environment variable are changed in heroku please run 
 `heroku run npm run build` 
