@@ -1,6 +1,6 @@
 'use strict';
 
 angular.module('topcoderX')
-    .controller('MainController', ['$scope', function ($scope) {
+    .controller('MemberController', ['$scope', function ($scope) {
         $scope.title = 'Members';
     }]);
