@@ -20,6 +20,7 @@ const config = require('./config');
 const routes = require('./routes');
 const logger = require('./common/logger');
 const errors = require('./common/errors');
+const constants = require('./common/constants');
 
 const app = express();
 app.use(cors());
@@ -38,7 +39,7 @@ _.forEach(routes, (verbs, path) => {
     }
     const actions = [];
     actions.push((req, res, next) => {
-      const v3jwt = _.get(req.cookies, 'v3jwt');
+      const v3jwt = _.get(req.cookies, constants.JWT_V3_NAME);
       if (v3jwt) {
         const decoded = jwtDecode(v3jwt);
         req.currentUser = {
@@ -56,8 +57,8 @@ _.forEach(routes, (verbs, path) => {
           return next();
         }
         req.session.tcLoginReturnUrl = req.originalUrl;
-        const callbackUri = `${config.WEBSITE}${config.TC_LOGIN_CALLBACK_URL}`;
-        return res.redirect(`${config.TC_LOGIN_URL}?retUrl=${encodeURIComponent(callbackUri)}`);
+        const callbackUri = `${config.WEBSITE}${constants.TC_LOGIN_CALLBACK_URL}`;
+        return res.redirect(`${constants.TOPCODER_VALUES[config.TOPCODER_ENV].TC_LOGIN_URL}?retUrl=${encodeURIComponent(callbackUri)}`);
       });
     }
     actions.push(method);

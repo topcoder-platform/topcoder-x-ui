@@ -6,8 +6,7 @@
 'use strict';
 
 angular.module('topcoderX')
-  .factory('ProjectService', ['$location', '$http', function ($location, $http) {
-    var baseUrl = $location.protocol() + '://' + $location.host();
+  .factory('ProjectService', ['Helper', '$http', function (Helper, $http) {
     //object we will return
     var ProjectService = {};
     /**
@@ -15,7 +14,7 @@ angular.module('topcoderX')
      * @param project  the project to be created
      */
     ProjectService.create = function (project) {
-      return $http.post(baseUrl + '/api/v1/projects', project).then(function (response) {
+      return $http.post(Helper.baseUrl + '/api/v1/projects', project).then(function (response) {
         return response;
       });
     };
@@ -24,7 +23,7 @@ angular.module('topcoderX')
      * Get all projects
      */
     ProjectService.getProjects = function () {
-      return $http.get(baseUrl + '/api/v1/projects').then(function (response) {
+      return $http.get(Helper.baseUrl + '/api/v1/projects').then(function (response) {
         return response;
       });
     };
@@ -34,7 +33,7 @@ angular.module('topcoderX')
      * @param project the project to be updated
      */
     ProjectService.update = function (project) {
-      return $http.put(baseUrl + '/api/v1/projects', project).then(function (response) {
+      return $http.put(Helper.baseUrl + '/api/v1/projects', project).then(function (response) {
         return response;
       })
     };
@@ -46,7 +45,7 @@ angular.module('topcoderX')
      * @param tokenType  the code repository provider: its either gitlab or github
      */
     ProjectService.getUserToken = function (username, tokenType) {
-      return $http.get(baseUrl + '/api/v1/users/accessToken?username=' + username + '&tokenType=' + tokenType).then(function (response) {
+      return $http.get(Helper.baseUrl + '/api/v1/users/accessToken?username=' + username + '&tokenType=' + tokenType).then(function (response) {
         return response;
       })
     };
@@ -64,7 +63,7 @@ angular.module('topcoderX')
     ProjectService.createLabel = function (objc) {
       var req = {
         method: 'POST',
-        url: baseUrl + '/api/v1/projects/label',
+        url: Helper.baseUrl + '/api/v1/projects/label',
         data: objc
       };
       return $http(req).then(function (response) { return response; })
@@ -81,7 +80,7 @@ angular.module('topcoderX')
     ProjectService.createHooks = function (objc) {
       var req = {
         method: 'POST',
-        url: baseUrl + '/api/v1/projects/hook',
+        url: Helper.baseUrl + '/api/v1/projects/hook',
         data: objc
       };
       return $http(req).then(function (response) {

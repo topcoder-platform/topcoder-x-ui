@@ -33,7 +33,7 @@ async function ownerUserLogin(req, res) {
     req.session.state = helper.generateIdentifier();
   }
   // redirect to GitHub OAuth
-  const callbackUri = `${config.WEBSITE}${config.GITHUB_OWNER_CALLBACK_URL}`;
+  const callbackUri = `${config.WEBSITE}${constants.GITHUB_OWNER_CALLBACK_URL}`;
   res.redirect(`http://github.com/login/oauth/authorize?client_id=${
     config.GITHUB_CLIENT_ID
     }&redirect_uri=${
@@ -73,7 +73,7 @@ async function ownerUserLoginCallback(req, res) {
   req.session.ownerUsername = ownerUser.username;
 
   // redirect to success page
-  res.redirect(config.OWNER_USER_LOGIN_SUCCESS_URL);
+  res.redirect(constants.OWNER_USER_LOGIN_SUCCESS_URL);
 }
 
 /**
@@ -159,7 +159,7 @@ async function addUserToTeamCallback(req, res) {
     await UserMapping.create({ topcoderUsername, githubUsername: githubUser.username, githubUserId: githubUser.id });
   }
   // redirect to success page
-  res.redirect(config.USER_ADDED_TO_TEAM_SUCCESS_URL);
+  res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/github`);
 }
 
 module.exports = {

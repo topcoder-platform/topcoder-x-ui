@@ -6,8 +6,7 @@
 'use strict';
 
 angular.module('topcoderX')
-    .factory('SettingService', ['$location', '$http', function ($location, $http) {
-        var baseUrl = $location.protocol() + '://' + $location.host();
+    .factory('SettingService', ['Helper', '$http', function (Helper, $http) {
         //object we will return
         var service = {};
 
@@ -15,7 +14,7 @@ angular.module('topcoderX')
          * Get user's setting state
          */
         service.userSetting = function (handle) {
-            return $http.get(baseUrl + '/api/v1/users/setting?topcoderUsername=' + handle).then(function (response) {
+            return $http.get(Helper.baseUrl + '/api/v1/users/setting?topcoderUsername=' + handle).then(function (response) {
                 return response;
             });
         };
@@ -26,7 +25,7 @@ angular.module('topcoderX')
         * @param {string} state from github oAuth
         */
         service.githubOwnerCallback = function (code, state, handle) {
-            return $http.get(baseUrl + '/api/v1/github/owneruser/callback?code=' + code + '&state=' + state + '&topcoderUsername=' + handle).then(function (response) {
+            return $http.get(Helper.baseUrl + '/api/v1/github/owneruser/callback?code=' + code + '&state=' + state + '&topcoderUsername=' + handle).then(function (response) {
                 return response;
             });
         };

@@ -1,14 +1,14 @@
 'use strict';
 
 angular.module('topcoderX')
-  .controller('ProjectsController', ['$scope', '$state', 'ProjectService', '$filter', '$rootScope', 'DIRECT_URL_BASE', 'Alert',
-    function ($scope, $state, ProjectService, $filter, $rootScope, DIRECT_URL_BASE, Alert) {
+  .controller('ProjectsController', ['$scope', '$state', 'ProjectService', '$filter', '$rootScope', 'Alert', 'Helper',
+    function ($scope, $state, ProjectService, $filter, $rootScope, Alert, Helper) {
       //Current title
       $scope.title = 'Project Management';
 
       //direct base
-      $scope.directUrlBase = DIRECT_URL_BASE;
-      
+      $scope.directUrlBase = Helper.config().DIRECT_URL_BASE;
+
       //go to a project detail
       $scope.goProject = function (project) {
         if (project) {
@@ -38,6 +38,7 @@ angular.module('topcoderX')
           $scope.isLoaded = true;
           $scope.projects = $filter('filter')(response.data, { archived: false });
           $scope.archivedProjects = $filter('filter')(response.data, { archived: true });
+          $('.footable').trigger('footable_initialize');
         }).catch(function (error) {
           $scope.isLoaded = true;
           if (error.data) {
@@ -63,6 +64,5 @@ angular.module('topcoderX')
 
       $scope.init = function () {
         $('.footable').footable();
-          $(window).trigger('resize');
       }
     }]);
