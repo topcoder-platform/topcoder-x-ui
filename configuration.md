@@ -49,14 +49,14 @@ The following config parameters are supported, they are defined in `src/config.j
   these should be set to GITLAB_CLIENT_ID and GITLAB_CLIENT_SECRET environment variables
 
   ## Topcoder environment
-  When application depends upon the environment of Topcoder based on TOPCODER_ENV configuration. When this value is 'dev'
-  you should be using topcoderx.topcoder-dev.com.
+
+  Application depends upon the environment of Topcoder based on TOPCODER_ENV configuration. When this value is 'dev' you should be using topcoderx.topcoder-dev.com.
 
   To switch to production, simply change the TOPCODER_DEV to 'prod' and use topcoderx.topcoder.com
-
 
   Default configuration is for topcoder-dev environment.
 
   ## Credentials
+
   - for topcoder login in dev environment you can use any valid topcoder handle with default password 'appirio123'
   - for gitlab/github, you can use your own user account
