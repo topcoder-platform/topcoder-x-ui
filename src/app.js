@@ -42,7 +42,7 @@ _.forEach(routes, (verbs, path) => {
       if (v3jwt) {
         const decoded = jwtDecode(v3jwt);
         req.currentUser = {
-          handle: decoded.handle,
+          handle: decoded.handle.toLowerCase(),
         };
       }
       req.signature = `${def.controller}#${def.method}`;

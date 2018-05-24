@@ -120,18 +120,11 @@ angular.module('topcoderX', [
         })
         .state('app.membersAdded', {
           url: '/members',
-          templateUrl: 'app/members/members.html',
-          controller: 'MemberConroller',
+          templateUrl: 'app/members/member.html',
+          controller: 'MemberController',
           controllerAs: 'vm',
         });
 
       $urlRouterProvider.otherwise('/app/main');
       $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|tel|file|blob):/);
-      // use the HTML5 History API
-      // $locationProvider.html5Mode(true);
-      // $locationProvider.html5Mode({
-      //   enabled: true,
-      //   requireBase: false,
-      //   hashPrefix:'!'
-      // });
     }]);

@@ -15,14 +15,12 @@
         "serve": "./node_modules/.bin/concurrently \"npm run start:be\" \"npm run start:fe\"",
         "start:be": "nodemon src/app.js",
         "start:fe": "gulp build:watch",
-        "build:fe": "gulp build",
-        "build":"gulp build",
+        "build": "gulp build",
         "test": "node ./node_modules/mocha/bin/mocha --recursive --timeout 999999 --colors tests/*.test.js --bail",
         "clean": "gulp clean",
         "publish": "gulp publish",
         "test:fe": "gulp protractor",
         "lint": "gulp lint",
-        "serve:dist": "gulp serve:dist",
         "heroku-postbuild": "gulp build"
     },
     "dependencies": {

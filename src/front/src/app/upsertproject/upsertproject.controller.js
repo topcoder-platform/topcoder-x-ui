@@ -28,7 +28,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
     if ($rootScope.project) {
       $scope.title = 'Edit a Project';
       $scope.project = $rootScope.project;
-      $scope.project.id = $rootScope.project._id;
+      $scope.project.id = $rootScope.project.id;
       $scope.editing = true;
     } else {
       $scope.title = 'Add a Project';
@@ -100,7 +100,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
           'repoToken': $scope.token,
           'baseUrl': HOOK_BASE_URL,
           'repoType': $scope.repoType,
-          'challengeId': $scope.project.id
+          'projectId': $scope.project.id
         };
         ProjectService.createHooks(objc).then(function () {
           Alert.info('Webhook Added Successfully', $scope);
