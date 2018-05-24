@@ -15,6 +15,7 @@ const config = require('../config');
 const errors = require('../common/errors');
 const helper = require('../common/helper');
 const UserMapping = require('../models').UserMapping;
+const constants = require('../common/constants');
 
 const request = superagentPromise(superagent, Promise);
 
@@ -26,7 +27,7 @@ const request = superagentPromise(superagent, Promise);
  */
 async function getHandle(token) {
   const handle = await request
-    .get(config.TC_USER_PROFILE_URL)
+    .get(constants.TOPCODER_VALUES[config.TOPCODER_ENV].TC_USER_PROFILE_URL)
     .set('Authorization', `Bearer ${token}`)
     .end()
     .then((res) => res.body.handle);

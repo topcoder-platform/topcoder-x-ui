@@ -2,10 +2,10 @@
 
 angular.module('topcoderX')
   .factory('AuthService', [
-    '$q', '$log', 'jwtHelper', '$cookies', '$window', '$state', 'AUTH_URL',
-    'ACCOUNTS_CONNECTOR_URL', 'COOKIES_SECURE', 'JWT_V3_NAME', 'JWT_V2_NAME',
-    function ($q, $log, jwtHelper, $cookies, $window, $state, AUTH_URL,
-      ACCOUNTS_CONNECTOR_URL, COOKIES_SECURE, JWT_V3_NAME, JWT_V2_NAME) {
+    '$q', '$log', 'jwtHelper', '$cookies', '$window', '$state', '$rootScope',
+    'COOKIES_SECURE', 'JWT_V3_NAME', 'JWT_V2_NAME', 'Helper',
+    function ($q, $log, jwtHelper, $cookies, $window, $state, $rootScope,
+      COOKIES_SECURE, JWT_V3_NAME, JWT_V2_NAME, Helper) {
       // these constants are for AuthService internal usage only
       // they don't depend on the environment thus don't have to be placed in global config
       var GET_FRESH_TOKEN_REQUEST = 'GET_FRESH_TOKEN_REQUEST';
@@ -152,7 +152,7 @@ angular.module('topcoderX')
        */
       AuthService.logout = function () {
         // send request to the server that we want to log out
-        // save logginOut promise to be accessed any time
+        // save loggingOut promise to be accessed any time
         AuthService.logginOut = proxyCall(LOGOUT_REQUEST, LOGOUT_SUCCESS, LOGOUT_FAILURE).then(function () {
           AuthService.logginOut = null;
         });
@@ -164,7 +164,7 @@ angular.module('topcoderX')
       }
 
       AuthService.login = function () {
-        $window.location.href = AUTH_URL + '?retUrl=' + encodeURIComponent($window.location.href);
+        $window.location.href = Helper.config().TC_LOGIN_URL + '?retUrl=' + encodeURIComponent($window.location.href);
       }
 
       /**
@@ -174,7 +174,7 @@ angular.module('topcoderX')
       AuthService.init = function () {
         // add hidden iframe which is used to get API v3 token
         configureConnector({
-          connectorUrl: ACCOUNTS_CONNECTOR_URL,
+          connectorUrl: Helper.config().ACCOUNTS_CONNECTOR_URL,
           frameId: 'tc-accounts-iframe',
         });
       }
@@ -186,25 +186,25 @@ angular.module('topcoderX')
        * @return {Promise} promise to authenticate
        */
       AuthService.authenticate = function () {
-        return AuthService.ready().then(function () {
-          if (AuthService.isLoggedIn()) {
-            return $q.resolve();
-          } else {
-            if (AuthService.getTokenV2()) {
-              return AuthService.retriveFreshToken().catch(function (err) {
-                // if error about permission denied we will pass this error through
-                // otherwise got to login page
-                if (err !== AuthService.ERROR.NO_PERMISSIONS) {
-                  AuthService.login();
-                }
-                return $q.reject(err);
-              });
+        return AuthService.ready().then(function () {       
+            if (AuthService.isLoggedIn()) {
+              return $q.resolve();
             } else {
-              AuthService.login();
-              return $q.reject();
+              if (AuthService.getTokenV2()) {
+                return AuthService.retriveFreshToken().catch(function (err) {
+                  // if error about permission denied we will pass this error through
+                  // otherwise got to login page
+                  if (err !== AuthService.ERROR.NO_PERMISSIONS) {
+                    AuthService.login();
+                  }
+                  return $q.reject(err);
+                });
+              } else {
+                AuthService.login();
+                return $q.reject();
+              }
             }
-          }
-        });
+          });
       }
 
       /**
@@ -249,7 +249,7 @@ angular.module('topcoderX')
        * @return {Boolean}  true if user is logged in
        */
       AuthService.isLoggedIn = function () {
-        // we have to ckeck only for token v3, as if have this one, it means we have and v2 also
+        // we have to check only for token v3, as if have this one, it means we have and v2 also
         return !!AuthService.getTokenV3();
       }
 

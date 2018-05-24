@@ -10,12 +10,13 @@
  */
 const Joi = require('joi');
 const gitHubApi = require('octonode');
-const gitLabAPI = require('node-gitlab-api');
+const Gitlab = require('gitlab/dist/es5').default;
+const _ = require('lodash');
 const guid = require('guid');
 const kafka = require('../utils/kafka');
 const helper = require('../common/helper');
-const errors = require('../common/errors');
 const Project = require('../models').Project;
+const config = require('../config');
 
 const projectSchema = {
   project: {
@@ -39,7 +40,7 @@ const createProjectSchema = {
     rocketChatWebhook: Joi.string().required(),
     rocketChatChannelName: Joi.string().required(),
     archived: Joi.boolean().required(),
-    username: Joi.string().required()
+    username: Joi.string().required(),
   }
 };
 
@@ -49,12 +50,6 @@ const createProjectSchema = {
  * @returns {Object} created project
  */
 async function create(project) {
-  let dbProject = await Project.findOne({
-    tcDirectId: project.tcDirectId
-  });
-  if (dbProject) {
-    throw new errors.ValidationError(`Project already exists ${project.tcDirectId}`);
-  }
   /**
      * Uncomment below code to enable the function of raising event when 'project was created'
      *
@@ -65,7 +60,7 @@ async function create(project) {
      */
   project.username = project.username.toLowerCase();
   project.secretWebhookKey = guid.raw();
-  dbProject = new Project(project);
+  const dbProject = new Project(project);
   return await dbProject.save();
 }
 
@@ -77,12 +72,7 @@ create.schema = createProjectSchema;
  * @returns {Object} updated project
  */
 async function update(project) {
-  const dbProject = await Project.findOne({
-    tcDirectId: project.tcDirectId
-  });
-  if (!dbProject) {
-    throw new errors.NotFoundError(`Project doesn't exist ${project.tcDirectId}`);
-  }
+  const dbProject = await helper.ensureExists(Project, project.id);
   if (dbProject.archived === 'false' && project.archived === true) {
     // project archived detected.
     const result = {
@@ -121,28 +111,51 @@ async function getAll() {
 /**
  * creates label
  * @param {Object} body the request body
+ * @returns {Object} result
  */
 async function createLabel(body) {
   if (body.repoType === 'github') {
-    const client = gitHubApi.client(body.repoToken);
-    const ghrepo = client.repo(`${body.repoOwner}/${body.repoName}`);
-    await ghrepo.label({
-      name: body.label,
-      description: body.description,
-      color: body.color,
-    });
+    try {
+      const client = gitHubApi.client(body.repoToken);
+      const ghrepo = client.repo(`${body.repoOwner}/${body.repoName}`);
+      await Promise.all(config.LABELS.map(async (label) => {
+        await new Promise((resolve, reject) => {
+          ghrepo.label({
+            name: label.name,
+            color: label.color,
+          }, (error) => {
+            if (error) {
+              return reject(error);
+            }
+            return resolve();
+          });
+        });
+      }));
+    } catch (err) {
+      // if error is already exists discard
+      if (_.chain(err).get('body.errors').countBy({ code: 'already_exists' }).get('true').isUndefined().value()) {
+        throw helper.convertGitHubError(err, 'Failed to create labels.');
+      }
+    }
   } else {
-    const client = gitLabAPI({
-      url: 'https://gitlab.com',
-      oauthToken: body.repoToken,
-    });
-    await client.projects.labels.create(`${body.repoOwner}/${body.repoName}`, {
-      name: body.label,
-      color: `#${body.color}`,
-      description: body.description,
-    });
+    try {
+      const client = new Gitlab({
+        url: config.GITLAB_API_BASE_URL,
+        oauthToken: body.repoToken,
+      });
+      await Promise.all(config.LABELS.map(async (label) => {
+        await client.Labels.create(`${body.repoOwner}/${body.repoName}`, {
+          name: label.name,
+          color: `#${label.color}`,
+        });
+      }));
+    } catch (err) {
+      if (_.get(err, 'error.message') !== 'Label already exists') {
+        throw helper.convertGitLabError(err, 'Failed to create labels.');
+      }
+    }
   }
-  return;
+  return { success: true };
 }
 
 createLabel.schema = Joi.object().keys({
@@ -151,60 +164,76 @@ createLabel.schema = Joi.object().keys({
     repoToken: Joi.string().required(),
     repoOwner: Joi.string().required(),
     repoName: Joi.string().required(),
-    label: Joi.string().required(),
-    description: Joi.string().required(),
-    color: Joi.string().required(),
   }),
 });
 
 /**
  * creates hook
  * @param {Object} body the request body
+ * @returns {Object} result
  */
 async function createHook(body) {
   const projectDetail = await helper.ensureExists(Project, body.projectId);
   if (body.repoType === 'github') {
-    const client = gitHubApi.client(body.repoToken);
-    const ghrepo = client.repo(`${body.repoOwner}/${body.repoName}`);
-    await ghrepo.hook({
-      name: 'web',
-      active: true,
-      events: [
-        'push',
-        'pull_request',
-        'create',
-        'commit_comment',
-        'issue_comment',
-        'issues',
-        'label',
-      ],
-      config: {
-        url: `${body.baseUrl}/webhooks/github`,
-        content_type: 'json',
-        secret: projectDetail.secretWebhookKey,
-      },
-    });
-  } else {
-    const client = gitLabAPI({
-      url: 'https://gitlab.com',
-      oauthToken: body.repoToken,
-    });
-    await client.projects.hooks.add(`${body.repoOwner}/${body.repoName}`,
-      `${body.baseUrl}/webhooks/gitlab`, {
-        push_events: true,
-        issues_events: true,
-        confidential_issues_events: true,
-        merge_requests_events: true,
-        tag_push_events: true,
-        note_events: true,
-        job_events: true,
-        pipeline_events: true,
-        wiki_page_events: true,
-        token: projectDetail.secretWebhookKey,
+    try {
+      const client = gitHubApi.client(body.repoToken);
+      const ghrepo = client.repo(`${body.repoOwner}/${body.repoName}`);
+      await new Promise((resolve, reject) => {
+        ghrepo.hook({
+          name: 'web',
+          active: true,
+          events: [
+            'push',
+            'pull_request',
+            'create',
+            'commit_comment',
+            'issue_comment',
+            'issues',
+            'label',
+          ],
+          config: {
+            url: `${config.HOOK_BASE_URL}/webhooks/github`,
+            content_type: 'json',
+            secret: projectDetail.secretWebhookKey,
+          },
+        }, (error) => {
+          if (error) {
+            return reject(error);
+          }
+          return resolve();
+        });
+      });
+    } catch (err) {
+      // if error is already exists discard
+      if (_.chain(err).get('body.errors').countBy({ message: 'Hook already exists on this repository' }).get('true').isUndefined().value()) {
+        throw helper.convertGitHubError(err, 'Failed to create webhook.');
       }
-    );
+    }
+  } else {
+    try {
+      const client = new Gitlab({
+        url: config.GITLAB_API_BASE_URL,
+        oauthToken: body.repoToken,
+      });
+      await client.ProjectHooks.add(`${body.repoOwner}/${body.repoName}`,
+        `${config.HOOK_BASE_URL}/webhooks/gitlab`, {
+          push_events: true,
+          issues_events: true,
+          confidential_issues_events: true,
+          merge_requests_events: true,
+          tag_push_events: true,
+          note_events: true,
+          job_events: true,
+          pipeline_events: true,
+          wiki_page_events: true,
+          token: projectDetail.secretWebhookKey,
+        }
+      );
+    } catch (err) {
+      throw helper.convertGitLabError(err, 'Failed to create webhook.');
+    }
   }
-  return;
+  return { success: true }
 }
 
 createHook.schema = Joi.object().keys({
@@ -214,7 +243,6 @@ createHook.schema = Joi.object().keys({
     repoOwner: Joi.string().required(),
     repoToken: Joi.string().required(),
     repoName: Joi.string().required(),
-    baseUrl: Joi.string().required(),
   }),
 });
 

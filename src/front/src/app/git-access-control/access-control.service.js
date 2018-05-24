@@ -6,8 +6,8 @@
 'use strict';
 
 angular.module('topcoderX')
-    .factory('GitAccessControlService', ['$http', '$location', function ($http, $location) {
-        var baseUrl = $location.protocol() + '://' + $location.host();
+    .factory('GitAccessControlService', ['$http', 'Helper', function ($http, Helper) {
+        var baseUrl = Helper.baseUrl;
         var service = {};
 
         /**

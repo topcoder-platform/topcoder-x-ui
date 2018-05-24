@@ -11,6 +11,7 @@
 const config = require('../config');
 const helper = require('../common/helper');
 const TCUserService = require('../services/TCUserService');
+const constants = require('../common/constants');
 
 /**
  * TC user login.
@@ -27,8 +28,8 @@ async function login(req, res) {
 
     res.redirect(req.session.tcLoginReturnUrl);
   } else {
-    const callbackUri = `${config.WEBSITE}${config.TC_LOGIN_CALLBACK_URL}`;
-    res.redirect(`${config.TC_LOGIN_URL}?retUrl=${encodeURIComponent(callbackUri)}`);
+    const callbackUri = `${config.WEBSITE}${constants.TC_LOGIN_CALLBACK_URL}`;
+    res.redirect(`${constants.TOPCODER_VALUES[config.TOPCODER_ENV].TC_LOGIN_URL}?retUrl=${encodeURIComponent(callbackUri)}`);
   }
 }
 

@@ -32,7 +32,7 @@ async function ensureOwnerUser(token, topcoderUsername) {
   try {
     // get current user name
     userProfile = await request
-      .get(`${config.GITLAB_API_BASE_URL}/user`)
+      .get(`${config.GITLAB_API_BASE_URL}/api/v4/user`)
       .set('Authorization', `Bearer ${token}`)
       .end()
       .then((res) => res.body);
@@ -95,7 +95,7 @@ ensureOwnerUser.schema = Joi.object().keys({
 async function listOwnerUserGroups(token, page = 1, perPage = constants.GITLAB_DEFAULT_PER_PAGE) {
   try {
     const response = await request
-      .get(`${config.GITLAB_API_BASE_URL}/groups`)
+      .get(`${config.GITLAB_API_BASE_URL}/api/v4/groups`)
       .query({ page, per_page: perPage, owned: true })
       .set('Authorization', `Bearer ${token}`)
       .end();
@@ -170,7 +170,7 @@ async function addGroupMember(groupId, ownerUserToken, normalUserToken) {
   try {
     // get normal user id
     const res = await request
-      .get(`${config.GITLAB_API_BASE_URL}/user`)
+      .get(`${config.GITLAB_API_BASE_URL}/api/v4/user`)
       .set('Authorization', `Bearer ${normalUserToken}`)
       .end();
     const userId = res.body.id;
@@ -180,7 +180,7 @@ async function addGroupMember(groupId, ownerUserToken, normalUserToken) {
 
     // add user to group
     await request
-      .post(`${config.GITLAB_API_BASE_URL}/groups/${groupId}/members`)
+      .post(`${config.GITLAB_API_BASE_URL}/api/v4/groups/${groupId}/members`)
       .set('Authorization', `Bearer ${ownerUserToken}`)
       .send(`user_id=${userId}&access_level=${constants.GITLAB_DEFAULT_GROUP_ACCESS_LEVEL}`)
       .end();
@@ -209,7 +209,7 @@ async function getUserIdByUsername(username) {
   try {
     // get current user
     const users = await request
-      .get(`${config.GITLAB_API_BASE_URL}/users?username=${username}`)
+      .get(`${config.GITLAB_API_BASE_URL}/api/v4/users?username=${username}`)
       .end()
       .then((res) => res.body);
     if (!users || !users.length) {

@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('topcoderX').controller('SettingController', ['currentUser', '$scope', 'OWNER_LOGIN_GITHUB_URL',
-    'OWNER_LOGIN_GITLAB_URL', 'SettingService', '$rootScope', 'Alert', '$location',
+    'OWNER_LOGIN_GITLAB_URL', 'SettingService', '$rootScope', 'Alert', 'Helper',
     function (currentUser, $scope, OWNER_LOGIN_GITHUB_URL,
-        OWNER_LOGIN_GITLAB_URL, SettingService, $rootScope, Alert, $location) {
+        OWNER_LOGIN_GITLAB_URL, SettingService, $rootScope, Alert, Helper) {
         $scope.settings = {};
         $scope.isLoaded = false;
 
@@ -19,11 +19,9 @@ angular.module('topcoderX').controller('SettingController', ['currentUser', '$sc
         };
         _getSetting();
 
-        const baseUrl = $location.protocol() + '://' + $location.host();
-
         $scope.loginUrl = {
-            github: baseUrl + OWNER_LOGIN_GITHUB_URL,
-            gitlab: baseUrl + OWNER_LOGIN_GITLAB_URL,
+            github: Helper.baseUrl + OWNER_LOGIN_GITHUB_URL,
+            gitlab: Helper.baseUrl + OWNER_LOGIN_GITLAB_URL,
         }
         
     }]);

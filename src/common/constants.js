@@ -48,6 +48,26 @@ const GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION = 3600;
 // The Gitlab refresh token time in seconds before expiration
 const GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION = 300;
 
+const TOPCODER_VALUES = {
+  dev: {
+    TC_LOGIN_URL: 'https://accounts.topcoder-dev.com/member',
+    TC_USER_PROFILE_URL: 'http://api.topcoder-dev.com/v2/user/profile',
+  },
+  prod: {
+    TC_LOGIN_URL: 'https://accounts.topcoder.com/member',
+    TC_USER_PROFILE_URL: 'http://api.topcoder.com/v2/user/profile',
+  },
+};
+
+const GITHUB_OWNER_CALLBACK_URL = '/api/v1/github/owneruser/callback';
+const GITLAB_OWNER_CALLBACK_URL = '/api/v1/gitlab/owneruser/callback';
+
+const OWNER_USER_LOGIN_SUCCESS_URL = '/#/app/settings';
+const USER_ADDED_TO_TEAM_SUCCESS_URL = '/#/app/members';
+
+const TC_LOGIN_CALLBACK_URL = '/api/v1/tclogin';
+const JWT_V3_NAME = 'v3jwt';
+
 module.exports = {
   DEFAULT_PER_PAGE,
   MAX_PER_PAGE,
@@ -60,4 +80,11 @@ module.exports = {
   GITLAB_DEFAULT_GROUP_ACCESS_LEVEL,
   GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION,
   GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION,
+  TOPCODER_VALUES,
+  GITHUB_OWNER_CALLBACK_URL,
+  GITLAB_OWNER_CALLBACK_URL,
+  OWNER_USER_LOGIN_SUCCESS_URL,
+  USER_ADDED_TO_TEAM_SUCCESS_URL,
+  TC_LOGIN_CALLBACK_URL,
+  JWT_V3_NAME,
 };

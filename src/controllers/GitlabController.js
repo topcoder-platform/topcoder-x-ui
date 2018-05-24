@@ -37,7 +37,7 @@ async function ownerUserLogin(req, res) {
     req.session.state = helper.generateIdentifier();
   }
   // redirect to GitLab OAuth
-  const callbackUri = `${config.WEBSITE}${config.GITLAB_OWNER_CALLBACK_URL}`;
+  const callbackUri = `${config.WEBSITE}${constants.GITLAB_OWNER_CALLBACK_URL}`;
   res.redirect(`https://gitlab.com/oauth/authorize?client_id=${
     config.GITLAB_CLIENT_ID
   }&redirect_uri=${
@@ -66,7 +66,7 @@ async function ownerUserLoginCallback(req, res) {
       client_secret: config.GITLAB_CLIENT_SECRET,
       code,
       grant_type: 'authorization_code',
-      redirect_uri: `${config.WEBSITE}${config.GITLAB_OWNER_CALLBACK_URL}`,
+      redirect_uri: `${config.WEBSITE}${constants.GITLAB_OWNER_CALLBACK_URL}`,
     })
     .end();
   const topcoderUsername = req.currentUser.handle;
@@ -84,7 +84,7 @@ async function ownerUserLoginCallback(req, res) {
   // store username to session
   req.session.gitlabOwnerUsername = ownerUser.username;
   // redirect to success page
-  res.redirect(config.OWNER_USER_LOGIN_SUCCESS_URL);
+  res.redirect(constants.OWNER_USER_LOGIN_SUCCESS_URL);
 }
 
 /**
@@ -132,7 +132,7 @@ async function addUserToGroup(req, res) {
     config.GITLAB_CLIENT_ID
   }&redirect_uri=${
     encodeURIComponent(callbackUri)
-  }&response_type=code&state=${identifier}&scope=read_user api`);
+  }&response_type=code&state=${identifier}&scope=read_user`);
 }
 
 /**
@@ -203,7 +203,7 @@ async function addUserToGroupCallback(req, res) {
     await UserMapping.create({topcoderUsername, gitlabUsername: gitlabUser.username, gitlabUserId: gitlabUser.id});
   }
   // redirect to success page
-  res.redirect(config.USER_ADDED_TO_TEAM_SUCCESS_URL);
+  res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/gitlab`);
 }
 
 module.exports = {

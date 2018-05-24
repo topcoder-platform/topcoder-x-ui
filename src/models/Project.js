@@ -23,5 +23,7 @@ const schema = new mongoose.Schema({
   secretWebhookKey: { type: String, required: true },
 });
 
+schema.index({tcDirectId: 1});
+
 module.exports = schema;
 

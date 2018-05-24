@@ -22,7 +22,7 @@ function runTests (singleRun, done) {
 
   gulp.src(testFiles)
     .pipe($.karma({
-      configFile: 'karma.conf.js',
+      configFile: 'src/front/karma.conf.js',
       action: (singleRun)? 'run': 'watch'
     }))
     .on('error', function (err) {

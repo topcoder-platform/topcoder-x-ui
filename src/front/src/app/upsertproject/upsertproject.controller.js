@@ -6,9 +6,7 @@
 'use strict';
 
 angular.module('topcoderX').controller('ProjectController', ['currentUser', '$scope', '$timeout', 'ProjectService',
-  '$rootScope', '$state', 'Alert', 'LABELS', 'LABELS_COLOR', 'HOOK_BASE_URL',
-  function (currentUser, $scope, $timeout, ProjectService,
-    $rootScope, $state, Alert, LABELS, LABELS_COLOR, HOOK_BASE_URL) {
+  '$rootScope', '$state', 'Alert', function (currentUser, $scope, $timeout, ProjectService, $rootScope, $state, Alert) {
 
     //Maintain the navigation state.
     $timeout(function () {
@@ -70,22 +68,20 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
     //function to add labels to the current project.
     $scope.addLabels = function () {
       getRepoDetail($scope.project.repoUrl, function () {
-        for (var i = 0; i < LABELS.length; i++) {
-          var objc = {
-            'repoOwner': $scope.repoOwner,
-            'repoName': $scope.repoName,
-            'repoToken': $scope.token,
-            'label': LABELS[i],
-            'color': LABELS_COLOR[i],
-            'description': 'Demo description',
-            'repoType': $scope.repoType
-          };
-          ProjectService.createLabel(objc).then(function () {
-            Alert.info('Label Added Successfully', $scope);
-          }).catch(function (error) {
-            Alert.error(error.data.message, $scope);
-          });
-        }
+        // for (var i = 0; i < $rootScope.config.LABELS.length; i++) {
+        var objc = {
+          'repoOwner': $scope.repoOwner,
+          'repoName': $scope.repoName,
+          'repoToken': $scope.token,
+         
+          'repoType': $scope.repoType
+        };
+        ProjectService.createLabel(objc).then(function () {
+          Alert.info('Label Added Successfully', $scope);
+        }).catch(function (error) {
+          Alert.error(error.data.message, $scope);
+        });
+        // }
       }, function (error) {
         Alert.error(error.data.message, $scope);
       });
@@ -98,7 +94,6 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
           'repoOwner': $scope.repoOwner,
           'repoName': $scope.repoName,
           'repoToken': $scope.token,
-          'baseUrl': HOOK_BASE_URL,
           'repoType': $scope.repoType,
           'projectId': $scope.project.id
         };

@@ -119,7 +119,7 @@ angular.module('topcoderX', [
           controllerAs: 'vm',
         })
         .state('app.membersAdded', {
-          url: '/members',
+          url: '/members/:provider',
           templateUrl: 'app/members/member.html',
           controller: 'MemberController',
           controllerAs: 'vm',

@@ -1,7 +1,7 @@
 {
-    "name": "lagertha",
+    "name": "topcoderx",
     "version": "1.0.0",
-    "description": "lagertha app",
+    "description": "Topcoder X app",
     "author": "TCSCODER",
     "license": "ISC",
     "private": true,
@@ -13,12 +13,11 @@
     "scripts": {
         "start": "node src/app.js",
         "serve": "./node_modules/.bin/concurrently \"npm run start:be\" \"npm run start:fe\"",
-        "start:be": "nodemon src/app.js",
+        "start:be": "nodemon src/app.js ",
         "start:fe": "gulp build:watch",
         "build": "gulp build",
         "test": "node ./node_modules/mocha/bin/mocha --recursive --timeout 999999 --colors tests/*.test.js --bail",
         "clean": "gulp clean",
-        "publish": "gulp publish",
         "test:fe": "gulp protractor",
         "lint": "gulp lint",
         "heroku-postbuild": "gulp build"
@@ -28,7 +27,7 @@
         "angular-animate": "~1.4.4",
         "angular-clipboard": "~1.2.1",
         "angular-cookies": "~1.4.4",
-        "angular-footable": "~0.0.3",
+        "angular-footable": "0.0.3",
         "angular-jwt": "~0.0.9",
         "angular-moment": "~1.0.0-beta.3",
         "angular-resource": "~1.4.4",
@@ -58,6 +57,7 @@
         "footable": "~2.0.3",
         "get-parameter-names": "^0.3.0",
         "github-api": "^3.0.0",
+        "gitlab": "^3.3.6",
         "guid": "0.0.12",
         "icheck": "1.0.2",
         "joi": "^10.6.0",
@@ -68,7 +68,6 @@
         "lodash": "^4.17.4",
         "metismenu": "~2.0.2",
         "mongoose": "^4.11.9",
-        "node-gitlab-api": "^2.2.6",
         "octonode": "^0.9.2",
         "pace-js": "~1.0.2",
         "shortid": "^2.2.8",
@@ -139,5 +138,14 @@
         "vinyl-buffer": "1.0.0",
         "vinyl-source-stream": "1.1.0",
         "wiredep": "~4.0.0"
+    },
+    "nodemonConfig": {
+        "ignore": [
+            "gulp/*",
+            "src/front/*",
+            "src/public/*",
+            ".tmp/*"
+        ],
+        "delay": "2500"
     }
 }
