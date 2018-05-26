@@ -114,4 +114,12 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
         $scope.getLastPage = function (provider) {
             return $scope.tableConfig[provider].totalPages;
         };
+
+        $scope.tabChanged = function (provider) {
+            $scope.tableConfig[provider].pageNumber = 1;
+            $scope.tableConfig[provider].initialized = false;
+            if ($scope.settings[provider]) {
+                _getOwnerList(provider);
+            }
+        }
     }]);

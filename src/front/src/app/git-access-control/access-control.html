@@ -11,141 +11,142 @@
             <div class="col-lg-12">
                 <div class="ibox float-e-margins">
                     <div class="ibox-content">
-                        <div>
-                            <h3>Github</h3>
-                            <div ng-if="settings.github==true">
-                                <div ng-show="tableConfig.github.initialized">
-                                    <table ng-if="tableConfig.github.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
-                                        <thead>
-                                            <tr>
-                                                <th class="col-lg-2" data-sort-ignore="true">Team Name</th>
-                                                <th class="col-lg-2" data-sort-ignore="true">Get Link</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr ng-repeat="item in tableConfig.github.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
-                                                <td class="col-lg-2">{{item.name}}</td>
-                                                <td class="col-lg-2">
-                                                    <button class="btn btn-sm btn-success" ng-click="getSharableLink(item, 'github')">
-                                                        <strong>Get Link</strong>
-                                                    </button>
-                                                    <div ng-if="item.showLink">
-                                                        <br>
-                                                        <p>{{item.accessLink}}</p>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <td colspan="4">
-                                                    <ul class="pagination pull-right">
-                                                        <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.github.pageNumber === 1}">
-                                                            <a ng-click="changePage(1, 'github')">«</a>
-                                                        </li>
-                                                        <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.github.pageNumber === 1}">
-                                                            <a ng-click="changePage(tableConfig.github.pageNumber - 1, 'github')">‹</a>
-                                                        </li>
-                                                        <li class="footable-page" ng-class="{'active' : item === tableConfig.github.pageNumber}" ng-repeat="item in getPageArray('github')">
-                                                            <a ng-click="changePage(item, 'github')">{{item}}</a>
-                                                        </li>
-                                                        <li class="footable-page-arrow" ng-class="{'disabled': pageNumber === getLastPage('github')}">
-                                                            <a ng-click="changePage(tableConfig.github.pageNumber + 1, 'github')">›</a>
-                                                        </li>
-                                                        <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.github.pageNumber === getLastPage('github')}">
-                                                            <a ng-click="changePage(getLastPage('github'), 'github')">»</a>
-                                                        </li>
+                        <uib-tabset active="active">
+                            <uib-tab index="0" heading="Github" select="tabChanged('github')">
+                                <br/>
+                                <div ng-if="settings.github==true">
+                                    <div ng-show="tableConfig.github.initialized">
+                                        <table ng-if="tableConfig.github.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
+                                            <thead>
+                                                <tr>
+                                                    <th class="col-lg-2" data-sort-ignore="true">Team Name</th>
+                                                    <th class="col-lg-2" data-sort-ignore="true">Get Link</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="item in tableConfig.github.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
+                                                    <td class="col-lg-2">{{item.name}}</td>
+                                                    <td class="col-lg-2">
+                                                        <button class="btn btn-sm btn-success" ng-click="getSharableLink(item, 'github')">
+                                                            <strong>Get Link</strong>
+                                                        </button>
+                                                        <div ng-if="item.showLink">
+                                                            <br>
+                                                            <p>{{item.accessLink}}</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="4">
+                                                        <ul class="pagination pull-right">
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.github.pageNumber === 1}">
+                                                                <a ng-click="changePage(1, 'github')">«</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.github.pageNumber === 1}">
+                                                                <a ng-click="changePage(tableConfig.github.pageNumber - 1, 'github')">‹</a>
+                                                            </li>
+                                                            <li class="footable-page" ng-class="{'active' : item === tableConfig.github.pageNumber}" ng-repeat="item in getPageArray('github')">
+                                                                <a ng-click="changePage(item, 'github')">{{item}}</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': pageNumber === getLastPage('github')}">
+                                                                <a ng-click="changePage(tableConfig.github.pageNumber + 1, 'github')">›</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.github.pageNumber === getLastPage('github')}">
+                                                                <a ng-click="changePage(getLastPage('github'), 'github')">»</a>
+                                                            </li>
 
-                                                    </ul>
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                    <div ng-if="tableConfig.github.items.length==0 && tableConfig.github.initialized">
+                                        You don't appear to have any Github teams available to manage through Topcoder X. Topcoder X is used to give Topcoder
+                                        members access to specific teams using your ownership credentials. If you
+                                        don't have any teams, Topcoder X won't be able to manage access for you.
+                                        Please see this link for information on Github teams:
+                                        <a href="https://help.github.com/articles/organizing-members-into-teams/" target="_blank">here</a>
+                                    </div>
                                 </div>
-                                <div ng-if="tableConfig.github.items.length==0 && tableConfig.github.initialized">
-                                    You don't appear to have any Github teams available to manage through Topcoder X. Topcoder X is used to give Topcoder
-                                    members access to specific teams using your ownership credentials. If you don't
-                                    have any teams, Topcoder X won't be able to manage access for you. Please see
-                                    this link for information on Github teams:
-                                    <a href="https://help.github.com/articles/organizing-members-into-teams/" target="_blank">here</a>
+                                <div ng-if="settings.github==false">
+                                    <p>Your account isn't registered in the Topcoder X tool.</p>
+                                    <a class="btn btn-primary" ui-sref="app.settings">
+                                        <i class="fa fa-cog"></i>
+                                        <small> Go To Settings</small>
+                                    </a>
                                 </div>
-                            </div>
-                            <div ng-if="settings.github==false">
-                                <p>Your account isn't registered in the Topcoder X tool.</p>
-                                <a class="btn btn-primary" ui-sref="app.settings">
-                                    <i class="fa fa-cog"></i>
-                                    <small> Go To Settings</small>
-                                </a>
-                            </div>
-                        </div>
-                        <br>
-                        <div>
-                            <h3>Gitlab</h3>
-                            <div ng-if="settings.gitlab==true">
-                                <div ng-show="tableConfig.gitlab.initialized">
-                                    <table ng-show="tableConfig.gitlab.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
-                                        <thead>
-                                            <tr>
-                                                <th class="col-lg-2" data-sort-ignore="true">Group Name</th>
-                                                <th class="col-lg-2" data-sort-ignore="true">Get Link</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr ng-repeat="item in tableConfig.gitlab.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
-                                                <td class="col-lg-2">{{item.name}}</td>
-                                                <td class="col-lg-2">
-                                                    <button class="btn btn-sm btn-success" ng-click="getSharableLink(item, 'gitlab')">
-                                                        <strong>Get Link</strong>
-                                                    </button>
-                                                    <div ng-if="item.showLink">
-                                                        <br>
-                                                        <p>{{item.accessLink}}</p>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <td colspan="4">
-                                                    <ul class="pagination pull-right">
-                                                        <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.gitlab.pageNumber === 1}">
-                                                            <a ng-click="changePage(1, 'gitlab')">«</a>
-                                                        </li>
-                                                        <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.gitlab.pageNumber === 1}">
-                                                            <a ng-click="changePage(tableConfig.gitlab.pageNumber - 1, 'gitlab')">‹</a>
-                                                        </li>
-                                                        <li class="footable-page" ng-class="{'active' : item === tableConfig.gitlab.pageNumber}" ng-repeat="item in getPageArray('gitlab')">
-                                                            <a ng-click="changePage(item, 'gitlab')">{{item}}</a>
-                                                        </li>
-                                                        <li class="footable-page-arrow" ng-class="{'disabled': pageNumber === getLastPage('gitlab')}">
-                                                            <a ng-click="changePage(tableConfig.gitlab.pageNumber + 1, 'gitlab')">›</a>
-                                                        </li>
-                                                        <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.gitlab.pageNumber === getLastPage('gitlab')}">
-                                                            <a ng-click="changePage(getLastPage('gitlab'), 'gitlab')">»</a>
-                                                        </li>
+                            </uib-tab>
+                            <uib-tab index="1" heading="Gitlab"  select="tabChanged('gitlab')">
+                                <br/>
+                                <div ng-if="settings.gitlab==true">
+                                    <div ng-show="tableConfig.gitlab.initialized">
+                                        <table ng-show="tableConfig.gitlab.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
+                                            <thead>
+                                                <tr>
+                                                    <th class="col-lg-2" data-sort-ignore="true">Group Name</th>
+                                                    <th class="col-lg-2" data-sort-ignore="true">Get Link</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="item in tableConfig.gitlab.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
+                                                    <td class="col-lg-2">{{item.name}}</td>
+                                                    <td class="col-lg-2">
+                                                        <button class="btn btn-sm btn-success" ng-click="getSharableLink(item, 'gitlab')">
+                                                            <strong>Get Link</strong>
+                                                        </button>
+                                                        <div ng-if="item.showLink">
+                                                            <br>
+                                                            <p>{{item.accessLink}}</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="4">
+                                                        <ul class="pagination pull-right">
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.gitlab.pageNumber === 1}">
+                                                                <a ng-click="changePage(1, 'gitlab')">«</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.gitlab.pageNumber === 1}">
+                                                                <a ng-click="changePage(tableConfig.gitlab.pageNumber - 1, 'gitlab')">‹</a>
+                                                            </li>
+                                                            <li class="footable-page" ng-class="{'active' : item === tableConfig.gitlab.pageNumber}" ng-repeat="item in getPageArray('gitlab')">
+                                                                <a ng-click="changePage(item, 'gitlab')">{{item}}</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': pageNumber === getLastPage('gitlab')}">
+                                                                <a ng-click="changePage(tableConfig.gitlab.pageNumber + 1, 'gitlab')">›</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.gitlab.pageNumber === getLastPage('gitlab')}">
+                                                                <a ng-click="changePage(getLastPage('gitlab'), 'gitlab')">»</a>
+                                                            </li>
 
-                                                    </ul>
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                    <div ng-if="tableConfig.gitlab.items.length==0 && tableConfig.gitlab.initialized">
+                                        You don't appear to have any Gitlab groups available to manage through Topcoder X. Topcoder X is used to give Topcoder
+                                        members access to specific group using your ownership credentials. If you
+                                        don't have any group, Topcoder X won't be able to manage access for you.
+                                        Please see this link for information on Gitlab group:
+                                        <a href="https://docs.gitlab.com/ee/user/group/" target="_blank">here</a>
+                                    </div>
                                 </div>
-                                <div ng-if="tableConfig.gitlab.items.length==0 && tableConfig.gitlab.initialized">
-                                    You don't appear to have any Gitlab groups available to manage through Topcoder X. Topcoder X is used to give Topcoder
-                                    members access to specific group using your ownership credentials. If you don't
-                                    have any group, Topcoder X won't be able to manage access for you. Please see
-                                    this link for information on Gitlab group:
-                                    <a href="https://docs.gitlab.com/ee/user/group/" target="_blank">here</a>
+                                <div ng-if="settings.gitlab==false">
+                                    <p>Your account isn't registered in the Topcoder X tool.</p>
+                                    <a class="btn btn-primary" ui-sref="app.settings">
+                                        <i class="fa fa-cog"></i>
+                                        <small> Go To Settings</small>
+                                    </a>
                                 </div>
-                            </div>
-                            <div ng-if="settings.gitlab==false">
-                                <p>Your account isn't registered in the Topcoder X tool.</p>
-                                <a class="btn btn-primary" ui-sref="app.settings">
-                                    <i class="fa fa-cog"></i>
-                                    <small> Go To Settings</small>
-                                </a>
-                            </div>
-                        </div>
+                            </uib-tab>
+                        </uib-tabset>
                     </div>
                 </div>
             </div>
