@@ -3,7 +3,7 @@
  */
 
 /**
- * This module contains the schema of the Challenge.
+ * This module contains the schema of a project registered with TC-X.
  *
  * @author TCSCODER
  * @version 1.0
@@ -26,4 +26,3 @@ const schema = new mongoose.Schema({
 schema.index({tcDirectId: 1});
 
 module.exports = schema;
-
