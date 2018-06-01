@@ -8,7 +8,6 @@ The following config parameters are supported, they are defined in `src/config.j
 | PORT                                   | the port the application will listen on    | 80                              |
 | API_VERSION                            | the API version                            | v1                             |
 | LOG_LEVEL                              | the log level                              | info                            |
-| MONGODB_URI                            | the MongoDB URI                            | mongodb://localhost:27017/topcoderx |
 | SESSION_SECRET                         | the session secret                         | kjsdfkj34857                     |
 | GITHUB_CLIENT_ID                       | the GitHub client id                       | No default - needs to be set up using the instructions below                                 |
 | GITHUB_CLIENT_SECRET                   | the GitHub client secret                   | No default - needs to be set up using the instructions below                                                         |
@@ -16,7 +15,8 @@ The following config parameters are supported, they are defined in `src/config.j
 | GITLAB_CLIENT_SECRET                   | the GitLab client secret                   | No default - needs to be set up using the instructions below                                                             |
 | WEBSITE                                | used as base to construct various URLs     | http://topcoderx.topcoder-dev.com/ |
 | GITLAB_API_BASE_URL                    | The Gitlab API base URL                    | https://gitlab.com|
-|TOPIC  | kafka topic| |
+| MONGODB_URI                            | The MongoDB URI.  This needs to be the same MongoDB used by topcoder-x-receiver, topcoder-x-processor, and topcoder-x-site                           | mongodb://127.0.0.1:27017/topcoderx |
+|TOPIC  | The Kafka topic where events are published.  This must be the same as the configured value for topcoder-x-processor| |
 |KAFKA_OPTIONS | Kafka connection options| |
 |KAFKA_HOST | The Kafka host to connect to| localhost:9092 |
 |KAFKA_CLIENT_CERT | The Kafka SSL certificate to use when connecting| Read from kafka_client.cer file, but this can be set as a string like it is on Heroku |
