@@ -1,4 +1,4 @@
-# Topcoder x configuration
+# Topcoder X Configuration
 
 The following config parameters are supported, they are defined in `src/config.js` and can be configured as env variables:
 
