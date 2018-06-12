@@ -27,12 +27,21 @@
                                                 <tr ng-repeat="item in tableConfig.github.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
                                                     <td class="col-lg-2">{{item.name}}</td>
                                                     <td class="col-lg-2">
-                                                        <button class="btn btn-sm btn-success" ng-click="getSharableLink(item, 'github')">
+                                                        <button class="btn btn-sm btn-success" ng-hide="item.gettingLink" ng-click="getSharableLink(item, 'github')">
                                                             <strong>Get Link</strong>
                                                         </button>
-                                                        <div ng-if="item.showLink">
-                                                            <br>
-                                                            <p>{{item.accessLink}}</p>
+                                                        <button class="btn btn-sm btn-success disabled" ng-show="item.gettingLink">
+                                                            <i class="fa fa-spinner fa-spin"></i>
+                                                        </button>
+                                                        <p uib-alert class="alert-success" ng-repeat="alert in item.alerts" dismiss-on-timeout="1200" close="item.alerts=[]">{{alert}}</p>
+                                                        <p uib-alert class="alert-error" ng-repeat="alert in item.errors" dismiss-on-timeout="1200" close="item.errors=[]">{{alert}}</p>
+                                                        <div ng-if="item.showLink" class="input-group" ng-hide="item.gettingLink">
+                                                            <input type="text" class="form-control" ng-model="item.accessLink" readonly></input>
+                                                            <a class="input-group-addon" uib-tooltip="Copy URL to clipboard" clipboard supported="supported" text="item.accessLink"
+                                                                on-copied="item.alerts=[];item.alerts.push('Link has been copied to the clipboard')"
+                                                                on-error="item.errors=[];item.errors.push('An error occurred while copying link to clipboard')">
+                                                                <i class="fa fa-clipboard"></i>
+                                                            </a>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -79,7 +88,7 @@
                                     </a>
                                 </div>
                             </uib-tab>
-                            <uib-tab index="1" heading="Gitlab"  select="tabChanged('gitlab')">
+                            <uib-tab index="1" heading="Gitlab" select="tabChanged('gitlab')">
                                 <br/>
                                 <div ng-if="settings.gitlab==true">
                                     <div ng-show="tableConfig.gitlab.initialized">
@@ -94,12 +103,21 @@
                                                 <tr ng-repeat="item in tableConfig.gitlab.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
                                                     <td class="col-lg-2">{{item.name}}</td>
                                                     <td class="col-lg-2">
-                                                        <button class="btn btn-sm btn-success" ng-click="getSharableLink(item, 'gitlab')">
+                                                        <button class="btn btn-sm btn-success" ng-hide="item.gettingLink" ng-click="getSharableLink(item, 'gitlab')">
                                                             <strong>Get Link</strong>
                                                         </button>
-                                                        <div ng-if="item.showLink">
-                                                            <br>
-                                                            <p>{{item.accessLink}}</p>
+                                                        <button class="btn btn-sm btn-success disabled" ng-show="item.gettingLink">
+                                                            <i class="fa fa-spinner fa-spin"></i>
+                                                        </button>
+                                                        <p uib-alert class="alert-success" ng-repeat="alert in item.alerts" dismiss-on-timeout="1200" close="item.alerts=[]">{{alert}}</p>
+                                                        <p uib-alert class="alert-error" ng-repeat="alert in item.errors" dismiss-on-timeout="1200" close="item.errors=[]">{{alert}}</p>
+                                                        <div ng-if="item.showLink" class="input-group" ng-hide="item.gettingLink">
+                                                            <input type="text" class="form-control" ng-model="item.accessLink" readonly></input>
+                                                            <a class="input-group-addon" uib-tooltip="Copy URL to clipboard" clipboard supported="supported" text="item.accessLink"
+                                                                on-copied="item.alerts=[];item.alerts.push('Link has been copied to the clipboard')"
+                                                                on-error="item.errors=[];item.errors.push('An error occurred while copying link to clipboard')">
+                                                                <i class="fa fa-clipboard"></i>
+                                                            </a>
                                                         </div>
                                                     </td>
                                                 </tr>

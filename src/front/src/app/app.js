@@ -86,24 +86,26 @@ angular.module('topcoderX', [
           data: { pageTitle: 'Project Management' },
           resolve: { auth: authenticate }
         })
-        .state('app.challenges', {
-          url: '/challenges',
-          templateUrl: 'app/challenges/challenges.html',
-          data: { pageTitle: 'Topcoder Platform' },
-          resolve: { auth: authenticate }
-        })
-        .state('app.tickets', {
-          url: '/tickets',
-          templateUrl: 'app/challenges/tickets.html',
-          data: { pageTitle: 'Git Tickets' },
-          resolve: { auth: authenticate }
-        })
-        .state('app.changelog', {
-          url: '/changelog',
-          templateUrl: 'app/changelog/changelog.html',
-          data: { pageTitle: 'Changelog' },
-          resolve: { auth: authenticate }
-        })
+        // following code is commented to hide the menu
+        // un comment this when pages are developed
+        // .state('app.challenges', {
+        //   url: '/challenges',
+        //   templateUrl: 'app/challenges/challenges.html',
+        //   data: { pageTitle: 'Topcoder Platform' },
+        //   resolve: { auth: authenticate }
+        // })
+        // .state('app.tickets', {
+        //   url: '/tickets',
+        //   templateUrl: 'app/challenges/tickets.html',
+        //   data: { pageTitle: 'Git Tickets' },
+        //   resolve: { auth: authenticate }
+        // })
+        // .state('app.changelog', {
+        //   url: '/changelog',
+        //   templateUrl: 'app/changelog/changelog.html',
+        //   data: { pageTitle: 'Changelog' },
+        //   resolve: { auth: authenticate }
+        // })
         .state('app.settings', {
           url: '/settings',
           templateUrl: 'app/settings/settings.html',
@@ -117,8 +119,9 @@ angular.module('topcoderX', [
           templateUrl: 'app/git-access-control/access-control.html',
           controller: 'GitAccessController',
           controllerAs: 'vm',
+          resolve: { auth: authenticate }
         })
-        .state('app.membersAdded', {
+        .state('membersAdded', {
           url: '/members/:provider',
           templateUrl: 'app/members/member.html',
           controller: 'MemberController',

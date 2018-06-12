@@ -24,11 +24,11 @@ const projectSchema = {
     title: Joi.string().required(),
     tcDirectId: Joi.number().required(),
     repoUrl: Joi.string().required(),
-    rocketChatWebhook: Joi.string().required(),
-    rocketChatChannelName: Joi.string().required(),
+    rocketChatWebhook: Joi.string().allow(null),
+    rocketChatChannelName: Joi.string().allow(null),
     archived: Joi.boolean().required(),
     username: Joi.string().required(),
-    secretWebhookKey: Joi.string().required()
+    secretWebhookKey: Joi.string().required(),
   }
 };
 
@@ -37,8 +37,8 @@ const createProjectSchema = {
     title: Joi.string().required(),
     tcDirectId: Joi.number().required(),
     repoUrl: Joi.string().required(),
-    rocketChatWebhook: Joi.string().required(),
-    rocketChatChannelName: Joi.string().required(),
+    rocketChatWebhook: Joi.string().allow(null),
+    rocketChatChannelName: Joi.string().allow(null),
     archived: Joi.boolean().required(),
     username: Joi.string().required(),
   }
@@ -102,11 +102,19 @@ update.schema = projectSchema;
 
 /**
  * gets all projects
+ * @param {String} status the status of project
  * @returns {Array} all projects
  */
-async function getAll() {
-  return await Project.find({});
+async function getAll(status) {
+  if (status === 'archived') {
+    return await Project.find({ archived: true });
+  }
+  return await Project.find({ archived: false });
 }
+
+getAll.schema = Joi.object().keys({
+  status: Joi.string().required().allow('active', 'archived').default('active'),
+});
 
 /**
  * creates label

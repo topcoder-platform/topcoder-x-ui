@@ -22,8 +22,8 @@ angular.module('topcoderX')
     /**
      * Get all projects
      */
-    ProjectService.getProjects = function () {
-      return $http.get(Helper.baseUrl + '/api/v1/projects').then(function (response) {
+    ProjectService.getProjects = function (status) {
+      return $http.get(Helper.baseUrl + '/api/v1/projects?status=' + status).then(function (response) {
         return response;
       });
     };

@@ -34,11 +34,10 @@ async function update(req) {
 /**
  * get all projects
  * @param {Object} req the request
- * @param {Object} res the response
  * @returns {Array} the result
  */
-async function getAll() {
-  return await ProjectService.getAll();
+async function getAll(req) {
+  return await ProjectService.getAll(req.query.status);
 }
 
 /**

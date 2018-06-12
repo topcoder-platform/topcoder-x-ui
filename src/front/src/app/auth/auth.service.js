@@ -2,9 +2,9 @@
 
 angular.module('topcoderX')
   .factory('AuthService', [
-    '$q', '$log', 'jwtHelper', '$cookies', '$window', '$state', '$rootScope',
+    '$q', '$log', 'jwtHelper', '$cookies', '$window', '$state', '$rootScope', '$http',
     'COOKIES_SECURE', 'JWT_V3_NAME', 'JWT_V2_NAME', 'Helper',
-    function ($q, $log, jwtHelper, $cookies, $window, $state, $rootScope,
+    function ($q, $log, jwtHelper, $cookies, $window, $state, $rootScope, $http,
       COOKIES_SECURE, JWT_V3_NAME, JWT_V2_NAME, Helper) {
       // these constants are for AuthService internal usage only
       // they don't depend on the environment thus don't have to be placed in global config
@@ -108,8 +108,9 @@ angular.module('topcoderX')
 
       var AuthService = {
         ERROR: {
-          NO_PERMISSIONS: 'Current user doesn\'t have administrator permissions.'
-        }
+          NO_PERMISSIONS: 'Current user doesn\'t have permissions.',
+        },
+        PermissionDenied: false,
       };
 
       /**
@@ -134,13 +135,8 @@ angular.module('topcoderX')
       AuthService.retriveFreshToken = function () {
         return proxyCall(GET_FRESH_TOKEN_REQUEST, GET_FRESH_TOKEN_SUCCESS, GET_FRESH_TOKEN_FAILURE)
           .then(function (data) {
-            var user = jwtHelper.decodeToken(data.token);
-
-            if ($.inArray('administrator', user && user.roles) < 0) {
-              return $q.reject(AuthService.ERROR.NO_PERMISSIONS);
-            } else {
-              AuthService.setTokenV3(data.token);
-            }
+            AuthService.setTokenV3(data.token);
+            return AuthService.isAuthorized();
           });
       }
 
@@ -186,25 +182,31 @@ angular.module('topcoderX')
        * @return {Promise} promise to authenticate
        */
       AuthService.authenticate = function () {
-        return AuthService.ready().then(function () {       
-            if (AuthService.isLoggedIn()) {
-              return $q.resolve();
+        return AuthService.ready().then(function () {
+          if (AuthService.isLoggedIn()) {
+            return AuthService.isAuthorized();
+          } else {
+            if (AuthService.getTokenV2()) {
+              return AuthService.retriveFreshToken();
             } else {
-              if (AuthService.getTokenV2()) {
-                return AuthService.retriveFreshToken().catch(function (err) {
-                  // if error about permission denied we will pass this error through
-                  // otherwise got to login page
-                  if (err !== AuthService.ERROR.NO_PERMISSIONS) {
-                    AuthService.login();
-                  }
-                  return $q.reject(err);
-                });
-              } else {
-                AuthService.login();
-                return $q.reject();
-              }
+              AuthService.login();
+              return $q.reject();
             }
-          });
+          }
+        });
+      }
+
+      /**
+       * checks if current user is allowed to use the app or not
+       */
+      AuthService.isAuthorized = function () {
+        return $http.get(Helper.baseUrl + '/api/v1/security/isAuthorized').then(function (res) {
+          if (res.data === true) {
+            return $q.resolve();
+          }
+          AuthService.PermissionDenied = true;
+          return $q.reject(AuthService.ERROR.NO_PERMISSIONS);
+        }).catch(function (err) { return $q.reject(err); });
       }
 
       /**

@@ -14,7 +14,7 @@ angular.module('topcoderX')
 
     // if we come to this page and user is logged in, and we are not loggin out
     // then we shouldn't be on this page so we redirect to index
-    if (AuthService.isLoggedIn() && !AuthService.logginOut) {
+    if (AuthService.isLoggedIn() && !AuthService.logginOut && !AuthService.PermissionDenied) {
       $state.go('app.main');
 
       // if we are loggin out currently, then show "loggin out..." message

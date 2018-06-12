@@ -19,8 +19,8 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       'title': '',
       'tcDirectId': '',
       'repoUrl': '',
-      'rocketChatWebhook': '',
-      'rocketChatChannelName': '',
+      'rocketChatWebhook': null,
+      'rocketChatChannelName': null,
       'archived': false
     };
     if ($rootScope.project) {
