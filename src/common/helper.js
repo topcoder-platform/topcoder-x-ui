@@ -15,13 +15,16 @@ const getParams = require('get-parameter-names');
 const bluebird = require('bluebird');
 const uuid = require('uuid/v4');
 const bcrypt = require('bcryptjs');
+const parseDomain = require('parse-domain');
 const config = require('../config');
 const logger = require('./logger');
 const errors = require('./errors');
 const constants = require('./constants');
 const NotFoundError = require('./errors').NotFoundError;
+const ValidationError = require('./errors').ValidationError;
 
 bluebird.promisifyAll(bcrypt);
+bluebird.promisifyAll(parseDomain);
 
 /**
  * Convert array with arguments to object
@@ -82,7 +85,7 @@ function _decorateWithValidators(service) {
     const params = getParams(method);
     service[name] = async function serviceMethodWithValidation(...args) {
       const value = _combineObject(params, args);
-      const normalized = Joi.attempt(value, method.schema, {abortEarly: false});
+      const normalized = Joi.attempt(value, method.schema, { abortEarly: false });
       // Joi will normalize values
       // for example string number '1' to 1
       // if schema type is number
@@ -188,6 +191,42 @@ async function ensureExists(Model, criteria) {
   return result;
 }
 
+/**
+ * get the provider name from git repo url
+ * @param {String} repoUrl the project repo URL
+ * @returns {String} the provider
+ */
+async function getProviderType(repoUrl) {
+  const parsedDomain = await parseDomain(repoUrl);
+  if (!parsedDomain || !parsedDomain.domain || (parsedDomain.domain !== 'github' && parsedDomain.domain !== 'gitlab')) {
+    throw new ValidationError('Invalid git repo url');
+  }
+  return parsedDomain.domain;
+}
+
+/**
+ * gets the git username of copilot for a project
+ * @param {Object} models the db models
+ * @param {Object} project the db project detail
+ * @param {String} provider the git provider
+ * @returns {Object} the owner/copilot for the project
+ */
+async function getProjectOwner(models, project, provider) {
+  const userMapping = await models.UserMapping.findOne({
+    topcoderUsername: project.username,
+  });
+
+  if (!userMapping || (provider === 'github' && !userMapping.githubUserId) || (provider === 'gitlab' && !userMapping.gitlabUserId)) {
+    throw new Error(`Couldn't find owner username for '${provider}' for this repository.`);
+  }
+
+  const copilot = await models.User.findOne({
+    username: provider === 'github' ? userMapping.githubUsername : userMapping.gitlabUsername,
+    type: provider,
+  });
+  return copilot;
+}
+
 
 /**
  * Generate an unique identifier
@@ -206,4 +245,6 @@ module.exports = {
   convertGitLabError,
   ensureExists,
   generateIdentifier,
+  getProviderType,
+  getProjectOwner,
 };

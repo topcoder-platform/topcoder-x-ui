@@ -42,7 +42,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr ng-repeat="project in projects" class="animate-repeat" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
+                                                <tr ng-repeat="project in projects" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
                                                     <td class="col-lg-2">{{project.title}}</td>
                                                     <td class="col-lg-2">
                                                         <a href="{{directUrlBase}}{{project.tcDirectId}}" target="_blank">{{project.tcDirectId}}</a>
