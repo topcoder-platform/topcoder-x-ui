@@ -9,33 +9,22 @@
  */
 
 
-const {promisify} = require('util');
-const kafka = require('kafka-node');
+const kafka = require('no-kafka');
 const config = require('../config');
 const logger = require('../common/logger');
 
 class Kafka {
   constructor() {
-    this.client = new kafka.KafkaClient(config.KAFKA_OPTIONS);
-    this.producer = new kafka.Producer(this.client);
-    this.producer.on('ready', () => {
+    this.producer = new kafka.Producer(config.KAFKA_OPTIONS);
+    this.producer.init().then(() => {
       logger.info('kafka producer is ready.');
-
-      this.producer.createTopics([config.TOPIC], true, (err) => {
-        if (err) {
-          logger.error(`error in creating topic: ${config.TOPIC}, error: ${err.stack}`);
-        } else {
-          logger.info(`kafka topic: ${config.TOPIC} is ready`);
-        }
-      });
-    });
-    this.producer.on('error', (err) => {
+    }).catch((err) => {
       logger.error(`kafka is not connected. ${err.stack}`);
     });
-    this.sendAsync = promisify(this.producer.send).bind(this.producer);
   }
+
   send(message) {
-    return this.sendAsync([{topic: config.TOPIC, messages: message}]);
+    return this.producer.send({ topic: config.TOPIC, message: { value: message } });
   }
 }
 
