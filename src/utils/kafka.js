@@ -24,7 +24,21 @@ class Kafka {
   }
 
   send(message) {
-    return this.producer.send({ topic: config.TOPIC, message: { value: message } });
+    const data = JSON.stringify({
+      topic: config.TOPIC,
+      originator: 'topcoder-x-ui',
+      timestamp: (new Date()).toISOString(),
+      'mime-type': 'application/json',
+      payload: {
+        value: message,
+      },
+    });
+    return this.producer.send({
+      topic: config.TOPIC,
+      message: {
+        value: data,
+      },
+    });
   }
 }
 
