@@ -73,11 +73,12 @@ Note: heroku domain should match subdomain of topcoder-dev or topcoder depending
 
 ## Verification
 
-- run `npm serve` to start the app
+- run `npm run serve` to start the app
 - go to topcoderx.topcoder-dev.com and it will redirect to Topcoder login page, after successful login it will redirect back to Topcoder x app.
 - go to settings by clicking username at top right corner
 - setup both git provider to authorize topcoder-x to manage your repo on behalf of you
 - go to project management and create/edit projects, create hook and label
 - go to git access control menu and check list of groups have authorized
-- click get link button to get the shareable link which can be used by topcoder member to self assign to the repository.
+- click get link button to get the shareable link which can be used by topcoder member to self assign to the repository. Click to icon next to url to copy to clipboard.
+- normal member cannot use the application, allowed roles are configured in API, if normal user tries to access the app, error is shown in login page.
 

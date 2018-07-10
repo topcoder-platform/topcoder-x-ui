@@ -14,6 +14,7 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
                 totalPages: 1,
                 searchMethod: GitAccessControlService.getGithubOwnerTeams,
                 initialized: false,
+                accessLinkMethod: GitAccessControlService.getGithubShareableLink,
             },
             gitlab: {
                 pageNumber: 1,
@@ -23,6 +24,7 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
                 totalPages: 1,
                 searchMethod: GitAccessControlService.getGitlabOwnerGroups,
                 initialized: false,
+                accessLinkMethod: GitAccessControlService.getGitlabShareableLink,
             }
         }
 
@@ -52,9 +54,6 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
                 if ($scope.settings.github) {
                     _getOwnerList('github');
                 }
-                if ($scope.settings.gitlab) {
-                    _getOwnerList('gitlab');
-                }
                 $scope.isLoaded = true;
             }).catch(function (error) {
                 $scope.isLoaded = true;
@@ -66,17 +65,16 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
          * getSharableLink Get the register url for a team
          */
         $scope.getSharableLink = function (team, provider) {
-            if (provider === 'github') {
-                GitAccessControlService.getGithubShareableLink(team.id).then(function (response) {
-                    team.accessLink = response.data.url;
-                    team.showLink = true;
-                }).catch(_handleError);
-            } else {
-                GitAccessControlService.getGitlabShareableLink(team.id).then(function (response) {
-                    team.accessLink = response.data.url;
-                    team.showLink = true;
-                }).catch(_handleError);
-            }
+            team.gettingLink = true;
+            var config = $scope.tableConfig[provider];
+            config.accessLinkMethod.apply(vm, [team.id]).then(function (response) {
+                team.accessLink = response.data.url;
+                team.showLink = true;
+                team.gettingLink = false;
+            }).catch(function (err) {
+                team.gettingLink = false;
+                _handleError(err);
+            });
         }
 
         // handle errors

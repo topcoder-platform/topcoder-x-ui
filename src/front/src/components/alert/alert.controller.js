@@ -9,6 +9,7 @@ angular.module('topcoderX')
     };
 
     $scope.addAlert = function (alert) {
+      $scope.alert = [];
       $scope.alerts.push(alert);
     };
 

@@ -18,6 +18,7 @@ angular.module('topcoderX')
       };
 
       Alert.issue = function (alert, $scope) {
+        Alert.clear($scope);
         $log.debug('Alert#alert::type:' + alert.type + ',message:' + alert.message);
         var scope = $scope || $rootScope
         scope.$broadcast('alert.AlertIssued', alert);

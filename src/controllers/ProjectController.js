@@ -18,7 +18,7 @@ const ProjectService = require('../services/ProjectService');
  * @returns {Object} the result
  */
 async function create(req) {
-  return await ProjectService.create(req.body);
+  return await ProjectService.create(req.body, req.currentUser.handle);
 }
 
 /**
@@ -28,17 +28,16 @@ async function create(req) {
  * @returns {Object} the result
  */
 async function update(req) {
-  return await ProjectService.update(req.body);
+  return await ProjectService.update(req.body, req.currentUser.handle);
 }
 
 /**
  * get all projects
  * @param {Object} req the request
- * @param {Object} res the response
  * @returns {Array} the result
  */
-async function getAll() {
-  return await ProjectService.getAll();
+async function getAll(req) {
+  return await ProjectService.getAll(req.query.status, req.currentUser.handle);
 }
 
 /**
@@ -48,7 +47,7 @@ async function getAll() {
  * @returns {Object} the result
  */
 async function createLabel(req) {
-  return await ProjectService.createLabel(req.body);
+  return await ProjectService.createLabel(req.body, req.currentUser.handle);
 }
 
 /**
@@ -58,7 +57,7 @@ async function createLabel(req) {
  * @returns {Object} the result
  */
 async function createHook(req) {
-  return await ProjectService.createHook(req.body);
+  return await ProjectService.createHook(req.body, req.currentUser.handle);
 }
 
 module.exports = {
