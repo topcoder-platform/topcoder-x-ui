@@ -38,6 +38,7 @@ module.exports = {
     get: {
       controller: 'GithubController',
       method: 'addUserToTeam',
+      allowNormalUser: true,
       tcLogin: true,
     },
   },
@@ -45,6 +46,7 @@ module.exports = {
     get: {
       controller: 'GithubController',
       method: 'addUserToTeamCallback',
+      allowNormalUser: true,
     },
   },
 
@@ -77,6 +79,7 @@ module.exports = {
     get: {
       controller: 'GitlabController',
       method: 'addUserToGroup',
+      allowNormalUser: true,
       tcLogin: true,
     },
   },
@@ -84,6 +87,7 @@ module.exports = {
     get: {
       controller: 'GitlabController',
       method: 'addUserToGroupCallback',
+      allowNormalUser: true,
     },
   },
 
@@ -97,7 +101,6 @@ module.exports = {
     get: {
       controller: 'TCUserController',
       method: 'getUserMapping',
-      isAdmin: true,
     },
   },
   '/projects': {
@@ -136,6 +139,13 @@ module.exports = {
     get: {
       controller: 'UserController',
       method: 'getUserToken',
+    },
+  },
+  '/security/isAuthorized': {
+    get: {
+      controller: 'SecurityController',
+      method: 'isAuthorized',
+      allowNormalUser: true,
     },
   },
 };

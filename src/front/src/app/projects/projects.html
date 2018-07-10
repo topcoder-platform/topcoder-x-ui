@@ -4,106 +4,112 @@
         <div class="col-lg-6">
             <h2>{{title}}</h2>
         </div>
-        <div class="col-lg-2 with-button">
-            <button class="btn btn-sm btn-info" ng-click="goProject()">+</button>
+        <div class="col-lg-2 with-button pull-right">
+            <button class="btn btn-sm btn-info pull-right" ng-click="goProject()">
+                <i class="fa fa-plus"></i> Add Project</button>
         </div>
     </div>
 
     <div class="wrapper wrapper-content animated fadeInRight">
-        <div class="row" ng-if="isLoaded">
+        <div class="row">
             <div class="col-lg-12">
                 <div class="ibox float-e-margins">
                     <div class="ibox-content">
-                        <div ng-show="projects.length===0">
-                            <div class="text-center m-t-lg">
-                                <h4>You don't have active projects right now. Please
-                                    <button class="btn btn-sm btn-info" ng-click="goProject()">
-                                        <strong>
-                                            Add a Project
-                                        </strong>
-                                    </button>
-                                </h4>
-                            </div>
-                        </div>
-                        <div ng-hide="projects.length===0">
-                            <h3> Active Projects:</h3>
-                            <table class="footable table table-stripped toggle-arrow-tiny" data-page-navigation=".pagination" data-page-size="10" ng-init="init()">
-                                <thead>
-                                    <tr>
-                                        <th class="col-lg-2">Project Name</th>
-                                        <th class="col-lg-2">Topcoder Direct ID</th>
-                                        <th class="col-lg-2">Gitlab/Github Repo Url</th>
-                                        <th class="col-lg-3" data-sort-ignore="true"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="project in projects" class="animate-repeat" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
-                                        <td class="col-lg-2">{{project.title}}</td>
-                                        <td class="col-lg-2">
-                                            <a href="{{directUrlBase}}{{project.tcDirectId}}" target="_blank">{{project.tcDirectId}}</a>
-                                        </td>
-                                        <td class="col-lg-2">
-                                            <a href="{{project.repoUrl}}" target="_blank"> {{repoType(project.repoUrl)}} </a>
-                                        </td>
-                                        <td class="col-lg-2">
-                                            <button class="btn btn-sm btn-success" ng-click="goProject(project)">
-                                                <strong>Edit</strong>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="4">
-                                            <ul class="pagination pull-right"></ul>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-
-                        <div class="with-button">
-                            <button class="btn btn-sm btn-info" ng-click="togoArchiveTable()">
-                                <strong>
-                                    Toggle Archived Projects
-                                </strong>
-                            </button>
-                        </div>
-
-                        <div ng-show="archiveShow">
-                            <h3> Actieved Project:</h3>
-                            <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="10">
-                                <thead>
-                                    <tr>
-                                        <th class="col-lg-2">Project Name</th>
-                                        <th class="col-lg-2">Topcoder Direct ID</th>
-                                        <th class="col-lg-2">Gitlab/Github Repo Url</th>
-                                        <th class="col-lg-2" data-sort-ignore="true"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="archivedProject in archivedProjects">
-                                        <td class="col-lg-2">{{archivedProject.title}}</td>
-                                        <td class="col-lg-2">
-                                            <a>{{archivedProject.tcDirectId}}</a>
-                                        </td>
-                                        <td class="col-lg-2">{{archivedProject.repoUrl}}</td>
-                                        <td class="col-lg-2">
-                                            <button class="btn btn-sm btn-success" ng-click="goProject(archivedProject)">
-                                                <strong>Edit</strong>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="4">
-                                            <ul class="pagination pull-right"></ul>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
+                        <uib-tabset active="active">
+                            <uib-tab index="0" heading="Current Projects" select="getProjects('active')">
+                                <br/>
+                                <div ng-if="isLoaded">
+                                    <div ng-show="projects.length===0">
+                                        <div class="text-center m-t-lg">
+                                            <h4>You don't have active projects right now. Please
+                                                <button class="btn btn-sm btn-info" ng-click="goProject()">
+                                                    <strong>
+                                                        Add a Project
+                                                    </strong>
+                                                </button>
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    <div ng-hide="projects.length===0">
+                                        <table class="footable table table-stripped toggle-arrow-tiny" data-page-navigation=".pagination" data-page-size="10"
+                                            ng-init="init()">
+                                            <thead>
+                                                <tr>
+                                                    <th class="col-lg-2">Project Name</th>
+                                                    <th class="col-lg-2">Topcoder Direct ID</th>
+                                                    <th class="col-lg-2">Gitlab/Github Repo Url</th>
+                                                    <th class="col-lg-3" data-sort-ignore="true"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="project in projects" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
+                                                    <td class="col-lg-2">{{project.title}}</td>
+                                                    <td class="col-lg-2">
+                                                        <a href="{{directUrlBase}}{{project.tcDirectId}}" target="_blank">{{project.tcDirectId}}</a>
+                                                    </td>
+                                                    <td class="col-lg-2">
+                                                        <a href="{{project.repoUrl}}" target="_blank"> {{repoType(project.repoUrl)}} </a>
+                                                    </td>
+                                                    <td class="col-lg-2">
+                                                        <button class="btn btn-sm btn-success" ng-click="goProject(project)">
+                                                            <strong>Edit</strong>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="4">
+                                                        <ul class="pagination pull-right"></ul>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </uib-tab>
+                            <uib-tab index="1" heading="Archived Projects" select="getProjects('archived')">
+                                <br/>
+                                <div ng-if="isLoaded">
+                                    <div ng-show="projects.length===0" class="text-center m-t-lg">
+                                        <p>No projects have been archived.</p>
+                                    </div>
+                                    <div ng-hide="projects.length===0">
+                                        <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="10">
+                                            <thead>
+                                                <tr>
+                                                    <th class="col-lg-2">Project Name</th>
+                                                    <th class="col-lg-2">Topcoder Direct ID</th>
+                                                    <th class="col-lg-2">Gitlab/Github Repo Url</th>
+                                                    <th class="col-lg-2" data-sort-ignore="true"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="archivedProject in projects">
+                                                    <td class="col-lg-2">{{archivedProject.title}}</td>
+                                                    <td class="col-lg-2">
+                                                        <a>{{archivedProject.tcDirectId}}</a>
+                                                    </td>
+                                                    <td class="col-lg-2">{{archivedProject.repoUrl}}</td>
+                                                    <td class="col-lg-2">
+                                                        <button class="btn btn-sm btn-success" ng-click="goProject(archivedProject)">
+                                                            <strong>Edit</strong>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="4">
+                                                        <ul class="pagination pull-right"></ul>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </uib-tab>
+                        </uib-tabset>
                     </div>
                 </div>
             </div>

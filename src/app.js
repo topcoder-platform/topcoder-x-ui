@@ -44,6 +44,7 @@ _.forEach(routes, (verbs, path) => {
         const decoded = jwtDecode(v3jwt);
         req.currentUser = {
           handle: decoded.handle.toLowerCase(),
+          roles: decoded.roles,
         };
       }
       req.signature = `${def.controller}#${def.method}`;
@@ -59,6 +60,20 @@ _.forEach(routes, (verbs, path) => {
         req.session.tcLoginReturnUrl = req.originalUrl;
         const callbackUri = `${config.WEBSITE}${constants.TC_LOGIN_CALLBACK_URL}`;
         return res.redirect(`${constants.TOPCODER_VALUES[config.TOPCODER_ENV].TC_LOGIN_URL}?retUrl=${encodeURIComponent(callbackUri)}`);
+      });
+    }
+    if (!def.allowNormalUser) {
+      actions.push((req, res, next) => {
+        // check if any allowed role is matched with user's roles
+        if (_(req.currentUser.roles).map((i) => i.toLowerCase())
+          .intersection(_.map(config.ALLOWED_TOPCODER_ROLES, (j) => j.toLowerCase())).size() === 0) {
+          const statusCode = 403;
+          return res.status(statusCode).json({
+            code: 'Forbidden',
+            message: 'You are not allowed to access this resource.',
+          });
+        }
+        return next();
       });
     }
     actions.push(method);

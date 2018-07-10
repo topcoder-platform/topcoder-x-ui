@@ -1,5 +1,5 @@
 {
-  "extends":"eslint-config-topcoder/nodejs",
+  "extends": "eslint-config-topcoder/nodejs",
   "env": {
     "mocha": true
   },
@@ -10,5 +10,7 @@
       "experimentalObjectRestSpread": true
     }
   },
-  "rules": {  }
+  "rules": {
+    "lodash/prefer-invoke-map": 0
+  }
 }
