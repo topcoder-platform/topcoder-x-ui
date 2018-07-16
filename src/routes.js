@@ -148,4 +148,10 @@ module.exports = {
       allowNormalUser: true,
     },
   },
+  '/issues': {
+    get: {
+      controller: 'IssueController',
+      method: 'search',
+    },
+  },
 };
