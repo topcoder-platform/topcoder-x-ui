@@ -68,6 +68,8 @@ angular.module('topcoderX', [
         })
         .state('app.main', {
           url: '/main',
+          controller: 'MainController',
+          controllerAs: 'vm',
           templateUrl: 'app/main/main.html',
           data: { pageTitle: 'Dashboard' },
           resolve: { auth: authenticate }
