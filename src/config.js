@@ -34,6 +34,6 @@ module.exports = {
   },
   HOOK_BASE_URL: process.env.HOOK_BASE_URL || 'http://x.topcoder-dev.com',
   TOPCODER_ENV: process.env.TOPCODER_ENV || 'dev',
-  LABELS: process.env.LABELS || [{ name: 'Open for pickup', color: '112233' }, { name: 'Assigned', color: '445566' }, { name: 'Ready for review', color: '123123' }, { name: 'Paid', color: '456456' }, { name: 'Feedback', color: 'ff0011' }, { name: 'Fix accepted', color: 'aabb11' }],
+  LABELS: process.env.LABELS || [{ name: 'Open for pickup', color: '428BCA' }, { name: 'Assigned', color: '004E00' }, { name: 'Ready for review', color: 'D1D100' }, { name: 'Paid', color: '7F8C8D' }, { name: 'Feedback', color: 'FF0000' }, { name: 'Fix accepted', color: '69D100' }],
   ALLOWED_TOPCODER_ROLES: process.env.ALLOWED_TOPCODER_ROLES || ['administrator', 'admin', 'connect manager', 'connect admin', 'copilot', 'connect copilot'],
 };
