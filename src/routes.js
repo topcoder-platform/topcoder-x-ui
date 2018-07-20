@@ -95,6 +95,7 @@ module.exports = {
     get: {
       controller: 'TCUserController',
       method: 'login',
+      allowNormalUser: true,
     },
   },
   '/admin/tcuser': {
