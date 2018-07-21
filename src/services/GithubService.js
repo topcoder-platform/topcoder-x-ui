@@ -10,6 +10,7 @@
  */
 const GitHub = require('github-api');
 const Joi = require('joi');
+const _ = require('lodash');
 const config = require('../config');
 const constants = require('../common/constants');
 const helper = require('../common/helper');
@@ -173,22 +174,27 @@ getTeamRegistrationUrl.schema = Joi.object().keys({
  * @returns {Promise} the promise result
  */
 async function addTeamMember(teamId, ownerUserToken, normalUserToken) {
+  let username;
+  let id;
   try {
     // get normal user name
     const githubNormalUser = new GitHub({ token: normalUserToken });
     const normalUser = await githubNormalUser.getUser().getProfile();
-    const username = normalUser.data.login;
-    const id = normalUser.data.id;
+    username = normalUser.data.login;
+    id = normalUser.data.id;
 
     // add normal user to team
     const github = new GitHub({ token: ownerUserToken });
     const team = github.getTeam(teamId);
     await team.addMembership(username);
-    // return github username
-    return { username, id };
   } catch (err) {
-    throw helper.convertGitHubError(err, 'Failed to add team member');
+    // if error is already exists discard
+    if (_.chain(err).get('body.errors').countBy({ code: 'already_exists' }).get('true').isUndefined().value()) {
+      throw helper.convertGitHubError(err, 'Failed to add team member');
+    }
   }
+  // return github username
+  return {username, id};
 }
 
 addTeamMember.schema = Joi.object().keys({
