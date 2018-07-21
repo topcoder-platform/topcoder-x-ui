@@ -11,6 +11,7 @@
 const Joi = require('joi');
 const superagent = require('superagent');
 const superagentPromise = require('superagent-promise');
+const _ = require('lodash');
 const config = require('../config');
 const constants = require('../common/constants');
 const helper = require('../common/helper');
@@ -167,13 +168,16 @@ getGroupRegistrationUrl.schema = Joi.object().keys({
  * @returns {Promise} the promise result
  */
 async function addGroupMember(groupId, ownerUserToken, normalUserToken) {
+  let username;
+  let userId;
   try {
     // get normal user id
     const res = await request
       .get(`${config.GITLAB_API_BASE_URL}/api/v4/user`)
       .set('Authorization', `Bearer ${normalUserToken}`)
       .end();
-    const userId = res.body.id;
+    userId = res.body.id;
+    username = res.body.username;
     if (!userId) {
       throw new errors.UnauthorizedError('Can not get user id from the normal user access token.');
     }
@@ -187,10 +191,13 @@ async function addGroupMember(groupId, ownerUserToken, normalUserToken) {
     // return gitlab username
     return { username: res.body.username, id: res.body.id };
   } catch (err) {
-    if (err instanceof errors.ApiError) {
-      throw err;
+    if (_.get(JSON.parse(err.response.text), 'message') !== 'Member already exists') {
+      if (err instanceof errors.ApiError) {
+        throw err;
+      }
+      throw helper.convertGitLabError(err, 'Failed to add group member');
     }
-    throw helper.convertGitLabError(err, 'Failed to add group member');
+    return {username, id: userId};
   }
 }
 
