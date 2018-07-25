@@ -37,7 +37,7 @@
             <input class="form-control" type="url" ng-model="project.repoUrl" required />
             <span ng-show="projectForm.project.repoUrl.$touched && projectForm.project.repoUrl.$invalid">The TC Repo URL is required.</span>
             <br />
-            <div class="hide">
+            <div class="hide" *ng-if="true">
               <label class="form-label">Rocket.chat Webhook URL:</label>
               <input class="form-control" type="url" ng-model="project.rocketChatWebhook"/>
               <span ng-show="projectForm.project.rocketChatWebhook.$touched && projectForm.project.rocketChatWebhook.$invalid">The Rocket Chat Webhook is required.</span>
@@ -52,7 +52,7 @@
               ng-model="project.archived" ng-true-value="'true'" ng-false-value="'false'" />
             <br/>
 
-            <button class="with-button btn btn-sm btn-info" ng-click="projectForm.$valid && save()">
+            <button type="submit" class="with-button btn btn-sm btn-info" ng-click="projectForm.$valid && save()">
               <strong>
                 Save
               </strong>
