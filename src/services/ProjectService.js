@@ -142,7 +142,8 @@ async function createLabel(body, currentUserTopcoderHandle) {
   let index = 1;
   const repoName = results[results.length - index];
   index += 1;
-  const repoOwner = results[results.length - index];
+  const excludePart = 3;
+  const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
   if (provider === 'github') {
     try {
       const client = gitHubApi.client(copilot.accessToken);
@@ -212,7 +213,8 @@ async function createHook(body, currentUserTopcoderHandle) {
   let index = 1;
   const repoName = results[results.length - index];
   index += 1;
-  const repoOwner = results[results.length - index];
+  const excludePart = 3;
+  const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
   if (provider === 'github') {
     try {
       const client = gitHubApi.client(copilot.accessToken);
