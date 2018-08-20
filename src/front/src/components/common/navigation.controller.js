@@ -1,9 +1,43 @@
 'use strict';
 
-angular.module('topcoderX')
-  .controller('NavController', ['$scope', '$state', function ($scope, $state) {
+
+angular.module('topcoderX') // eslint-disable-line angular/no-services
+    .controller('NavController', ['$scope', '$log', '$state', '$cookies', '$http', function ($scope, $log, $state, $cookies, $http) {
     $scope.$state = $state;
     $scope.menuList = false;
+    $scope.user = {};
+
+    /**
+     * detect env and get relevant api domain
+     *
+     * @returns {String} api domain
+     */
+    function domain () {
+        const dev = window.location.origin.includes('.topcoder-dev.com');
+        if (dev) {
+            return 'topcoder-dev';
+        } else {
+            return 'topcoder';
+        }
+    };
+
+
+    const token = $cookies.get('tcjwt');
+    const req = {
+        url: 'http://api.' + domain() + '.com/v2/user/profile',
+        method: 'Get',
+        headers: {
+            Authorization: 'Bearer ' + token,
+        },
+    };
+    $http(req).then(function (tcUser) {
+        $scope.user = tcUser.data;
+        if (tcUser.data.copilot) {
+            $log.info('Success - user is a copilot');
+        } else {
+            $log.warn('Warning - Use isn\'t a a copilot');
+        }
+    });
 
     $scope.forceStateProjects = function () {
       $state.go('app.projects');

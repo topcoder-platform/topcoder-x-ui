@@ -1,0 +1,15 @@
+<div class="dialog" ng-show="dialog" ng-controller="DialogController" class="ng-scope">
+    <div class="dialog-inner" role="dialog">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="close()">
+            <span aria-hidden="true">×</span>
+        </button>
+        <h3>{{dialog.message}}</h3>
+        <br>
+        <button class="btn btn-sm btn-success" ng-click="proceed()">
+            <strong>Yes</strong>
+        </button>
+        <button class="btn btn-sm btn-danger" ng-click="close()">
+            <strong>No</strong>
+        </button>
+    </div>
+</div>
