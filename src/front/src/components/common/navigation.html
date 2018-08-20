@@ -25,7 +25,12 @@
                     <span class="nav-label">Git access control</span>
                 </a>
             </li>
-            
+            <li ng-if="user.copilot" ui-sref-active="active" id="copilotPayments">
+                <a ui-sref="app.copilotPayments">
+                    <i class="fa fa-plane"></i>
+                    <span class="nav-label">Copilot Payments</span>
+                </a>
+            </li>
             <li ui-sref-active="active" class="hide">
                 <a href="#">
                     <i class="fa fa-code"></i>

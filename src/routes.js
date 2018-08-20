@@ -130,6 +130,32 @@ module.exports = {
       method: 'createHook',
     },
   },
+  '/payments': {
+      get: {
+          controller: 'PaymentController',
+          method: 'getAll',
+      },
+      post: {
+          controller: 'PaymentController',
+          method: 'create',
+      },
+      put: {
+          controller: 'PaymentController',
+          method: 'update',
+      },
+  },
+  '/payments/:id': {
+      delete: {
+          controller: 'PaymentController',
+          method: 'remove',
+      },
+  },
+  '/payments/updates' : {
+      post: {
+          controller: 'PaymentController',
+          method: 'updateAll',
+      },
+  },
   '/users/setting': {
     get: {
       controller: 'UserController',
