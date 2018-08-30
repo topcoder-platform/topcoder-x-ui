@@ -7,9 +7,11 @@ angular.module('topcoderX')
     $scope.proceed = function () {
       $scope.dialog = null;
       $rootScope.dialog.proceed = true;
+      $rootScope.$broadcast('dialog.finished', { proceed: true });
     };
     $scope.close = function () {
       $scope.dialog = null;
+      $rootScope.$broadcast('dialog.finished', { proceed: false });
     };
     $scope.addDialog = function (dialog) {
       $scope.dialog = dialog;

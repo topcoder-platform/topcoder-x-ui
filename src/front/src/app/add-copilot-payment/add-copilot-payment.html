@@ -1,4 +1,4 @@
-<div ng-controller="AddPaymentController">
+<div ng-controller="AddCopilotPaymentController">
     <div class="col-md-10 col-md-offset-1" ng-include src="'components/alert/alert.html'"></div>
     <div class="row wrapper border-bottom white-bg page-heading">
         <div class="col-lg-4">
@@ -21,13 +21,9 @@
                         <input class="form-control" type="number" ng-model="payment.amount" required/>
                         <span ng-show="paymentForm.payment.amount.$touched && paymentForm.payment.amount.$invalid">The payment Amount is required.</span>
                         <br />
-                        <label class="form-label">Desciption:</label>
+                        <label class="form-label">Description:</label>
                         <input class="form-control" type="text" ng-model="payment.description" required/>
                         <span ng-show="paymentForm.payment.description.$touched && paymentForm.payment.description.$invalid">The payment Description is required.</span>
-                        <br />
-                        <label class="form-label">Challenge:</label>
-                        <input class="form-control" type="number" ng-model="payment.challenge" required/>
-                        <span ng-show="paymentForm.payment.challenge.$touched && paymentForm.payment.challenge.$invalid">The payment Challenge is required.</span>
                         <br />
                         <br />
                         <button type="submit" class="with-button btn btn-sm btn-info" ng-click="paymentForm.$valid && save()">

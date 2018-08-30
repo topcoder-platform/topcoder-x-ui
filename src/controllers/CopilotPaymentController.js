@@ -9,7 +9,7 @@
  * @version 1.0
  */
 const helper = require('../common/helper');
-const PaymentService = require('../services/PaymentService');
+const CopilotPaymentService = require('../services/CopilotPaymentService');
 
 /**
  * update payments status
@@ -18,7 +18,7 @@ const PaymentService = require('../services/PaymentService');
  * @returns {Promise} fetch payment updates execution
  */
 async function updateAll(req) {
-    return await PaymentService.updateAll(req.currentUser);
+    return await CopilotPaymentService.updateAll(req.currentUser);
 }
 
 /**
@@ -28,12 +28,12 @@ async function updateAll(req) {
  * @returns {Object} the result
  */
 async function getAll(req) {
-    const payments = await PaymentService.getAll(req.query);
+    const payments = await CopilotPaymentService.getAll(req.query, req.currentUser);
     const active = [];
     const closed = [];
 
     payments.forEach(function (payment) {
-        if (payment.closed === "true") {
+        if (payment.closed === true) {
             closed.push(payment);
         } else {
             active.push(payment);
@@ -49,7 +49,7 @@ async function getAll(req) {
  * @returns {Object} the result
  */
 async function create(req) {
-    return await PaymentService.create(req.currentUser, req.body.payment);
+    return await CopilotPaymentService.create(req.currentUser, req.body.payment);
 }
 
 /**
@@ -59,7 +59,7 @@ async function create(req) {
  * @returns {Object} the result
  */
 async function update(req) {
-    return await PaymentService.update(req.currentUser, req.body.payment);
+    return await CopilotPaymentService.update(req.currentUser, req.body.payment);
 }
 
 /**
@@ -69,7 +69,7 @@ async function update(req) {
  * @returns {Object} the result
  */
 async function remove(req) {
-    return await PaymentService.remove(req.params.id, req.currentUser);
+    return await CopilotPaymentService.remove(req.params.id, req.currentUser);
 }
 
 

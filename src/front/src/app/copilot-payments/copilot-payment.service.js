@@ -6,7 +6,7 @@
 'use strict';
 
 angular.module('topcoderX')
-  .factory('PaymentService', ['$http', 'Helper', function ($http, Helper) {
+  .factory('CopilotPaymentService', ['$http', 'Helper', function ($http, Helper) {
     var baseUrl = Helper.baseUrl;
     var service = {};
 
@@ -15,7 +15,7 @@ angular.module('topcoderX')
      *
      */
     service.updateAll = function () {
-      return $http.post(baseUrl + '/api/v1/payments/updates/').then(function (response) {
+      return $http.post(baseUrl + '/api/v1/payments/copilot/updates/').then(function (response) {
         return response;
       });
     };
@@ -25,7 +25,7 @@ angular.module('topcoderX')
      *
      */
     service.getAll = function (query) {
-      return $http.get(baseUrl + '/api/v1/payments?sortBy=' + query).then(function (response) {
+      return $http.get(baseUrl + '/api/v1/payments/copilot?sortBy=' + query).then(function (response) {
         return response;
       });
     };
@@ -35,7 +35,7 @@ angular.module('topcoderX')
      *
      */
     service.create = function (bodyParam) {
-      return $http.post(baseUrl + '/api/v1/payments/', { payment: bodyParam }).then(function (response) {
+      return $http.post(baseUrl + '/api/v1/payments/copilot/', { payment: bodyParam }).then(function (response) {
         return response;
       });
     };
@@ -45,7 +45,7 @@ angular.module('topcoderX')
      *
      */
     service.update = function (bodyParam) {
-      return $http.put(baseUrl + '/api/v1/payments/', { payment: bodyParam }).then(function (response) {
+      return $http.put(baseUrl + '/api/v1/payments/copilot/', { payment: bodyParam }).then(function (response) {
         return response;
       });
     };
@@ -55,7 +55,7 @@ angular.module('topcoderX')
      *
      */
     service.delete = function (id) {
-      return $http.delete(baseUrl + '/api/v1/payments/' + (id || '')).then(function (response) {
+      return $http.delete(baseUrl + '/api/v1/payments/copilot/' + id).then(function (response) {
         return response.data;
       });
     };

@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('topcoderX')
-  .controller('CopilotPaymentsController', ['$scope', '$rootScope', '$state', 'PaymentService', '$filter', 'Alert', 'Dialog', '$log', '$timeout',
-    function ($scope, $rootScope, $state, PaymentService, $filter, Alert, Dialog, $log, $timeout) {
+  .controller('CopilotPaymentsController', ['$scope', '$rootScope', '$state', 'CopilotPaymentService', '$filter', 'Alert', 'Dialog', '$log', '$timeout',
+    function ($scope, $rootScope, $state, CopilotPaymentService, $filter, Alert, Dialog, $log, $timeout) {
       $scope.title = 'Copilot payment page';
       $scope.payments = [];
       $scope.isLoaded = false;
@@ -18,34 +18,31 @@ angular.module('topcoderX')
       };
 
       $scope.updateAll = function () {
-        PaymentService.updateAll().then(function () {
+        CopilotPaymentService.updateAll().then(function () {
           $timeout(function () {
             $scope.getPayments($scope.status);
-          }, 5000);
+          }, 15000);
         }).catch(function (err) {
-          $log.info(err);
-          _handleError({ data: { error: err, message: 'Error updating payments list' } });
+          _handleError(err, 'Error updating payments list');
         });
       };
 
       $scope.getPayments = function (status) {
         $scope.isLoaded = false;
-        PaymentService.getAll('project').then(function (res) {
-            $log.info(res);
-
-            if (status === 'active') {
-              $scope.payments = res.data.activePayments;
-              $scope.isLoaded = true;
-              $scope.status = 'active';
-            }
-            if (status === 'closed') {
-              $scope.payments = res.data.closedPayments;
-              $scope.isLoaded = true;
-              $scope.status = 'closed';
-            }
+        CopilotPaymentService.getAll('project').then(function (res) {
+          if (status === 'active') {
+            $scope.payments = res.data.activePayments;
+            $scope.isLoaded = true;
+            $scope.status = 'active';
+          }
+          if (status === 'closed') {
+            $scope.payments = res.data.closedPayments;
+            $scope.isLoaded = true;
+            $scope.status = 'closed';
+          }
         }).catch(function (err) {
           $scope.isLoaded = true;
-          _handleError({ data: { error: err, message: 'Error getting payments.' } });
+          _handleError(err, 'Error getting payments.');
         });
       };
 
@@ -62,15 +59,12 @@ angular.module('topcoderX')
        * @param {Number} id payment id
        */
       function _handleDeletePayment(id) {
-        PaymentService.delete(id).then(function () {
+        CopilotPaymentService.delete(id).then(function () {
           Alert.info('Successfully deleted payments.', $scope);
-          $timeout(function () {
-            $rootScope.dialog = null;
-            $scope.getPayments($scope.status);
-          }, 2000);
+          $rootScope.dialog = null;
+          $scope.getPayments($scope.status);
         }).catch(function (er) {
-          $log.error(er, $scope);
-          _handleError({ data: { error: er, message: 'Error deleting payment.' } });
+          _handleError(er, 'Error deleting payment.');
         });
       }
 
@@ -79,28 +73,20 @@ angular.module('topcoderX')
           paymentId: payment.id,
           proceed: false,
         };
-        const watcher = $rootScope.$watch(function () {
-          if ($rootScope.dialog) {
-            return $rootScope.dialog.proceed;
-          }
-        }, function (newVal, oldVal) {
-          $log.info('---- [watching $rootScope.dialog] new:' + newVal + '+ ,old:' + oldVal + '');
-          if (newVal !== oldVal && $rootScope.dialog &&
-            (angular.isDefined($rootScope.dialog.paymentId) ||
-              $rootScope.dialog.paymentId != null ||
-              angular.isString($rootScope.dialog.paymentId === 'string'))) {
-            $log.warn('payment deletion', $scope);
+
+        // $log.warn(watcher, $scope);
+        $scope.$on('dialog.finished', function (event, args) {
+          if (args.proceed) {
             _handleDeletePayment($rootScope.dialog.paymentId);
+          } else {
+            $rootScope.dialog = {};
           }
         });
-
-        $log.warn(watcher, $scope);
         Dialog.show('Are you sure you want to delete this payment?', $scope);
       };
 
       $scope.sort = function (criteria) {
-        PaymentService.getAll(criteria).then(function (res) {
-          $log.info(res);
+        CopilotPaymentService.getAll(criteria).then(function (res) {
           if (status === 'active') {
             $scope.payments = res.data.activePayments;
             $scope.isLoaded = true;

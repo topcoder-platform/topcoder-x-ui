@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('topcoderX')
-    .controller('AddPaymentController', ['$scope', '$log', '$state', 'PaymentService', 'ProjectService', '$filter', '$rootScope', '$timeout', 'Alert',
-        function ($scope, $log, $state, PaymentService, ProjectService, $filter, $rootScope, $timeout, Alert) {
+    .controller('AddCopilotPaymentController', ['$scope', '$log', '$state', 'CopilotPaymentService', 'ProjectService', '$filter', '$rootScope', '$timeout', 'Alert',
+        function ($scope, $log, $state, CopilotPaymentService, ProjectService, $filter, $rootScope, $timeout, Alert) {
             // below logic is trying to identify whether we are editing a payment
             $scope.editing = true;
             $scope.projects = [];
@@ -10,12 +10,12 @@ angular.module('topcoderX')
                 project: null,
                 amount: null,
                 description: '',
-                challenge: '',
             };
             if ($rootScope.payment) {
                 $scope.title = 'Edit a Payment';
-                $scope.payment = $rootScope.payment;
+                $scope.payment = angular.copy($rootScope.payment);
                 $scope.payment.id = $rootScope.payment.id;
+                $scope.payment.project = $rootScope.payment.project.id;
                 $scope.editing = true;
             } else {
                 $scope.title = 'Add a Payment';
@@ -27,49 +27,40 @@ angular.module('topcoderX')
                 ProjectService.getProjects().then(function (response) {
                     $scope.projects = response.data;
                 }).catch(function (error) {
-                    _handleError({
-                        data:
-                            { error: error, message: 'There are not projects in Topcoder-X. Please create a project first.' }
-                    });
+                    _handleError(error, 'There are no projects in Topcoder-X. Please create a project first.');
                 });
             };
 
             $scope.getProjects();
 
             // handle error output
-            function _handleError(error, defualtMsg) {
-                const errMsg = error.data ? error.data.message : defualtMsg;
-                Alert(errMsg, $scope);
+            function _handleError(error, defaultMsg) {
+                const errMsg = error.data ? error.data.message : defaultMsg;
+                Alert.error(errMsg, $scope);
             }
 
             // create/update payment item
             $scope.save = function () {
                 if (!$scope.editing) {
-                    PaymentService.create($scope.payment).then(function (res) {
-                        $log.info(res);
+                    CopilotPaymentService.create($scope.payment).then(function () {
                         $state.go('app.copilotPayments');
-                    }).catch(function () {
-                        Alert.error('Error Creating Payment', $scope);
+                    }).catch(function (error) {
+                        _handleError(error, 'An error occurred while creating Payment.');
                     });
                 }
                 if ($scope.editing) {
-                    PaymentService.update({
+                    CopilotPaymentService.update({
                         id: $scope.payment.id,
                         project: $scope.payment.project,
                         amount: $scope.payment.amount,
                         description: $scope.payment.description,
-                        challenge: $scope.payment.challenge,
-                        closed: $scope.payment.closed
-                    }).then(function (res) {
-                        $timeout(function () {
-                            $log.info(res);
-                            $rootScope.payment = null;
-                            $state.go('app.copilotPayments');
-                        }, 6000);
-                    }).catch(function () {
-                        Alert.error('Error Updating Payment', $scope);
+                    }).then(function () {
+                        $rootScope.payment = null;
+                        $state.go('app.copilotPayments');
+                    }).catch(function (error) {
+                        _handleError(error, 'An error occurred while updating Payment.');
                     });
                 }
-            };
+            };            
         }
     ]);

@@ -137,9 +137,9 @@ angular.module('topcoderX', [
             resolve: { auth: authenticate }
         })
         .state('app.addPayment', {
-            url: '/add-payment',
-            templateUrl: 'app/add-payment/add-payment.html',
-            controller: 'AddPaymentController',
+            url: '/copilot-payment',
+            templateUrl: 'app/add-copilot-payment/add-copilot-payment.html',
+            controller: 'AddCopilotPaymentController',
             controllerAs: 'vm',
             resolve: { auth: authenticate }
         });

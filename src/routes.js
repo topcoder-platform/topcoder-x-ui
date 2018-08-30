@@ -8,6 +8,9 @@
  * @author TCSCODER
  * @version 1.0
  */
+
+const config = require('./config');
+
 module.exports = {
   '/github/owneruser/login': {
     get: {
@@ -130,31 +133,36 @@ module.exports = {
       method: 'createHook',
     },
   },
-  '/payments': {
-      get: {
-          controller: 'PaymentController',
-          method: 'getAll',
-      },
-      post: {
-          controller: 'PaymentController',
-          method: 'create',
-      },
-      put: {
-          controller: 'PaymentController',
-          method: 'update',
-      },
+  '/payments/copilot': {
+    get: {
+      controller: 'CopilotPaymentController',
+      method: 'getAll',
+      allowedRoles: [config.COPILOT_ROLE],
+    },
+    post: {
+      controller: 'CopilotPaymentController',
+      method: 'create',
+      allowedRoles: [config.COPILOT_ROLE],
+    },
+    put: {
+      controller: 'CopilotPaymentController',
+      method: 'update',
+      allowedRoles: [config.COPILOT_ROLE],
+    },
   },
-  '/payments/:id': {
-      delete: {
-          controller: 'PaymentController',
-          method: 'remove',
-      },
+  '/payments/copilot/:id': {
+    delete: {
+      controller: 'CopilotPaymentController',
+      method: 'remove',
+      allowedRoles: [config.COPILOT_ROLE],
+    },
   },
-  '/payments/updates' : {
-      post: {
-          controller: 'PaymentController',
-          method: 'updateAll',
-      },
+  '/payments/copilot/updates': {
+    post: {
+      controller: 'CopilotPaymentController',
+      method: 'updateAll',
+      allowedRoles: [config.COPILOT_ROLE],
+    },
   },
   '/users/setting': {
     get: {
