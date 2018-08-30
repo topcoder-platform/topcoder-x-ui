@@ -76,6 +76,20 @@ _.forEach(routes, (verbs, path) => {
         return next();
       });
     }
+    if (def.allowedRoles) {
+      actions.push((req, res, next) => {
+        // check if user has allowed roles
+        if (_(req.currentUser.roles).map((i) => i.toLowerCase())
+          .intersection(_.map(def.allowedRoles, (j) => j.toLowerCase())).size() === 0) {
+          const statusCode = 403;
+          return res.status(statusCode).json({
+            code: 'Forbidden',
+            message: 'You are not allowed to access this resource.',
+          });
+        }
+        return next();
+      });
+    }
     actions.push(method);
     app[verb](`/api/${config.API_VERSION}${path}`, actions);
   });

@@ -35,7 +35,7 @@ angular.module('topcoderX') // eslint-disable-line angular/no-services
         if (tcUser.data.copilot) {
             $log.info('Success - user is a copilot');
         } else {
-            $log.warn('Warning - Use isn\'t a a copilot');
+            $log.warn('Warning - User isn\'t a a copilot');
         }
     });
 

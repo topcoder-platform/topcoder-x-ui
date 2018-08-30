@@ -24,6 +24,8 @@ The following config parameters are supported, they are defined in `src/config.j
 | HOOK_BASE_URL            | The base URL of the topcoder-x-receiver, used when adding webhooks automatically to repositories | |
 | TOPCODER_ENV | The topcoder environment to use, can support 'dev' or 'prod' | 'dev'                     |
 |LABELS| Labels we are going to add to the repository in the form of array of object with `name` and `color` property. Color should be hex code without hash||
+|ALLOWED_TOPCODER_ROLES| The allowed Topcoder role to use Topcoder X app| see configuration |
+|COPILOT_ROLE| The role to identify copilot|'copilot'|
 
 ## GitHub OAuth App Setup
 
