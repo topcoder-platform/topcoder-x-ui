@@ -8,6 +8,8 @@
  * @author TCSCODER
  * @version 1.0
  */
+const fs = require('fs');
+const path = require('path');
 const Joi = require('joi');
 const gitHubApi = require('octonode');
 const Gitlab = require('gitlab/dist/es5').default;
@@ -279,12 +281,73 @@ async function createHook(body, currentUserTopcoderHandle) {
 
 createHook.schema = createLabel.schema;
 
+/**
+ * adds the wiki rules the project's repository
+ * @param {Object} body the request body
+ * @param {String} currentUserTopcoderHandle the topcoder handle of current user
+ * @returns {Object} result
+ */
+async function addWikiRules(body, currentUserTopcoderHandle) {
+  const dbProject = await helper.ensureExists(Project, body.projectId);
+  if (dbProject.username !== currentUserTopcoderHandle) {
+    dbProject.username = currentUserTopcoderHandle;
+    await dbProject.save();
+  }
+  const provider = await helper.getProviderType(dbProject.repoUrl);
+  const copilot = await helper.getProjectOwner(models, dbProject, provider);
+  const results = dbProject.repoUrl.split('/');
+  let index = 1;
+  const repoName = results[results.length - index];
+  index += 1;
+  const excludePart = 3;
+  const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
+  const content = fs.readFileSync(path.resolve(__dirname, '../assets/WorkingWithTickets.md'), 'utf8'); // eslint-disable-line 
+  if (provider === 'github') {
+    try {
+      const client = gitHubApi.client(copilot.accessToken);
+      const ghrepo = client.repo(`${repoOwner}/${repoName}`);
+      await new Promise((resolve, reject) => {
+        ghrepo.issue({
+          title: 'Github ticket rules',
+          body: content,
+        }, (error) => {
+          if (error) {
+            return reject(error);
+          }
+          return resolve();
+        });
+      });
+    } catch (err) {
+      throw helper.convertGitHubError(err, 'Failed to add wiki rules.');
+    }
+  } else {
+    try {
+      const client = new Gitlab({
+        url: config.GITLAB_API_BASE_URL,
+        oauthToken: copilot.accessToken,
+      });
+      await client.Wikis.create(`${repoOwner}/${repoName}`,
+        {
+          content,
+          title: 'Gitlab ticket rules',
+        }
+      );
+    } catch (err) {
+      throw helper.convertGitLabError(err, 'Failed to add wiki rules.');
+    }
+  }
+  return { success: true }
+}
+
+addWikiRules.schema = createLabel.schema;
+
 module.exports = {
   create,
   update,
   getAll,
   createLabel,
   createHook,
+  addWikiRules,
 };
 
 helper.buildService(module.exports);

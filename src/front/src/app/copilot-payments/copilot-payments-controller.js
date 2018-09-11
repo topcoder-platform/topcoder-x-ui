@@ -6,6 +6,7 @@ angular.module('topcoderX')
       $scope.title = 'Copilot payment page';
       $scope.payments = [];
       $scope.isLoaded = false;
+      $scope.totalPendingAmounts = 0;
       $scope.topcoderUrl = '';
       $scope.status = '';
       $scope.goPayment = function (payment) {
@@ -32,6 +33,10 @@ angular.module('topcoderX')
         CopilotPaymentService.getAll('project').then(function (res) {
           if (status === 'active') {
             $scope.payments = res.data.activePayments;
+            $scope.totalPendingAmounts = 0;
+            for (var i = 0; i < $scope.payments.length; i++) {
+              $scope.totalPendingAmounts += $scope.payments[i].amount;
+            }
             $scope.isLoaded = true;
             $scope.status = 'active';
           }

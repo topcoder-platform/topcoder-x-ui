@@ -7,7 +7,7 @@
 
 angular.module('topcoderX')
   .factory('ProjectService', ['Helper', '$http', function (Helper, $http) {
-    //object we will return
+    // object we will return
     var ProjectService = {};
     /**
      * Create a project
@@ -35,7 +35,7 @@ angular.module('topcoderX')
     ProjectService.update = function (project) {
       return $http.put(Helper.baseUrl + '/api/v1/projects', project).then(function (response) {
         return response;
-      })
+      });
     };
 
     /**
@@ -64,9 +64,11 @@ angular.module('topcoderX')
       var req = {
         method: 'POST',
         url: Helper.baseUrl + '/api/v1/projects/label',
-        data: objc
+        data: objc,
       };
-      return $http(req).then(function (response) { return response; })
+      return $http(req).then(function (response) {
+        return response;
+      });
     };
 
     /**
@@ -81,7 +83,22 @@ angular.module('topcoderX')
       var req = {
         method: 'POST',
         url: Helper.baseUrl + '/api/v1/projects/hook',
-        data: objc
+        data: objc,
+      };
+      return $http(req).then(function (response) {
+        return response;
+      });
+    };
+
+    /**
+     * Add wiki rules to the repository
+     * @param objc object containing the projectId property
+     */
+    ProjectService.addWikiRules = function (objc) {
+      var req = {
+        method: 'POST',
+        url: Helper.baseUrl + '/api/v1/projects/wikiRules',
+        data: objc,
       };
       return $http(req).then(function (response) {
         return response;

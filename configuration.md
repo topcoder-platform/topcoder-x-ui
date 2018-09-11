@@ -26,6 +26,7 @@ The following config parameters are supported, they are defined in `src/config.j
 |LABELS| Labels we are going to add to the repository in the form of array of object with `name` and `color` property. Color should be hex code without hash||
 |ALLOWED_TOPCODER_ROLES| The allowed Topcoder role to use Topcoder X app| see configuration |
 |COPILOT_ROLE| The role to identify copilot|'copilot'|
+|HELP_LINK| The link for help| 'https://github.com/topcoder-platform/topcoder-x-ui/wiki'|
 
 ## GitHub OAuth App Setup
 

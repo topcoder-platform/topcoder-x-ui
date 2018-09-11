@@ -51,6 +51,15 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       });
     };
 
+    // function to add wiki rules to the current project
+    $scope.addWikiRules = function () {
+      ProjectService.addWikiRules({ projectId: $scope.project.id }).then(function () {
+        Alert.info('Wiki Rules Added Successfully', $scope);
+      }).catch(function (error) {
+        Alert.error(error.data.message, $scope);
+      });
+    };
+
     // save the project info to database, and go back to project list view.
     $scope.save = function () {
       if ($scope.editing) {

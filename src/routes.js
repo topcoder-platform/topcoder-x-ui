@@ -133,6 +133,12 @@ module.exports = {
       method: 'createHook',
     },
   },
+  '/projects/wikiRules': {
+    post: {
+      controller: 'ProjectController',
+      method: 'addWikiRules',
+    },
+  },
   '/payments/copilot': {
     get: {
       controller: 'CopilotPaymentController',
@@ -187,6 +193,12 @@ module.exports = {
     get: {
       controller: 'IssueController',
       method: 'search',
+    },
+  },
+  '/appConfig': {
+    get: {
+      controller: 'AppConfigController',
+      method: 'getAppConfig',
     },
   },
 };
