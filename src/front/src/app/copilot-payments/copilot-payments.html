@@ -1,0 +1,133 @@
+<div ng-controller="CopilotPaymentsController">
+    <div class="col-md-10 col-md-offset-1" ng-include src="'components/alert/alert.html'"></div>
+    <div ng-include src="'components/dialog/dialog.html'"></div>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-4">
+            <h2>Copilot Payments</h2>
+        </div>
+        <div class="pull-right">
+            <div class="col-lg-6 with-button">
+                <button class="btn btn-sm btn-info add-payment-btn" ng-click="goPayment()">
+                    <i class="fa fa-plus"></i> Add Payment</button>
+            </div>
+            <div class="col-lg-6 with-button">
+                <button class="btn btn-sm btn-success pull-right" ng-click="updateAll()">
+                    <i class="fa fa-refresh"></i> Refresh</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrapper wrapper-content animated fadeInRight">
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-content">
+                        <div class="row" ng-hide="payments.length===0 || status==='closed'">
+                            <div class="col-lg-12">
+                                <p class="text-right font-bold">${{totalPendingAmounts}} total pending
+                                    payments
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <uib-tabset active="active">
+                                <uib-tab index="0" heading="Active" select="getPayments('active')">
+                                    <br/>
+                                    <div ng-if="isLoaded">
+                                        <div ng-show="payments.length===0">
+                                            <div class="text-center m-t-lg">
+                                                <h4>You don't have any active payments, Please
+                                                    <button class="btn btn-sm btn-info" ng-click="goPayment()">
+                                                        <strong>
+                                                            Add a Payment
+                                                        </strong>
+                                                    </button>
+                                                </h4>
+                                            </div>
+                                        </div>
+                                        <div ng-hide="payments.length===0">
+                                            <table class="footable table table-stripped toggle-arrow-tiny" data-page-navigation=".pagination" data-page-size="10"
+                                                ng-init="init()">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="col-lg-2">Project</th>
+                                                        <th class="col-lg-2">Amount</th>
+                                                        <th data-sort-ignore="true" class="col-lg-2">Description</th>
+                                                        <th class="col-lg-2">Challenge</th>
+                                                        <th data-sort-ignore="true" class="col-lg-2">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="payment in payments" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
+                                                        <td class="col-lg-2">{{payment.project.title}}</td>
+                                                        <td class="col-lg-2">${{payment.amount}}</td>
+                                                        <td class="col-lg-2">{{payment.description}}</td>
+                                                        <td class="col-lg-2">
+                                                            <a href="{{topcoderUrl}}/direct/contest/detail?projectId={{payment.challengeId}}" target="_blank">{{payment.challengeId}}</a>
+                                                        </td>
+                                                        <td class="col-lg-2">
+                                                            <button class="btn btn-sm btn-success" ng-click="goPayment(payment)">
+                                                                <strong>Edit</strong>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-danger" ng-click="deletePayment(payment)">
+                                                                <strong>Delete</strong>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="5">
+                                                            <ul class="pagination pull-right"></ul>
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </uib-tab>
+                                <uib-tab index="1" heading="Closed" select="getPayments('closed')">
+                                    <br/>
+                                    <div ng-if="isLoaded">
+                                        <div ng-show="payments.length===0" class="text-center m-t-lg">
+                                            <p>No closed payments yet.</p>
+                                        </div>
+                                        <div ng-hide="payments.length===0">
+                                            <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="10">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="col-lg-2">Project</th>
+                                                        <th class="col-lg-2">Amount</th>
+                                                        <th data-sort-ignore="true" class="col-lg-2">Description</th>
+                                                        <th class="col-lg-2">Challenge</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="payment in payments">
+                                                        <td class="col-lg-2">{{payment.project.title}}</td>
+                                                        <td class="col-lg-2">${{payment.amount}}</td>
+                                                        <td class="col-lg-2">{{payment.description}}</td>
+                                                        <td class="col-lg-2"><a href="{{topcoderUrl}}/direct/contest/detail?projectId={{payment.challengeId}}"
+                                                                target="_blank">{{payment.challengeId}}</a></td>
+                                                    </tr>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="5">
+                                                            <ul class="pagination pull-right"></ul>
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </uib-tab>
+                            </uib-tabset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -5,18 +5,25 @@
       <h2>{{title}}</h2>
     </div>
     <div class="pull-right">
-      <div class="col-lg-6 with-button" ng-show="editing">
+      <div class="col-lg-4 with-button" ng-show="editing">
         <button class="btn btn-sm btn-info" ng-click="addLabels()">
           <strong>Add Labels</strong>
         </button>
       </div>
-      <div class="col-lg-6 with-button" ng-show="editing">
+      <div class="col-lg-4 with-button" ng-show="editing">
         <button class="btn btn-sm btn-info" ng-click="addHooks()">
           <strong>
-            Add Webhooks
+            Add Webhook
           </strong>
         </button>
       </div>
+      <div class="col-lg-4 with-button" ng-show="editing">
+          <button class="btn btn-sm btn-info" ng-click="addWikiRules()">
+            <strong>
+              Add Wiki Rules
+            </strong>
+          </button>
+        </div>
     </div>
   </div>
 

@@ -60,12 +60,23 @@ async function createHook(req) {
   return await ProjectService.createHook(req.body, req.currentUser.handle);
 }
 
+/**
+ * adds the wiki rules the project's repository
+ * @param {Object} req the request
+ * @param {Object} res the response
+ * @returns {Object} the result
+ */
+async function addWikiRules(req) {
+  return await ProjectService.addWikiRules(req.body, req.currentUser.handle);
+}
+
 module.exports = {
   create,
   update,
   getAll,
   createLabel,
   createHook,
+  addWikiRules,
 };
 
 helper.buildController(module.exports);

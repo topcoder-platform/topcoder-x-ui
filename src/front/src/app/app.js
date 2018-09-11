@@ -128,7 +128,22 @@ angular.module('topcoderX', [
           templateUrl: 'app/members/member.html',
           controller: 'MemberController',
           controllerAs: 'vm',
+        })
+        .state('app.copilotPayments', {
+            url: '/copilot-payments',
+            templateUrl: 'app/copilot-payments/copilot-payments.html',
+            controller: 'CopilotPaymentsController',
+            controllerAs: 'vm',
+            resolve: { auth: authenticate }
+        })
+        .state('app.addPayment', {
+            url: '/copilot-payment',
+            templateUrl: 'app/add-copilot-payment/add-copilot-payment.html',
+            controller: 'AddCopilotPaymentController',
+            controllerAs: 'vm',
+            resolve: { auth: authenticate }
         });
+
 
       $urlRouterProvider.otherwise('/app/main');
       $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|tel|file|blob):/);

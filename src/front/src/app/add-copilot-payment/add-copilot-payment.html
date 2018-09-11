@@ -1,0 +1,43 @@
+<div ng-controller="AddCopilotPaymentController">
+    <div class="col-md-10 col-md-offset-1" ng-include src="'components/alert/alert.html'"></div>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-4">
+            <h2>{{title}}</h2>
+        </div>
+    </div>
+
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="text-center m-t-lg">
+                    <form name="paymentForm">
+                        <label class="form-label">Project:</label>
+                        <select ng-model="payment.project" class="form-control" required>
+                            <option ng-repeat="project in projects" value={{project.id}}>{{project.title}}</option>
+                        </select>
+                        <span ng-show="paymentForm.payment.project.$touched && paymentForm.payment.project.$invalid">The payment Project is required.</span>
+                        <br />
+                        <label class="form-label">Amount:</label>
+                        <input class="form-control" type="number" ng-model="payment.amount" required/>
+                        <span ng-show="paymentForm.payment.amount.$touched && paymentForm.payment.amount.$invalid">The payment Amount is required.</span>
+                        <br />
+                        <label class="form-label">Description:</label>
+                        <input class="form-control" type="text" ng-model="payment.description" required/>
+                        <span ng-show="paymentForm.payment.description.$touched && paymentForm.payment.description.$invalid">The payment Description is required.</span>
+                        <br />
+                        <br />
+                        <button type="submit" class="with-button btn btn-sm btn-info" ng-click="paymentForm.$valid && save()">
+                            <strong>
+                                Save
+                            </strong>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

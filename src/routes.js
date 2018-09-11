@@ -8,6 +8,9 @@
  * @author TCSCODER
  * @version 1.0
  */
+
+const config = require('./config');
+
 module.exports = {
   '/github/owneruser/login': {
     get: {
@@ -130,6 +133,43 @@ module.exports = {
       method: 'createHook',
     },
   },
+  '/projects/wikiRules': {
+    post: {
+      controller: 'ProjectController',
+      method: 'addWikiRules',
+    },
+  },
+  '/payments/copilot': {
+    get: {
+      controller: 'CopilotPaymentController',
+      method: 'getAll',
+      allowedRoles: [config.COPILOT_ROLE],
+    },
+    post: {
+      controller: 'CopilotPaymentController',
+      method: 'create',
+      allowedRoles: [config.COPILOT_ROLE],
+    },
+    put: {
+      controller: 'CopilotPaymentController',
+      method: 'update',
+      allowedRoles: [config.COPILOT_ROLE],
+    },
+  },
+  '/payments/copilot/:id': {
+    delete: {
+      controller: 'CopilotPaymentController',
+      method: 'remove',
+      allowedRoles: [config.COPILOT_ROLE],
+    },
+  },
+  '/payments/copilot/updates': {
+    post: {
+      controller: 'CopilotPaymentController',
+      method: 'updateAll',
+      allowedRoles: [config.COPILOT_ROLE],
+    },
+  },
   '/users/setting': {
     get: {
       controller: 'UserController',
@@ -153,6 +193,12 @@ module.exports = {
     get: {
       controller: 'IssueController',
       method: 'search',
+    },
+  },
+  '/appConfig': {
+    get: {
+      controller: 'AppConfigController',
+      method: 'getAppConfig',
     },
   },
 };
