@@ -38,4 +38,5 @@ module.exports = {
   LABELS: process.env.LABELS || [{ name: 'tcx_OpenForPickup', color: '428BCA' }, { name: 'tcx_Assigned', color: '004E00' }, { name: 'tcx_ReadyForReview', color: 'D1D100' }, { name: 'tcx_Paid', color: '7F8C8D' }, { name: 'tcx_Feedback', color: 'FF0000' }, { name: 'tcx_FixAccepted', color: '69D100' }],
   ALLOWED_TOPCODER_ROLES: process.env.ALLOWED_TOPCODER_ROLES || ['administrator', 'admin', 'connect manager', 'connect admin', 'copilot', 'connect copilot'],
   COPILOT_ROLE: process.env.COPILOT_ROLE || 'copilot',
+  HELP_LINK: process.env.HELP_LINK || 'https://github.com/topcoder-platform/topcoder-x-ui/wiki',
 };
