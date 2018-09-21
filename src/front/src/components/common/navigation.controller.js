@@ -1,12 +1,12 @@
 'use strict';
 
 angular.module('topcoderX') // eslint-disable-line angular/no-services
-  .controller('NavController', ['$scope', '$log', '$state', '$cookies', '$http', 'Helper',
-    function ($scope, $log, $state, $cookies, $http, Helper) {
+  .controller('NavController', ['$scope', '$log', '$state', '$cookies', '$http', '$rootScope',
+    function ($scope, $log, $state, $cookies, $http, $rootScope) {
       $scope.$state = $state;
       $scope.menuList = false;
       $scope.user = {};
-      $scope.appConfig = {};
+      $scope.appConfig = $rootScope.appConfig;
 
       /**
        * detect env and get relevant api domain
@@ -47,13 +47,5 @@ angular.module('topcoderX') // eslint-disable-line angular/no-services
       };
 
       // Click menu item go to another page will close the menu as well
-      angular.element(document.querySelectorAll("a[ui-sref]")).bind('click', $scope.menuOpen);
-
-      function getAppConfig() {
-        var baseUrl = Helper.baseUrl;
-        return $http.get(baseUrl + '/api/v1/appConfig').then(function (response) {
-          $scope.appConfig = response.data;
-        });
-      }
-      getAppConfig();
+      angular.element(document.querySelectorAll("a[ui-sref]")).bind('click', $scope.menuOpen);      
     }]);

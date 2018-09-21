@@ -27,6 +27,7 @@ The following config parameters are supported, they are defined in `src/config.j
 |ALLOWED_TOPCODER_ROLES| The allowed Topcoder role to use Topcoder X app| see configuration |
 |COPILOT_ROLE| The role to identify copilot|'copilot'|
 |HELP_LINK| The link for help| 'https://github.com/topcoder-platform/topcoder-x-ui/wiki'|
+|ADMINISTRATOR_ROLES| The array of roles to be considered as admin| `['administrator', 'admin']`|
 
 ## GitHub OAuth App Setup
 

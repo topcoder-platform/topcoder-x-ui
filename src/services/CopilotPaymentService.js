@@ -13,6 +13,7 @@ const _ = require('lodash');
 const helper = require('../common/helper');
 const models = require('../models');
 const kafka = require('../utils/kafka');
+const errors = require('../common/errors');
 
 const CopilotPayment = models.CopilotPayment;
 const Project = models.Project;
@@ -60,6 +61,25 @@ const removePaymentSchema = {
   }),
 };
 
+/**
+ * ensure if current user can update the copilot payment
+ * @param {String} paymentId the payment id
+ * @param {Object} topcoderUser the topcoder current user
+ * @returns {Object} the project and payment detail from database
+ * @private
+ */
+async function _ensureEditPermission(paymentId, topcoderUser) {
+  const dbPayment = await helper.ensureExists(CopilotPayment, paymentId);
+  const dbProject = await helper.ensureExists(Project, dbPayment.project);
+  // either user must be owner of project or user is copilot receiving payment
+  if (dbPayment.username !== topcoderUser.handle && dbProject.owner !== topcoderUser.handle) {
+    throw new errors.ForbiddenError('You do not have permission to edit this payment');
+  }
+  if (dbPayment.closed === true) {
+    throw new Error('Closed payment can not be updated');
+  }
+  return dbPayment;
+}
 
 /**
  * gets all payments
@@ -68,9 +88,15 @@ const removePaymentSchema = {
  * @returns {Array} copilot payments
  */
 async function getAll(query, topcoderUser) {
-  const condition = { username: topcoderUser.handle };
+  const projectIds = await Project.find({
+    $or: [
+      { owner: topcoderUser.handle },
+      { copilot: topcoderUser.handle },
+    ],
+  }).select('_id');
+  const condition = { project: {$in: projectIds}};
   const payments = await CopilotPayment.find(condition)
-    .populate({ path: 'project', select: 'title' });
+    .populate({ path: 'project', select: 'title owner copilot'});
 
   // sort by query criteria
   return await _.orderBy(payments, query, ['desc']);
@@ -91,14 +117,14 @@ async function updateAll(topcoderUser) {
     },
   };
   await kafka.send(JSON.stringify(paymentUpdatesEvent));
-  return {success: true};
+  return { success: true };
 }
 
 updateAll.schema = {
   topcoderUser: {
     handle: Joi.string().required(),
-    roles: Joi.array().required()
-  }
+    roles: Joi.array().required(),
+  },
 };
 
 /**
@@ -130,9 +156,11 @@ async function getExistingChallengeIdIfExists(dbPayment) {
  * @returns {Object} created payment
  */
 async function create(topcoderUser, payment) {
-  await helper.ensureExists(Project, payment.project);
-
-  payment.username = topcoderUser.handle;
+  const dbProject = await helper.ensureExists(Project, payment.project);
+  if (dbProject.copilot !== topcoderUser.handle && dbProject.owner !== topcoderUser.handle) {
+    throw new errors.ForbiddenError('You do not have permission to edit this payment');
+  }
+  payment.username = dbProject.copilot;
   payment.closed = false;
   let dbPayment = new CopilotPayment(payment);
 
@@ -161,14 +189,7 @@ create.schema = createPaymentSchema;
  * @returns {Object} updated detail
  */
 async function update(topcoderUser, payment) {
-  let dbPayment = await helper.ensureExists(CopilotPayment, payment.id);
-
-  if (dbPayment.username !== topcoderUser.handle) {
-    throw new Error('You do not have permission to edit this payment');
-  }
-  if (dbPayment.closed === true) {
-    throw new Error('Closed payment can not be updated');
-  }
+  let dbPayment = await _ensureEditPermission(payment.id, topcoderUser);
 
   // if nothing is changed then discard
   if (dbPayment.project === payment.project && dbPayment.amount === payment.amount && dbPayment.description === payment.description) { // eslint-disable-line
@@ -230,13 +251,7 @@ update.schema = paymentSchema;
  * @returns {Object} the success status
  */
 async function remove(id, topcoderUser) {
-  const dbPayment = await helper.ensureExists(CopilotPayment, id);
-  if (dbPayment.username !== topcoderUser.handle) {
-    throw new Error('You do not have permission to remove this payment');
-  }
-  if (dbPayment.closed === true) {
-    throw new Error('Closed payment can not be removed');
-  }
+  const dbPayment = await _ensureEditPermission(id, topcoderUser);
 
   const payment = await getExistingChallengeIdIfExists(dbPayment.toObject());
   await CopilotPayment.remove({ _id: id });
@@ -250,7 +265,7 @@ async function remove(id, topcoderUser) {
   };
 
   await kafka.send(JSON.stringify(paymentDeleteEvent));
-  return {success: true};
+  return { success: true };
 }
 
 remove.schema = removePaymentSchema;

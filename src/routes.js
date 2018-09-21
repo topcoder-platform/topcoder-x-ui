@@ -139,6 +139,13 @@ module.exports = {
       method: 'addWikiRules',
     },
   },
+  '/projects/transferOwnership': {
+    post: {
+      controller: 'ProjectController',
+      method: 'transferOwnerShip',
+      allowedRoles: config.ADMINISTRATOR_ROLES,
+    },
+  },
   '/payments/copilot': {
     get: {
       controller: 'CopilotPaymentController',
