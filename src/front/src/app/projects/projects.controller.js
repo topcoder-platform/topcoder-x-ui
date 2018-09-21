@@ -1,13 +1,20 @@
 'use strict';
 
 angular.module('topcoderX')
-  .controller('ProjectsController', ['$scope', '$state', 'ProjectService', '$filter', '$rootScope', 'Alert', 'Helper',
-    function ($scope, $state, ProjectService, $filter, $rootScope, Alert, Helper) {
+  .controller('ProjectsController', ['currentUser', '$scope', '$state', 'ProjectService', '$filter', '$rootScope', 'Alert', 'Helper', '$timeout',
+    function (currentUser, $scope, $state, ProjectService, $filter, $rootScope, Alert, Helper, $timeout) {
       //Current title
       $scope.title = 'Project Management';
 
       //direct base
       $scope.directUrlBase = Helper.config().DIRECT_URL_BASE;
+      $scope.isAdminUser = Helper.isAdminUser(currentUser);
+      $scope.filter = {
+        showAll: $scope.isAdminUser,
+      };
+      $scope.state = {
+        status: 'active',
+      };
 
       //go to a project detail
       $scope.goProject = function (project) {
@@ -34,12 +41,15 @@ angular.module('topcoderX')
 
       //private function to get projects.
       $scope.getProjects = function (status) {
+        $scope.state.status = status;
         $scope.isLoaded = false;
         $scope.projects = [];
-        ProjectService.getProjects(status).then(function (response) {
+        ProjectService.getProjects(status, $scope.filter.showAll).then(function (response) {
           $scope.isLoaded = true;
           $scope.projects = response.data;
-          $('.footable').trigger('footable_initialize');
+          $timeout(function () {
+            $scope.init();
+          }, 1000);
         }).catch(function (error) {
           $scope.isLoaded = true;
           if (error.data) {
@@ -57,5 +67,10 @@ angular.module('topcoderX')
 
       $scope.init = function () {
         $('.footable').footable();
+      };
+      $scope.init();
+      $scope.toggleShowAll = function () {
+        $scope.filter.showAll = !$scope.filter.showAll;
+        $scope.getProjects($scope.state.status);
       };
     }]);

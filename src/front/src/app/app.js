@@ -53,7 +53,8 @@ angular.module('topcoderX', [
             }],
             currentUser: ['AuthService', function (AuthService) {
               return AuthService.getCurrentUser();
-            }]
+            }],
+
           }
         })
         .state('app', {
@@ -63,8 +64,11 @@ angular.module('topcoderX', [
           resolve: {
             currentUser: ['AuthService', function (AuthService) {
               return AuthService.getCurrentUser();
-            }]
-          }
+            }],
+            AppConfig: ['AuthService', function (AuthService) {
+              return AuthService.getAppConfig();
+            }],
+          },
         })
         .state('app.main', {
           url: '/main',
@@ -84,6 +88,8 @@ angular.module('topcoderX', [
         })
         .state('app.projects', {
           url: '/projects',
+          controller: 'ProjectsController',
+          controllerAs: 'vm',
           templateUrl: 'app/projects/projects.html',
           data: { pageTitle: 'Project Management' },
           resolve: { auth: authenticate }
@@ -130,18 +136,18 @@ angular.module('topcoderX', [
           controllerAs: 'vm',
         })
         .state('app.copilotPayments', {
-            url: '/copilot-payments',
-            templateUrl: 'app/copilot-payments/copilot-payments.html',
-            controller: 'CopilotPaymentsController',
-            controllerAs: 'vm',
-            resolve: { auth: authenticate }
+          url: '/copilot-payments',
+          templateUrl: 'app/copilot-payments/copilot-payments.html',
+          controller: 'CopilotPaymentsController',
+          controllerAs: 'vm',
+          resolve: { auth: authenticate }
         })
         .state('app.addPayment', {
-            url: '/copilot-payment',
-            templateUrl: 'app/add-copilot-payment/add-copilot-payment.html',
-            controller: 'AddCopilotPaymentController',
-            controllerAs: 'vm',
-            resolve: { auth: authenticate }
+          url: '/copilot-payment',
+          templateUrl: 'app/add-copilot-payment/add-copilot-payment.html',
+          controller: 'AddCopilotPaymentController',
+          controllerAs: 'vm',
+          resolve: { auth: authenticate }
         });
 
 

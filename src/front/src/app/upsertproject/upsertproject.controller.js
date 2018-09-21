@@ -6,8 +6,9 @@
 'use strict';
 
 angular.module('topcoderX').controller('ProjectController', ['currentUser', '$scope', '$timeout', 'ProjectService',
-  '$rootScope', '$state', 'Alert', function (currentUser, $scope, $timeout, ProjectService, $rootScope, $state, Alert) {
-
+  '$rootScope', '$state', 'Alert', '$uibModal', 'Helper',
+  function (currentUser, $scope, $timeout, ProjectService, $rootScope, $state,
+    Alert, $uibModal, Helper) {
     // Maintain the navigation state.
     $timeout(function () {
       angular.element('#projectsManagement').addClass('active');
@@ -19,6 +20,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       title: '',
       tcDirectId: '',
       repoUrl: '',
+      copilot: currentUser.roles.indexOf($rootScope.appConfig.copilotRole) > -1 ? currentUser.handle : '',
       rocketChatWebhook: null,
       rocketChatChannelName: null,
       archived: false,
@@ -27,11 +29,15 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       $scope.title = 'Edit a Project';
       $scope.project = $rootScope.project;
       $scope.project.id = $rootScope.project.id;
+      $scope.project.copilot = $rootScope.project.copilot;
+      $scope.project.owner = $rootScope.project.owner;
       $scope.editing = true;
     } else {
       $scope.title = 'Add a Project';
       $scope.editing = false;
     }
+
+    $scope.isAdminUser = Helper.isAdminUser(currentUser);
 
     // function to add labels to the current project.
     $scope.addLabels = function () {
@@ -77,5 +83,24 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
           Alert.error(error.data.message, $scope);
         });
       }
+    };
+
+    $scope.openTransferOwnershipDialog = function () {
+      $uibModal.open({
+        size: 'md',
+        templateUrl: 'app/upsertproject/transfer-ownership-dialog.html',
+        controller: 'TransferOwnershipDialogController',
+        resolve: {
+          currentUser: function () {
+            return currentUser;
+          },
+          appConfig: function () {
+            return $rootScope.appConfig;
+          },
+          project: function () {
+            return $scope.project;
+          },
+        },
+      });
     };
   }]);

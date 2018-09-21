@@ -27,7 +27,7 @@ async function search(criteria, currentUserTopcoderHandle) {
   }
 
   // select projects for current user
-  const projects = await models.Project.find({ username: currentUserTopcoderHandle, archived: false });
+  const projects = await models.Project.find({ owner: currentUserTopcoderHandle, archived: false });
   query.projectId = {
     $in: projects.map((i) => i._id),
   };
@@ -51,7 +51,7 @@ async function search(criteria, currentUserTopcoderHandle) {
 search.schema = Joi.object().keys({
   criteria: Joi.object().keys({
     label: Joi.string().required(),
-    sortBy: Joi.string().valid('title', 'projectId.title', 'updatedAt', 'assignee').default('updatedAt'),
+    sortBy: Joi.string().valid('title', 'projectId.title', 'updatedAt', 'assignee', 'assignedAt').default('updatedAt'),
     sortDir: Joi.string().valid('asc', 'desc').default('asc'),
     page: Joi.number().integer().min(1).required(),
     perPage: Joi.number().integer().min(1).required(),

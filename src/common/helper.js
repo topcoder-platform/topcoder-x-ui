@@ -211,9 +211,9 @@ async function getProviderType(repoUrl) {
  * @param {String} provider the git provider
  * @returns {Object} the owner/copilot for the project
  */
-async function getProjectOwner(models, project, provider) {
+async function getProjectCopilot(models, project, provider) {
   const userMapping = await models.UserMapping.findOne({
-    topcoderUsername: project.username,
+    topcoderUsername: project.copilot,
   });
 
   if (!userMapping || (provider === 'github' && !userMapping.githubUserId) || (provider === 'gitlab' && !userMapping.gitlabUserId)) {
@@ -246,5 +246,5 @@ module.exports = {
   ensureExists,
   generateIdentifier,
   getProviderType,
-  getProjectOwner,
+  getProjectCopilot,
 };

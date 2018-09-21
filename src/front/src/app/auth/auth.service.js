@@ -272,7 +272,24 @@ angular.module('topcoderX')
         currentUser.token = tctV3;
 
         return currentUser;
-      }
+      };
+
+      /**
+       * gets the application configurations
+       */
+      AuthService.getAppConfig = function () {
+        var tctV3 = AuthService.getTokenV3();
+
+        if (!tctV3) {
+          return null;
+        }
+        return $http.get(Helper.baseUrl + '/api/v1/appConfig').then(function (res) {
+          $rootScope.appConfig = res.data;
+          return $q.resolve(res.data);
+        }).catch(function (err) {
+          return $q.reject(err);
+        });
+      };
 
       return AuthService;
 
