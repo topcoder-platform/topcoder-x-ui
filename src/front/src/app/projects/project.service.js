@@ -22,8 +22,8 @@ angular.module('topcoderX')
     /**
      * Get all projects
      */
-    ProjectService.getProjects = function (status) {
-      return $http.get(Helper.baseUrl + '/api/v1/projects?status=' + status).then(function (response) {
+    ProjectService.getProjects = function (status, showAll) {
+      return $http.get(Helper.baseUrl + '/api/v1/projects?status=' + status + '&showAll=' + showAll).then(function (response) {
         return response;
       });
     };
@@ -104,5 +104,25 @@ angular.module('topcoderX')
         return response;
       });
     };
+
+    /**
+     * transfers the ownership of project
+     * @param {String} projectId the project id
+     * @param {String} owner the topcoder handle of owner user
+     */
+    ProjectService.transferOwnership = function (pId, ownerHandle) {
+      var req = {
+        method: 'POST',
+        url: Helper.baseUrl + '/api/v1/projects/transferOwnership',
+        data: {
+          projectId: pId,
+          owner: ownerHandle,
+        },
+      };
+      return $http(req).then(function (response) {
+        return response;
+      });
+    };
+
     return ProjectService;
   }]);

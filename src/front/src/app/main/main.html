@@ -36,6 +36,10 @@
                         Project name
                         <span class="footable-sort-indicator"></span>
                       </th>
+                      <th class="footable-sortable" ng-click="sort('assignedAt', 'readyForReview')" ng-class="{'footable-sorted': tableConfig.readyForReview.sortBy === 'assignedAt' && tableConfig.readyForReview.sortDir === 'asc', 'footable-sorted-desc': tableConfig.readyForReview.sortBy === 'assignedAt' && tableConfig.readyForReview.sortDir === 'desc'}">
+                        Hours Assigned
+                        <span class="footable-sort-indicator"></span>
+                      </th>
                       <th class="col-lg-3" data-sort-ignore="true">Link to the ticket</th>
                     </tr>
                   </thead>
@@ -45,6 +49,7 @@
                       <td class="col-lg-2 col-md-2">[${{item.prizes[0]}}] {{item.title}}</td>
                       <td class="col-lg-2">{{item.assignee}}</td>
                       <td class="col-lg-2">{{item.projectId.title}}</td>
+                      <td class="col-lg-2 {{item.assignedAt| hourSince |hourSinceClass}}">{{item.assignedAt|hourSince}}</td>
                       <td class="col-lg-2">
                         <a href="{{item.projectId.repoUrl}}/issues/{{item.number}}" target="_blank">{{item.number}}</a>
                       </td>
@@ -52,7 +57,7 @@
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td colspan="5">
+                      <td colspan="6">
                         <ul class="pagination pull-right">
                           <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.readyForReview.pageNumber === 1}">
                             <a ng-click="changePage(1, 'readyForReview')">«</a>
@@ -101,6 +106,10 @@
                           Project name
                           <span class="footable-sort-indicator"></span>
                         </th>
+                        <th class="footable-sortable" ng-click="sort('assignedAt', 'assigned')" ng-class="{'footable-sorted': tableConfig.assigned.sortBy === 'assignedAt' && tableConfig.assigned.sortDir === 'asc', 'footable-sorted-desc': tableConfig.assigned.sortBy === 'assignedAt' && tableConfig.assigned.sortDir === 'desc'}">
+                          Hours Assigned
+                          <span class="footable-sort-indicator"></span>
+                        </th>
                         <th class="col-lg-3" data-sort-ignore="true">Link to the ticket</th>
                       </tr>
                     </thead>
@@ -110,6 +119,7 @@
                         <td class="col-lg-2 col-md-2">[${{item.prizes[0]}}] {{item.title}}</td>
                         <td class="col-lg-2">{{item.assignee}}</td>
                         <td class="col-lg-2">{{item.projectId.title}}</td>
+                        <td class="col-lg-2 {{item.assignedAt| hourSince |hourSinceClass}}">{{item.assignedAt|hourSince}}</td>
                         <td class="col-lg-2">
                           <a href="{{item.projectId.repoUrl}}/issues/{{item.number}}" target="_blank">{{item.number}}</a>
                         </td>
@@ -117,7 +127,7 @@
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td colspan="5">
+                        <td colspan="6">
                           <ul class="pagination pull-right">
                             <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.assigned.pageNumber === 1}">
                               <a ng-click="changePage(1, 'assigned')">«</a>

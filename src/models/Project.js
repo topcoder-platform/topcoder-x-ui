@@ -19,8 +19,9 @@ const schema = new mongoose.Schema({
   rocketChatWebhook: { type: String, required: false },
   rocketChatChannelName: { type: String, required: false },
   archived: { type: String, required: true },
-  username: { type: String, required: true },
+  owner: { type: String, required: true },
   secretWebhookKey: { type: String, required: true },
+  copilot: { type: String, required: true },
 });
 
 schema.index({tcDirectId: 1});

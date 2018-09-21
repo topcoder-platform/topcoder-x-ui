@@ -26,6 +26,7 @@ const schema = new mongoose.Schema({
   // From topcoder api
   challengeId: {type: Number, required: true, unique: true},
   projectId: {type: mongoose.Schema.Types.ObjectId, ref: 'Project'},
+  assignedAt: {type: Date, required: false},
 });
 
 // Issue number, provider, repositoryId must be unique
