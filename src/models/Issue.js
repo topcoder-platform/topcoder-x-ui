@@ -24,7 +24,7 @@ const schema = new mongoose.Schema({
     default: Date.now,
   },
   // From topcoder api
-  challengeId: {type: Number, required: true, unique: true},
+  challengeId: {type: Number, required: false, unique: true, sparse: true},
   projectId: {type: mongoose.Schema.Types.ObjectId, ref: 'Project'},
   assignedAt: {type: Date, required: false},
 });
