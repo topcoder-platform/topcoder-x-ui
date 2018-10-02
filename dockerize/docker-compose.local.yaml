@@ -1,0 +1,80 @@
+version: '3'
+services:
+  maildev:
+    image: djfarrelly/maildev
+    container_name: maildev.local
+    ports:
+      - 8000:80
+      - 1025:25
+
+  mongo:
+    image: mongo:3
+    container_name: mongo.local
+    ports:
+      - 27017:27017
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper.local
+    ports:
+      - 2181:2181
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka.local
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper.local:2181
+      KAFKA_LISTENERS: SSL://:9092
+      KAFKA_ADVERTISED_LISTENERS: SSL://kafka.local:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_CREATE_TOPICS: tc-x-events:1:1
+      KAFKA_SSL_KEYSTORE_LOCATION: "/certs/broker.keystore.jks"
+      KAFKA_SSL_KEYSTORE_PASSWORD: secret
+      KAFKA_SSL_KEY_PASSWORD: secret
+      KAFKA_SSL_TRUSTSTORE_LOCATION: "/certs/broker.truststore.jks"
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: secret
+      KAFKA_SSL_CLIENT_AUTH: required
+      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SSL
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./certs/broker.keystore.jks:/certs/broker.keystore.jks
+      - ./certs/broker.truststore.jks:/certs/broker.truststore.jks
+    ports:
+      - 9092:9092
+
+  topcoder-x-receiver:
+    image: topcoder-x-receiver:local
+    container_name: topcoder-x-receiver.local
+    depends_on:
+      - mongo
+      - kafka
+    volumes:
+      - ./certs/kafka_client.key:/topcoder-x-receiver/kafka_client.key
+      - ./certs/kafka_client.cer:/topcoder-x-receiver/kafka_client.cer
+    ports:
+      - 3002:3002
+
+  topcoder-x-processor:
+    image: topcoder-x-processor:local
+    container_name: topcoder-x-processor.local
+    depends_on:
+      - maildev
+      - mongo
+      - kafka
+    volumes:
+      - ./certs/kafka_client.key:/topcoder-x-processor/kafka_client.key
+      - ./certs/kafka_client.cer:/topcoder-x-processor/kafka_client.cer
+
+  topcoder-x-ui:
+    image: topcoder-x-ui:local
+    container_name: topcoder-x-ui.local
+    depends_on:
+      - mongo
+      - kafka
+    volumes:
+      - ./certs/kafka_client.key:/topcoder-x-ui/kafka_client.key
+      - ./certs/kafka_client.cer:/topcoder-x-ui/kafka_client.cer
+    ports:
+      - 80:80
