@@ -24,7 +24,7 @@ angular.module('topcoderX')
 
             // get topcoderx projects
             $scope.getProjects = function () {
-                ProjectService.getProjects().then(function (response) {
+                ProjectService.getProjects('active', true).then(function (response) {
                     $scope.projects = response.data;
                 }).catch(function (error) {
                     _handleError(error, 'There are no projects in Topcoder-X. Please create a project first.');
@@ -61,6 +61,6 @@ angular.module('topcoderX')
                         _handleError(error, 'An error occurred while updating Payment.');
                     });
                 }
-            };            
+            };
         }
     ]);

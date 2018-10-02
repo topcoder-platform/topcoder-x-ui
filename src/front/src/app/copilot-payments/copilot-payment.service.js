@@ -21,13 +21,18 @@ angular.module('topcoderX')
     };
 
     /**
-     * get copilot payment items
-     *
+     * searches copilot payment items
+     * @param {String} status the status
+     * @param {String} sortBy the sort by
+     * @param {String} sortDir the sort direction
+     * @param {Number} pageNo the page number
+     * @param {Number} pageSize the page size
      */
-    service.getAll = function (query) {
-      return $http.get(baseUrl + '/api/v1/payments/copilot?sortBy=' + query).then(function (response) {
-        return response;
-      });
+    service.search = function (status, sortBy, sortDir, pageNo, pageSize) {
+      return $http.get(baseUrl + '/api/v1/payments/copilot?status=' + status + '&sortBy=' + sortBy + '&sortDir=' + sortDir + '&page=' + pageNo + '&perPage=' + pageSize)
+        .then(function (response) {
+          return response;
+        });
     };
 
     /**

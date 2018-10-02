@@ -18,9 +18,14 @@ const errors = require('../common/errors');
 const CopilotPayment = models.CopilotPayment;
 const Project = models.Project;
 
-const getAllPaymentsSchema = {
-  query: Joi.object().keys({
-    sortBy: Joi.string().valid('project', 'amount', 'challenge').required()
+// payment search schema
+const searchSchema = {
+  criteria: Joi.object().keys({
+    status: Joi.boolean().required(),
+    sortBy: Joi.string().valid('project', 'amount', 'challenge').required(),
+    sortDir: Joi.string().valid('asc', 'desc').default('asc'),
+    page: Joi.number().integer().min(1).required(),
+    perPage: Joi.number().integer().min(1).required(),
   }).required(),
   topcoderUser: {
     handle: Joi.string().required(),
@@ -63,12 +68,13 @@ const removePaymentSchema = {
 
 /**
  * ensure if current user can update the copilot payment
+ * if has access then get information
  * @param {String} paymentId the payment id
  * @param {Object} topcoderUser the topcoder current user
  * @returns {Object} the project and payment detail from database
  * @private
  */
-async function _ensureEditPermission(paymentId, topcoderUser) {
+async function _ensureEditPermissionAndGetInfo(paymentId, topcoderUser) {
   const dbPayment = await helper.ensureExists(CopilotPayment, paymentId);
   const dbProject = await helper.ensureExists(Project, dbPayment.project);
   // either user must be owner of project or user is copilot receiving payment
@@ -82,27 +88,33 @@ async function _ensureEditPermission(paymentId, topcoderUser) {
 }
 
 /**
- * gets all payments
- * @param {String} query query param
+ * searches payments
+ * @param {Object} criteria the search criteria
  * @param {Object} topcoderUser the topcoder user details of logged in user
  * @returns {Array} copilot payments
  */
-async function getAll(query, topcoderUser) {
+async function search(criteria, topcoderUser) {
   const projectIds = await Project.find({
     $or: [
       { owner: topcoderUser.handle },
       { copilot: topcoderUser.handle },
     ],
   }).select('_id');
-  const condition = { project: {$in: projectIds}};
+  const condition = { project: { $in: projectIds } };
+  condition.closed = criteria.status;
   const payments = await CopilotPayment.find(condition)
-    .populate({ path: 'project', select: 'title owner copilot'});
-
-  // sort by query criteria
-  return await _.orderBy(payments, query, ['desc']);
+    .populate({ path: 'project', select: 'title owner copilot' });
+  const offset = (criteria.page - 1) * criteria.perPage;
+  const result = {
+    pages: Math.ceil(payments.length / criteria.perPage) || 1,
+    docs: _(payments).orderBy(criteria.sortBy, criteria.sortDir)
+      .slice(offset).take(criteria.perPage)
+      .value(),
+  };
+  return result;
 }
 
-getAll.schema = getAllPaymentsSchema;
+search.schema = searchSchema;
 
 /**
  * update payments list
@@ -189,7 +201,7 @@ create.schema = createPaymentSchema;
  * @returns {Object} updated detail
  */
 async function update(topcoderUser, payment) {
-  let dbPayment = await _ensureEditPermission(payment.id, topcoderUser);
+  let dbPayment = await _ensureEditPermissionAndGetInfo(payment.id, topcoderUser);
 
   // if nothing is changed then discard
   if (dbPayment.project === payment.project && dbPayment.amount === payment.amount && dbPayment.description === payment.description) { // eslint-disable-line
@@ -251,7 +263,7 @@ update.schema = paymentSchema;
  * @returns {Object} the success status
  */
 async function remove(id, topcoderUser) {
-  const dbPayment = await _ensureEditPermission(id, topcoderUser);
+  const dbPayment = await _ensureEditPermissionAndGetInfo(id, topcoderUser);
 
   const payment = await getExistingChallengeIdIfExists(dbPayment.toObject());
   await CopilotPayment.remove({ _id: id });
@@ -272,7 +284,7 @@ remove.schema = removePaymentSchema;
 
 
 module.exports = {
-  getAll,
+  search,
   create,
   update,
   remove,
