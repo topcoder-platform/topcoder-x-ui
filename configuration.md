@@ -16,15 +16,16 @@ The following config parameters are supported, they are defined in `src/config.j
 | WEBSITE                                | used as base to construct various URLs     | http://topcoderx.topcoder-dev.com/ |
 | GITLAB_API_BASE_URL                    | The Gitlab API base URL                    | https://gitlab.com|
 | MONGODB_URI                            | The MongoDB URI.  This needs to be the same MongoDB used by topcoder-x-receiver, topcoder-x-processor, and topcoder-x-site                           | mongodb://127.0.0.1:27017/topcoderx |
-|TOPIC  | The Kafka topic where events are published.  This must be the same as the configured value for topcoder-x-processor| |
+|TOPIC  | The Kafka topic where events are published.  This must be the same as the configured value for topcoder-x-processor| tc-x-events |
 |KAFKA_OPTIONS | Kafka connection options| |
 |KAFKA_HOST | The Kafka host to connect to| localhost:9092 |
 |KAFKA_CLIENT_CERT | The Kafka SSL certificate to use when connecting| Read from kafka_client.cer file, but this can be set as a string like it is on Heroku |
 |KAFKA_CLIENT_CERT_KEY | The Kafka SSL certificate key to use when connecting| Read from kafka_client.key file, but this can be set as a string like it is on Heroku|
+|KAFKA_CLIENT_CERT_KEY_PASS | The passphrase of certificate key | |
 | HOOK_BASE_URL            | The base URL of the topcoder-x-receiver, used when adding webhooks automatically to repositories | |
 | TOPCODER_ENV | The topcoder environment to use, can support 'dev' or 'prod' | 'dev'                     |
-|LABELS| Labels we are going to add to the repository in the form of array of object with `name` and `color` property. Color should be hex code without hash||
-|ALLOWED_TOPCODER_ROLES| The allowed Topcoder role to use Topcoder X app| see configuration |
+|LABELS| Labels we are going to add to the repository in the form of array of object with `name` and `color` property. Color should be hex code without hash|See configuration. Note when setup by environment, it must be a valid JSON string format.|
+|ALLOWED_TOPCODER_ROLES| The allowed Topcoder role to use Topcoder X app| See configuration. Note when setup by environment, it must be a valid JSON string format. |
 |COPILOT_ROLE| The role to identify copilot|'copilot'|
 |HELP_LINK| The link for help| 'https://github.com/topcoder-platform/topcoder-x-ui/wiki'|
 

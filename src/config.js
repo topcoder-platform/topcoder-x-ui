@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2017 TopCoder, Inc. All rights reserved.
  */
+require('dotenv').config();
 const fs = require('fs');
 /**
  * Define config.
@@ -30,13 +31,13 @@ module.exports = {
     ssl: {
       cert: process.env.KAFKA_CLIENT_CERT || fs.readFileSync('./kafka_client.cer'), // eslint-disable-line no-sync
       key: process.env.KAFKA_CLIENT_CERT_KEY || fs.readFileSync('./kafka_client.key'), // eslint-disable-line no-sync
-      passphrase: 'secret', // NOTE:* This configuration specifies the private key passphrase used while creating it.
+      passphrase: process.env.KAFKA_CLIENT_CERT_KEY_PASS || 'secret', // NOTE:* This configuration specifies the private key passphrase used while creating it.
     },
   },
   HOOK_BASE_URL: process.env.HOOK_BASE_URL || 'http://topcoderx.topcoder-dev.com',
   TOPCODER_ENV: process.env.TOPCODER_ENV || 'dev',
-  LABELS: process.env.LABELS || [{ name: 'tcx_OpenForPickup', color: '428BCA' }, { name: 'tcx_Assigned', color: '004E00' }, { name: 'tcx_ReadyForReview', color: 'D1D100' }, { name: 'tcx_Paid', color: '7F8C8D' }, { name: 'tcx_Feedback', color: 'FF0000' }, { name: 'tcx_FixAccepted', color: '69D100' }],
-  ALLOWED_TOPCODER_ROLES: process.env.ALLOWED_TOPCODER_ROLES || ['administrator', 'admin', 'connect manager', 'connect admin', 'copilot', 'connect copilot'],
+  LABELS: process.env.LABELS ? JSON.parse(process.env.LABELS) : [{ name: 'tcx_OpenForPickup', color: '428BCA' }, { name: 'tcx_Assigned', color: '004E00' }, { name: 'tcx_ReadyForReview', color: 'D1D100' }, { name: 'tcx_Paid', color: '7F8C8D' }, { name: 'tcx_Feedback', color: 'FF0000' }, { name: 'tcx_FixAccepted', color: '69D100' }],
+  ALLOWED_TOPCODER_ROLES: process.env.ALLOWED_TOPCODER_ROLES ? JSON.parse(process.env.ALLOWED_TOPCODER_ROLES) : ['administrator', 'admin', 'connect manager', 'connect admin', 'copilot', 'connect copilot'],
   COPILOT_ROLE: process.env.COPILOT_ROLE || 'copilot',
   HELP_LINK: process.env.HELP_LINK || 'https://github.com/topcoder-platform/topcoder-x-ui/wiki',
 };
