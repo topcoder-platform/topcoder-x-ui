@@ -74,12 +74,13 @@ async function _validateProjectData(project) {
 
 /**
  * ensure if current user can update the project
+ * if has access then get information
  * @param {String} projectId the project id
  * @param {String} currentUser the topcoder current user
  * @returns {Object} the project detail from database
  * @private
  */
-async function _ensureEditPermission(projectId, currentUser) {
+async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
   const dbProject = await helper.ensureExists(Project, projectId);
   if (await securityService.isAdminUser(currentUser.roles)) {
     return dbProject;
@@ -122,7 +123,7 @@ create.schema = createProjectSchema;
  * @returns {Object} updated project
  */
 async function update(project, currentUser) {
-  const dbProject = await _ensureEditPermission(project.id, currentUser);
+  const dbProject = await _ensureEditPermissionAndGetInfo(project.id, currentUser);
   await _validateProjectData(project);
   if (dbProject.archived === 'false' && project.archived === true) {
     // project archived detected.
@@ -193,7 +194,7 @@ getAll.schema = Joi.object().keys({
  * @returns {Object} result
  */
 async function createLabel(body, currentUser) {
-  const dbProject = await _ensureEditPermission(body.projectId, currentUser);
+  const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(dbProject.repoUrl);
   const copilot = await helper.getProjectCopilot(models, dbProject, provider);
   const results = dbProject.repoUrl.split('/');
@@ -260,7 +261,7 @@ createLabel.schema = Joi.object().keys({
  * @returns {Object} result
  */
 async function createHook(body, currentUser) {
-  const dbProject = await _ensureEditPermission(body.projectId, currentUser);
+  const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(dbProject.repoUrl);
   const copilot = await helper.getProjectCopilot(models, dbProject, provider);
   const results = dbProject.repoUrl.split('/');
@@ -341,7 +342,7 @@ createHook.schema = createLabel.schema;
  * @returns {Object} result
  */
 async function addWikiRules(body, currentUser) {
-  const dbProject = await _ensureEditPermission(body.projectId, currentUser);
+  const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(dbProject.repoUrl);
   const copilot = await helper.getProjectCopilot(models, dbProject, provider);
   const results = dbProject.repoUrl.split('/');
@@ -400,7 +401,7 @@ async function transferOwnerShip(body, currentUser) {
   if (!await securityService.isAdminUser(currentUser.roles)) {
     throw new errors.ForbiddenError('You can\'t transfer the ownership of this project');
   }
-  const dbProject = await _ensureEditPermission(body.projectId, currentUser);
+  const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(dbProject.repoUrl);
   const setting = await userService.getUserSetting(body.owner);
   if (!setting.gitlab && !setting.github) {

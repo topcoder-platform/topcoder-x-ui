@@ -149,7 +149,7 @@ module.exports = {
   '/payments/copilot': {
     get: {
       controller: 'CopilotPaymentController',
-      method: 'getAll',
+      method: 'search',
       allowedRoles: [config.COPILOT_ROLE],
     },
     post: {

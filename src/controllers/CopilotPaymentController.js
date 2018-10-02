@@ -22,24 +22,13 @@ async function updateAll(req) {
 }
 
 /**
- * get all the payment for the current copilot
+ * searches the payment according to criteria for the current copilot
  * @param {Object} req the request
  * @param {Object} res  the response
  * @returns {Object} the result
  */
-async function getAll(req) {
-    const payments = await CopilotPaymentService.getAll(req.query, req.currentUser);
-    const active = [];
-    const closed = [];
-
-    payments.forEach(function (payment) {
-        if (payment.closed === true) {
-            closed.push(payment);
-        } else {
-            active.push(payment);
-        }
-    });
-    return { activePayments: active, closedPayments: closed };
+async function search(req) {
+    return await CopilotPaymentService.search(req.query, req.currentUser);
 }
 
 /**
@@ -74,7 +63,7 @@ async function remove(req) {
 
 
 module.exports = {
-    getAll,
+    search,
     create,
     update,
     remove,
