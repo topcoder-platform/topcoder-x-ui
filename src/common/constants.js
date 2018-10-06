@@ -51,11 +51,11 @@ const GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION = 300;
 const TOPCODER_VALUES = {
   dev: {
     TC_LOGIN_URL: 'https://accounts.topcoder-dev.com/member',
-    TC_USER_PROFILE_URL: 'http://api.topcoder-dev.com/v2/user/profile',
+    TC_USER_PROFILE_URL: 'https://api.topcoder-dev.com/v2/user/profile',
   },
   prod: {
     TC_LOGIN_URL: 'https://accounts.topcoder.com/member',
-    TC_USER_PROFILE_URL: 'http://api.topcoder.com/v2/user/profile',
+    TC_USER_PROFILE_URL: 'https://api.topcoder.com/v2/user/profile',
   },
 };
 
