@@ -16,12 +16,12 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const jwtDecode = require('jwt-decode');
+const secure = require('ssl-express-www');
 const config = require('./config');
 const routes = require('./routes');
 const logger = require('./common/logger');
 const errors = require('./common/errors');
 const constants = require('./common/constants');
-const secure = require('ssl-express-www');
 
 const app = express();
 app.use(cors());
