@@ -21,9 +21,11 @@ const routes = require('./routes');
 const logger = require('./common/logger');
 const errors = require('./common/errors');
 const constants = require('./common/constants');
+const secure = require('ssl-express-www');
 
 const app = express();
 app.use(cors());
+app.use(secure);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({ secret: config.SESSION_SECRET, resave: false, saveUninitialized: true }));
