@@ -36,4 +36,6 @@ workflows:
       - "build-dev":
           filters:
             branches:
-              only: develop
+              only: 
+                - develop
+                - dockerize-circleci
