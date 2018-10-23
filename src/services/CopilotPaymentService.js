@@ -187,6 +187,7 @@ async function create(topcoderUser, payment) {
       payment: dbPayment.toObject(),
       copilot: topcoderUser,
     },
+    provider: 'copilotPayment',
   };
   await kafka.send(JSON.stringify(paymentCreateEvent));
   return dbPayment.toJSON();

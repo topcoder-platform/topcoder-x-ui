@@ -18,7 +18,7 @@ angular.module('topcoderX')
           return;
         }
         ProjectService.transferOwnership($scope.project.id, $scope.owner).then(function () {
-          Alert.info('Project ownership is transferred Successfully', $scope);
+          Alert.info('Project ownership is transferred Successfully', $rootScope);
           $rootScope.project = project;
           $rootScope.project.owner = $scope.owner;
           $state.go('app.project');
