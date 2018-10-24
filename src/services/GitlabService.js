@@ -97,7 +97,7 @@ async function listOwnerUserGroups(token, page = 1, perPage = constants.GITLAB_D
   try {
     const response = await request
       .get(`${config.GITLAB_API_BASE_URL}/api/v4/groups`)
-      .query({ page, per_page: perPage, min_access_level:40 })
+      .query({ page, per_page: perPage, owned: true })
       .set('Authorization', `Bearer ${token}`)
       .end();
 
