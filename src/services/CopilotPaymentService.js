@@ -10,8 +10,9 @@
  */
 const Joi = require('joi');
 const _ = require('lodash');
-const helper = require('../common/helper');
 const models = require('../models');
+const helper = require('../common/helper');
+const dbHelper = require('../common/db-helper');
 const kafka = require('../utils/kafka');
 const errors = require('../common/errors');
 
@@ -75,8 +76,9 @@ const removePaymentSchema = {
  * @private
  */
 async function _ensureEditPermissionAndGetInfo(paymentId, topcoderUser) {
-  const dbPayment = await helper.ensureExists(CopilotPayment, paymentId);
-  const dbProject = await helper.ensureExists(Project, dbPayment.project);
+  const dbPayment = await helper.ensureExists(CopilotPayment, paymentId, 'CopilotPayment');
+  const dbProject = await helper.ensureExists(Project, dbPayment.project, 'Project');
+
   // either user must be owner of project or user is copilot receiving payment
   if (dbPayment.username !== topcoderUser.handle && dbProject.owner !== topcoderUser.handle) {
     throw new errors.ForbiddenError('You do not have permission to edit this payment');
@@ -94,24 +96,53 @@ async function _ensureEditPermissionAndGetInfo(paymentId, topcoderUser) {
  * @returns {Array} copilot payments
  */
 async function search(criteria, topcoderUser) {
-  const projectIds = await Project.find({
-    $or: [
-      { owner: topcoderUser.handle },
-      { copilot: topcoderUser.handle },
-    ],
-  }).select('_id');
-  const condition = { project: { $in: projectIds } };
-  condition.closed = criteria.status;
-  const payments = await CopilotPayment.find(condition)
-    .populate({ path: 'project', select: 'title owner copilot' });
-  const offset = (criteria.page - 1) * criteria.perPage;
-  const result = {
-    pages: Math.ceil(payments.length / criteria.perPage) || 1,
-    docs: _(payments).orderBy(criteria.sortBy, criteria.sortDir)
-      .slice(offset).take(criteria.perPage)
-      .value(),
+  const filterValues = {};
+  const filter = {
+    FilterExpression: '#owner= :handle or copilot = :handle',
+    ExpressionAttributeNames: {
+      '#owner': 'owner',
+    },
+    ExpressionAttributeValues: {
+      ':handle': topcoderUser.handle,
+    },
   };
-  return result;
+  const projects = await dbHelper.scan(models.Project, filter);
+  if (projects && projects.length > 0) {
+    const filterProjectIds = _.join(projects.map((p, index) => {
+      const id = `:id${index}`;
+      filterValues[id] = p.id;
+      return id;
+    }), ',');
+
+    const FilterExpression = `#project in (${filterProjectIds}) AND closed = :status`;
+    filterValues[':status'] = criteria.status.toString();
+
+    const payments = await dbHelper.scan(CopilotPayment, {
+      FilterExpression,
+      ExpressionAttributeNames: {
+        '#project': 'project',
+      },
+      ExpressionAttributeValues: filterValues,
+    });
+
+    for (const payment of payments) { // eslint-disable-line guard-for-in,no-restricted-syntax
+      payment.project = await dbHelper.getById(models.Project, payment.project);
+    }
+
+    const offset = (criteria.page - 1) * criteria.perPage;
+    const result = {
+      pages: Math.ceil(payments.length / criteria.perPage) || 1,
+      docs: _(payments).orderBy(criteria.sortBy, criteria.sortDir)
+        .slice(offset).take(criteria.perPage)
+        .value(),
+    };
+    return result;
+  }
+
+  return {
+    pages: 0,
+    docs: [],
+  };
 }
 
 search.schema = searchSchema;
@@ -129,7 +160,7 @@ async function updateAll(topcoderUser) {
     },
   };
   await kafka.send(JSON.stringify(paymentUpdatesEvent));
-  return { success: true };
+  return {success: true};
 }
 
 updateAll.schema = {
@@ -146,14 +177,13 @@ updateAll.schema = {
  */
 async function getExistingChallengeIdIfExists(dbPayment) {
   // check if there is existing active challenge associated with this project
-  const existingPayments = await CopilotPayment.findOne({
+  const existingPayments = await dbHelper.scanOne(CopilotPayment, {
     project: dbPayment.project,
     username: dbPayment.username,
-    closed: false,
-    challengeId: {
-      $gt: 0,
-    },
+    closed: 'false',
+    challengeId: {gt: 0},
   });
+
   // if no existing challenge found then it will be created by processor
   if (existingPayments) {
     dbPayment.challengeId = existingPayments.challengeId;
@@ -168,29 +198,32 @@ async function getExistingChallengeIdIfExists(dbPayment) {
  * @returns {Object} created payment
  */
 async function create(topcoderUser, payment) {
-  const dbProject = await helper.ensureExists(Project, payment.project);
+  const dbProject = await helper.ensureExists(Project, payment.project, 'Project');
   if (dbProject.copilot !== topcoderUser.handle && dbProject.owner !== topcoderUser.handle) {
     throw new errors.ForbiddenError('You do not have permission to edit this payment');
   }
   payment.username = dbProject.copilot;
   payment.closed = false;
-  let dbPayment = new CopilotPayment(payment);
+  payment.id = helper.generateIdentifier();
+
+  let dbPayment = await dbHelper.create(CopilotPayment, payment);
 
   dbPayment = await getExistingChallengeIdIfExists(dbPayment);
   if (!_.isNumber(dbPayment.challengeId) && payment.amount <= 1) {
     throw new Error('The amount must be greater than 1');
   }
-  await dbPayment.save();
+  await dbHelper.update(CopilotPayment, dbPayment.id, dbPayment);
+
   const paymentCreateEvent = {
     event: 'copilotPayment.add',
     data: {
-      payment: dbPayment.toObject(),
+      payment: _.assign({}, dbPayment),
       copilot: topcoderUser,
     },
     provider: 'copilotPayment',
   };
   await kafka.send(JSON.stringify(paymentCreateEvent));
-  return dbPayment.toJSON();
+  return dbPayment;
 }
 
 create.schema = createPaymentSchema;
@@ -225,12 +258,12 @@ async function update(topcoderUser, payment) {
   if (!_.isNumber(dbPayment.challengeId) && payment.amount <= 1) {
     throw new Error('The amount must be greater than 1');
   }
-  await dbPayment.save();
 
+  await dbHelper.update(CopilotPayment, dbPayment.id, dbPayment);
   const paymentUpdateEvent = {
     event: dbPayment.challengeId > 0 ? 'copilotPayment.update' : 'copilotPayment.add',
     data: {
-      payment: dbPayment.toObject(),
+      payment: _.assign({}, dbPayment),
       copilot: topcoderUser,
     },
   };
@@ -251,7 +284,7 @@ async function update(topcoderUser, payment) {
     };
     await kafka.send(JSON.stringify(paymentDeleteEvent));
   }
-  return dbPayment.toJSON();
+  return dbPayment;
 }
 
 update.schema = paymentSchema;
@@ -265,10 +298,8 @@ update.schema = paymentSchema;
  */
 async function remove(id, topcoderUser) {
   const dbPayment = await _ensureEditPermissionAndGetInfo(id, topcoderUser);
-
-  const payment = await getExistingChallengeIdIfExists(dbPayment.toObject());
-  await CopilotPayment.remove({ _id: id });
-
+  const payment = await getExistingChallengeIdIfExists(dbPayment);
+  await dbHelper.remove(CopilotPayment, {id});
   const paymentDeleteEvent = {
     event: 'copilotPayment.delete',
     data: {
@@ -278,7 +309,7 @@ async function remove(id, topcoderUser) {
   };
 
   await kafka.send(JSON.stringify(paymentDeleteEvent));
-  return { success: true };
+  return {success: true};
 }
 
 remove.schema = removePaymentSchema;

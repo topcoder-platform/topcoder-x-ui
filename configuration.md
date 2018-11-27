@@ -15,7 +15,6 @@ The following config parameters are supported, they are defined in `src/config.j
 | GITLAB_CLIENT_SECRET                   | the GitLab client secret                   | No default - needs to be set up using the instructions below                                                             |
 | WEBSITE                                | used as base to construct various URLs     | http://topcoderx.topcoder-dev.com/ |
 | GITLAB_API_BASE_URL                    | The Gitlab API base URL                    | https://gitlab.com|
-| MONGODB_URI                            | The MongoDB URI.  This needs to be the same MongoDB used by topcoder-x-receiver, topcoder-x-processor, and topcoder-x-site                           | mongodb://127.0.0.1:27017/topcoderx |
 |TOPIC  | The Kafka topic where events are published.  This must be the same as the configured value for topcoder-x-processor| |
 |KAFKA_OPTIONS | Kafka connection options| |
 |KAFKA_HOST | The Kafka host to connect to| localhost:9092 |
@@ -28,6 +27,10 @@ The following config parameters are supported, they are defined in `src/config.j
 |COPILOT_ROLE| The role to identify copilot|'copilot'|
 |HELP_LINK| The link for help| 'https://github.com/topcoder-platform/topcoder-x-ui/wiki'|
 |ADMINISTRATOR_ROLES| The array of roles to be considered as admin| `['administrator', 'admin']`|
+|AWS_ACCESS_KEY_ID | The Amazon certificate key to use when connecting. Use local dynamodb you can set fake value|FAKE_ACCESS_KEY_ID |
+|AWS_SECRET_ACCESS_KEY | The Amazon certificate access key to use when connecting. Use local dynamodb you can set fake value|FAKE_SECRET_ACCESS_KEY |
+|AWS_REGION | The Amazon certificate region to use when connecting. Use local dynamodb you can set fake value|FAKE_REGION |
+|IS_LOCAL | Use Amazon DynamoDB Local or server. |true |
 
 ## GitHub OAuth App Setup
 

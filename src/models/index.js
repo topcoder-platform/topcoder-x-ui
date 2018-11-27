@@ -3,11 +3,24 @@
  */
 const Path = require('path');
 const fs = require('fs');
-const mongoose = require('mongoose');
+const dynamoose = require('dynamoose');
 const config = require('../config');
 
-mongoose.Promise = Promise;
-const conn = mongoose.createConnection(config.MONGODB_URI);
+dynamoose.AWS.config.update({
+  accessKeyId: config.DYNAMODB.AWS_ACCESS_KEY_ID,
+  secretAccessKey: config.DYNAMODB.AWS_SECRET_ACCESS_KEY,
+  region: config.DYNAMODB.AWS_REGION,
+});
+
+if (config.DYNAMODB.IS_LOCAL) {
+  dynamoose.local();
+}
+
+dynamoose.setDefaults({
+  create: true,
+  update: false,
+});
+
 const models = {};
 
 // Bootstrap models
@@ -15,23 +28,8 @@ fs.readdirSync(__dirname).forEach((file) => { // eslint-disable-line no-sync
   if (file !== 'index.js') {
     const filename = file.split('.')[0];
     const schema = require(Path.join(__dirname, filename)); // eslint-disable-line global-require
-    const model = conn.model(filename, schema);
+    const model = dynamoose.model(filename, schema);
     models[filename] = model;
-
-    model.schema.options.minimize = false;
-    model.schema.options.toJSON = {
-      transform: (doc, ret) => {
-        if (ret._id) {
-          ret.id = String(ret._id);
-          delete ret._id;
-        }
-        delete ret.__v;
-        if (filename === 'Admin') {
-          delete ret.password;
-        }
-        return ret;
-      },
-    };
   }
 });
 

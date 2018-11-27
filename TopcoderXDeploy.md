@@ -1,6 +1,6 @@
 # Topcoder X overview
 
-Topcoder-X is a set of applications and services that allow a copilot or Topcoder customer to manage work directly through Gitlab or Github.  When an issue is created in a Gitlab or Github project set up in Topcoder-X, Topcoder-X will create a Topcoder challenge to mirror the Gitlab or Github issue, and it will ensure that the challenge has the correct prize, copilot, assignee, description, and title.  As the Gitlab or Github issue is updated, Topcoder-X will ensure that the Topcoder challenge associated with the issue is updated appropriately.  When the Gitlab or Github issue is closed, Topcoder-X will activate and close the Topcoder challenge, ensuring that the members get paid as expected.  
+Topcoder-X is a set of applications and services that allow a copilot or Topcoder customer to manage work directly through Gitlab or Github.  When an issue is created in a Gitlab or Github project set up in Topcoder-X, Topcoder-X will create a Topcoder challenge to mirror the Gitlab or Github issue, and it will ensure that the challenge has the correct prize, copilot, assignee, description, and title.  As the Gitlab or Github issue is updated, Topcoder-X will ensure that the Topcoder challenge associated with the issue is updated appropriately.  When the Gitlab or Github issue is closed, Topcoder-X will activate and close the Topcoder challenge, ensuring that the members get paid as expected.
 
 At each step of the process, Topcoder-X will add comments to the Gitlab or Github project, ensuring that the members know where the Topcoder challenge is and what the status of the challenge is.
 
@@ -10,7 +10,7 @@ The information is updated in real time based on webhook integrations with Gitla
 
 ## Dependencies
 * NodeJS 8+
-* MongoDB 3.2
+* DynamoDB
 * Kafka
 * nodemon (for local development)
 
@@ -25,18 +25,21 @@ Topcoder-X comprises 3 pieces:
 All 3 pieces will be configured to use the same MongoDB and Kafka installations.
 
 
-## MongoDB
+## DynamoDB
 
-The MongoDB can be created using default options.  Just make sure that it is configured properly as `MONGODB_URI` in all 3 pieces:
+The DynamoDB can be created using default options.  Just make sure that it is configured properly as `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `IS_LOCAL` in all 3 pieces:
 
 * Topcoder-X processor
 * Topcoder-X receiver
 * Topcoder-X UI
 
-Sample from our development environment:
-
-`MONGODB_URI: mongodb://heroku_k366sw2n:<password>@ds135552.mlab.com:35552/heroku_k366sw2n`
-
+Sample from our local development environment:
+```
+AWS_ACCESS_KEY_ID: 'FAKE_ACCESS_KEY_ID'
+AWS_SECRET_ACCESS_KEY: 'FAKE_SECRET_ACCESS_KEY'
+AWS_REGION: 'FAKE_REGION'
+IS_LOCAL: true
+```
 ## Kafka
 
 Installing Kafka can be done either locally or using a cloud service.  You'll need to note how the service is configured and will have to update the configuration appropriately for the receiver, processor, and site.
@@ -87,7 +90,7 @@ To this:
 
 For login to work, your local Topcoder-X-UI deployment needs to have a `*.topcoder-dev.com` DNS name.  Our development environment uses `x.topcoder-dev.com`
 
-You can make this change in your local `/etc/hosts` file.  
+You can make this change in your local `/etc/hosts` file.
 
 ```
 127.0.0.1   x.topcoder-dev.com
@@ -100,7 +103,7 @@ You can login with one of these sample accounts:
 
 ## Local webhook setup
 
-The hardest part of the setup may be ensuring that Gitlab and Github can make callbacks to your local environment.  You will have to ensure that your Topcoder-X receiver is publicly accessible on the public internet.  
+The hardest part of the setup may be ensuring that Gitlab and Github can make callbacks to your local environment.  You will have to ensure that your Topcoder-X receiver is publicly accessible on the public internet.
 
 If your ISP dynamically configures your IP address, you can use a dyndns service:
 
@@ -118,7 +121,7 @@ http://<publicly accessible domain name>:<port>/webhooks/gitlab
 #### Github
 
 ```
-https://<publicly accessible domain name>:<port>/webhooks/github  
+https://<publicly accessible domain name>:<port>/webhooks/github
 ```
 
 ## Account setup
@@ -153,7 +156,7 @@ Contest https://www.topcoder-dev.com/challenges/30052039 has been updated - it h
 
 ## Sample development configs
 
-For reference, this is what the sample configs look like in our development environment, which should closely match your local deployment environment. 
+For reference, this is what the sample configs look like in our development environment, which should closely match your local deployment environment.
 
 You can use the Gitlab and Github keys and secrets below, but you are also welcome to create your own.
 
@@ -174,12 +177,15 @@ MAILGUN_SMTP_LOGIN:           postmaster@mail.x.topcoder-dev.com
 MAILGUN_SMTP_PASSWORD:        c8aefb446e76febdbc31d57ef30b9c10
 MAILGUN_SMTP_PORT:            587
 MAILGUN_SMTP_SERVER:          smtp.mailgun.org
-MONGODB_URI:                  mongodb://heroku_k366sw2n:<password>@ds135552.mlab.com:35552/heroku_k366sw2n
 NODE_DEBUG:                   app
 NODE_ENV:                     development
 NODE_MODULES_CACHE:           false
 NODE_TLS_REJECT_UNAUTHORIZED: 0
 TOPIC:                        topcoder-x
+AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
+AWS_REGION: FAKE_REGION
+IS_LOCAL: true
 ```
 
 #### Topcoder-X receiver
@@ -191,10 +197,13 @@ KAFKA_CLIENT_CERT: <cert>
 KAFKA_CLIENT_CERT_KEY: <key>
 KAFKA_HOST:                   silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
 LOG_LEVEL:                    debug
-MONGODB_URI:                  mongodb://heroku_k366sw2n:<password>@ds135552.mlab.com:35552/heroku_k366sw2n
 NODE_ENV:                     development
 NODE_TLS_REJECT_UNAUTHORIZED: 0
 TOPIC:                        topcoder-x
+AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
+AWS_REGION: FAKE_REGION
+IS_LOCAL: true
 ```
 
 #### Topcoder-X UI
@@ -211,11 +220,14 @@ HOOK_BASE_URL:         https://topcoder-x-receiver-dev.herokuapp.com
 KAFKA_CLIENT_CERT:  <cert>
 KAFKA_CLIENT_CERT_KEY: <key>
 KAFKA_HOST:            silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
-MONGODB_URI:           mongodb://heroku_k366sw2n:<password>@ds135552.mlab.com:35552/heroku_k366sw2n
 NPM_CONFIG_PRODUCTION: false
 SESSION_SECRET:        kjsdfkj34857
 TC_LOGIN_URL:          https://accounts.topcoder-dev.com/member
 TC_USER_PROFILE_URL:   http://api.topcoder-dev.com/v2/user/profile
 TOPIC:                 topcoder-x
 WEBSITE:               https://x.topcoder-dev.com
+AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
+AWS_REGION: FAKE_REGION
+IS_LOCAL: true
 ```

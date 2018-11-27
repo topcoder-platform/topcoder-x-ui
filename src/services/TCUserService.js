@@ -51,7 +51,7 @@ async function getUserMapping(query) {
       'At least one of topcoderUsername/gitlabUsername/githubUsername should be provided.');
   }
 
-  return await helper.ensureExists(UserMapping, query);
+  return await helper.ensureExists(UserMapping, query, 'UserMapping');
 }
 
 getUserMapping.schema = Joi.object().keys({

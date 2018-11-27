@@ -18,7 +18,7 @@ const CopilotPaymentService = require('../services/CopilotPaymentService');
  * @returns {Promise} fetch payment updates execution
  */
 async function updateAll(req) {
-    return await CopilotPaymentService.updateAll(req.currentUser);
+  return await CopilotPaymentService.updateAll(req.currentUser);
 }
 
 /**
@@ -28,7 +28,7 @@ async function updateAll(req) {
  * @returns {Object} the result
  */
 async function search(req) {
-    return await CopilotPaymentService.search(req.query, req.currentUser);
+  return await CopilotPaymentService.search(req.query, req.currentUser);
 }
 
 /**
@@ -38,7 +38,7 @@ async function search(req) {
  * @returns {Object} the result
  */
 async function create(req) {
-    return await CopilotPaymentService.create(req.currentUser, req.body.payment);
+  return await CopilotPaymentService.create(req.currentUser, req.body.payment);
 }
 
 /**
@@ -48,7 +48,7 @@ async function create(req) {
  * @returns {Object} the result
  */
 async function update(req) {
-    return await CopilotPaymentService.update(req.currentUser, req.body.payment);
+  return await CopilotPaymentService.update(req.currentUser, req.body.payment);
 }
 
 /**
@@ -58,16 +58,16 @@ async function update(req) {
  * @returns {Object} the result
  */
 async function remove(req) {
-    return await CopilotPaymentService.remove(req.params.id, req.currentUser);
+  return await CopilotPaymentService.remove(req.params.id, req.currentUser);
 }
 
 
 module.exports = {
-    search,
-    create,
-    update,
-    remove,
-    updateAll
+  search,
+  create,
+  update,
+  remove,
+  updateAll,
 };
 
 helper.buildController(module.exports);
