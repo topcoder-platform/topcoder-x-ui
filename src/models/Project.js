@@ -9,21 +9,34 @@
  * @version 1.0
  */
 
+const dynamoose = require('dynamoose');
 
-const mongoose = require('mongoose');
+const Schema = dynamoose.Schema;
 
-const schema = new mongoose.Schema({
-  title: { type: String, required: true },
-  tcDirectId: { type: Number, required: true },
-  repoUrl: { type: String, required: true },
-  rocketChatWebhook: { type: String, required: false },
-  rocketChatChannelName: { type: String, required: false },
-  archived: { type: String, required: true },
-  owner: { type: String, required: true },
-  secretWebhookKey: { type: String, required: true },
-  copilot: { type: String, required: true },
+const schema = new Schema({
+  id: {
+    type: String,
+    hashKey: true,
+    required: true,
+  },
+  title: {type: String, required: true},
+  tcDirectId: {
+    type: Number,
+    required: true,
+    index: {
+      global: true,
+      rangeKey: 'id',
+      project: true,
+      name: 'TcDirectIdIndex',
+    },
+  },
+  repoUrl: {type: String, required: true},
+  rocketChatWebhook: {type: String, required: false},
+  rocketChatChannelName: {type: String, required: false},
+  archived: {type: String, required: true},
+  owner: {type: String, required: true},
+  secretWebhookKey: {type: String, required: true},
+  copilot: {type: String, required: true},
 });
-
-schema.index({tcDirectId: 1});
 
 module.exports = schema;

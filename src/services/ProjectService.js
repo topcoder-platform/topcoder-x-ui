@@ -8,6 +8,7 @@
  * @author TCSCODER
  * @version 1.0
  */
+
 const fs = require('fs');
 const path = require('path');
 const Joi = require('joi');
@@ -17,14 +18,15 @@ const _ = require('lodash');
 const guid = require('guid');
 const kafka = require('../utils/kafka');
 const helper = require('../common/helper');
+const dbHelper = require('../common/db-helper');
 const models = require('../models');
 const config = require('../config');
 const errors = require('../common/errors');
+
 const userService = require('./UserService');
 const securityService = require('./SecurityService');
 
 
-const Project = models.Project;
 const currentUserSchema = Joi.object().keys({
   handle: Joi.string().required(),
   roles: Joi.array().required(),
@@ -41,6 +43,8 @@ const projectSchema = {
     owner: Joi.string().required(),
     secretWebhookKey: Joi.string().required(),
     copilot: Joi.string().required(),
+    createdAt: Joi.date(),
+    updatedAt: Joi.date(),
   },
   currentUser: currentUserSchema,
 };
@@ -81,7 +85,7 @@ async function _validateProjectData(project) {
  * @private
  */
 async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
-  const dbProject = await helper.ensureExists(Project, projectId);
+  const dbProject = await helper.ensureExists(models.Project, projectId, 'Project');
   if (await securityService.isAdminUser(currentUser.roles)) {
     return dbProject;
   }
@@ -107,11 +111,12 @@ async function create(project, currentUserTopcoderHandle) {
      * }
      * await kafka.send(JSON.stringify(JSON.stringify(projectCreateEvent)));
      */
+
   project.owner = currentUserTopcoderHandle;
   project.secretWebhookKey = guid.raw();
   project.copilot = project.copilot.toLowerCase();
-  const dbProject = new Project(project);
-  return await dbProject.save();
+  project.id = helper.generateIdentifier();
+  return await dbHelper.create(models.Project, project);
 }
 
 create.schema = createProjectSchema;
@@ -148,7 +153,8 @@ async function update(project, currentUser) {
     dbProject[item[0]] = item[1];
     return item;
   });
-  return await dbProject.save();
+
+  return await dbHelper.update(models.Project, dbProject.id, dbProject);
 }
 
 update.schema = projectSchema;
@@ -161,22 +167,30 @@ update.schema = projectSchema;
  */
 async function getAll(query, currentUser) {
   const condition = {
-    archived: false,
+    archived: 'false',
   };
 
   if (query.status === 'archived') {
-    condition.archived = true;
+    condition.archived = 'true';
   }
   // if show all is checked user must be admin
   if (query.showAll && await securityService.isAdminUser(currentUser.roles)) {
-    return await Project.find(condition);
+    return await dbHelper.scan(models.Project, condition);
   }
-  condition.$or = [
-    { owner: currentUser.handle },
-    { copilot: currentUser.handle },
-  ];
 
-  return await Project.find(condition);
+  const filter = {
+    FilterExpression: '(#owner= :handle or copilot = :handle) AND #archived = :status',
+    ExpressionAttributeNames: {
+      '#owner': 'owner',
+      '#archived': 'archived',
+    },
+    ExpressionAttributeValues: {
+      ':handle': currentUser.handle,
+      ':status': condition.archived,
+    },
+  };
+
+  return await dbHelper.scan(models.Project, filter);
 }
 
 getAll.schema = Joi.object().keys({
@@ -222,7 +236,11 @@ async function createLabel(body, currentUser) {
       }));
     } catch (err) {
       // if error is already exists discard
-      if (_.chain(err).get('body.errors').countBy({ code: 'already_exists' }).get('true').isUndefined().value()) {
+      if (_.chain(err).get('body.errors').countBy({
+        code: 'already_exists',
+      }).get('true')
+        .isUndefined()
+        .value()) {
         throw helper.convertGitHubError(err, 'Failed to create labels.');
       }
     }
@@ -244,7 +262,9 @@ async function createLabel(body, currentUser) {
       }
     }
   }
-  return { success: true };
+  return {
+    success: true,
+  };
 }
 
 createLabel.schema = Joi.object().keys({
@@ -301,7 +321,11 @@ async function createHook(body, currentUser) {
       });
     } catch (err) {
       // if error is already exists discard
-      if (_.chain(err).get('body.errors').countBy({ message: 'Hook already exists on this repository' }).get('true').isUndefined().value()) {
+      if (_.chain(err).get('body.errors').countBy({
+        message: 'Hook already exists on this repository',
+      }).get('true')
+        .isUndefined()
+        .value()) {
         throw helper.convertGitHubError(err, 'Failed to create webhook.');
       }
     }
@@ -329,7 +353,9 @@ async function createHook(body, currentUser) {
       throw helper.convertGitLabError(err, 'Failed to create webhook.');
     }
   }
-  return { success: true }
+  return {
+    success: true,
+  };
 }
 
 createHook.schema = createLabel.schema;
@@ -351,7 +377,7 @@ async function addWikiRules(body, currentUser) {
   index += 1;
   const excludePart = 3;
   const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
-  const content = fs.readFileSync(path.resolve(__dirname, '../assets/WorkingWithTickets.md'), 'utf8'); // eslint-disable-line 
+  const content = fs.readFileSync(path.resolve(__dirname, '../assets/WorkingWithTickets.md'), 'utf8'); // eslint-disable-line
   if (provider === 'github') {
     try {
       const client = gitHubApi.client(copilot.accessToken);
@@ -386,7 +412,9 @@ async function addWikiRules(body, currentUser) {
       throw helper.convertGitLabError(err, 'Failed to add wiki rules.');
     }
   }
-  return { success: true }
+  return {
+    success: true,
+  };
 }
 
 addWikiRules.schema = createLabel.schema;
@@ -412,8 +440,9 @@ async function transferOwnerShip(body, currentUser) {
     Please have them sign in and set up their ${provider} accounts with Topcoder-X before transferring ownership.`);
   }
 
-  dbProject.owner = body.owner;
-  return await dbProject.save();
+  return await dbHelper.update(models.Project, dbProject.id, {
+    owner: body.owner,
+  });
 }
 transferOwnerShip.schema = Joi.object().keys({
   body: Joi.object().keys({

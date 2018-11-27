@@ -10,9 +10,10 @@
  */
 const Joi = require('joi');
 const _ = require('lodash');
+const moment = require('moment');
 const helper = require('../common/helper');
+const dbHelper = require('../common/db-helper');
 const models = require('../models');
-
 
 /**
  * searches the issues
@@ -21,31 +22,56 @@ const models = require('../models');
  * @returns {Object} the search results
  */
 async function search(criteria, currentUserTopcoderHandle) {
-  const query = {};
+  let filterLabel = '';
+  const filterValues = {};
   if (criteria.label) {
-    query.labels = { $in: [criteria.label] };
+    filterLabel = 'contains(labels, :label)';
+    filterValues[':label'] = criteria.label;
   }
 
   // select projects for current user
-  const projects = await models.Project.find({ owner: currentUserTopcoderHandle, archived: false });
-  query.projectId = {
-    $in: projects.map((i) => i._id),
-  };
+  const projects = await dbHelper.scan(models.Project, {
+    owner: currentUserTopcoderHandle,
+    archived: 'false',
+  });
 
-  if (!criteria.sortBy) {
-    criteria.sortBy = 'updatedAt';
-    criteria.sortDir = 'desc';
+  if (projects && projects.length > 0) {
+    const filterProjectIds = _.join(projects.map((p, index) => {
+      const id = `:id${index}`;
+      filterValues[id] = p.id;
+      return id;
+    }), ',');
+    const FilterExpression = `${filterLabel} AND projectId in (${filterProjectIds})`;
+
+    if (!criteria.sortBy) {
+      criteria.sortBy = 'updatedAt';
+      criteria.sortDir = 'desc';
+    }
+
+    const docs = await dbHelper.scan(models.Issue, {
+      FilterExpression,
+      ExpressionAttributeValues: filterValues,
+    });
+
+    for (const issue of docs) { // eslint-disable-line guard-for-in,no-restricted-syntax
+      issue.projectId = await dbHelper.getById(models.Project, issue.projectId);
+      issue.assignedAt = moment(issue.assignedAt).format('YYYY-MM-DD HH:mm:ss');
+    }
+
+    const offset = (criteria.page - 1) * criteria.perPage;
+    const result = {
+      pages: Math.ceil(docs.length / criteria.perPage) || 1,
+      docs: _(docs).orderBy(criteria.sortBy, criteria.sortDir)
+        .slice(offset).take(criteria.perPage)
+        .value(),
+    };
+    return result;
   }
-  const docs = await models.Issue.find(query)
-    .populate({ path: 'projectId', select: 'title repoUrl' });
-  const offset = (criteria.page - 1) * criteria.perPage;
-  const result = {
-    pages: Math.ceil(docs.length / criteria.perPage) || 1,
-    docs: _(docs).orderBy(criteria.sortBy, criteria.sortDir)
-      .slice(offset).take(criteria.perPage)
-      .value(),
+
+  return {
+    pages: 0,
+    docs: [],
   };
-  return result;
 }
 
 search.schema = Joi.object().keys({

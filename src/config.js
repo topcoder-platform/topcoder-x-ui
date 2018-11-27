@@ -12,7 +12,7 @@ module.exports = {
   PORT: process.env.PORT || 80, // eslint-disable-line no-magic-numbers
   API_VERSION: process.env.API_VERSION || 'v1',
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
-  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/topcoderx',
+  // MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/topcoderx',
   SESSION_SECRET: process.env.SESSION_SECRET || 'kjsdfkj34857',
   // Github and gitlab client id and secret
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || 'ae39bea2a2a23f1dd032',
@@ -35,10 +35,23 @@ module.exports = {
   },
   HOOK_BASE_URL: process.env.HOOK_BASE_URL || 'http://topcoderx.topcoder-dev.com',
   TOPCODER_ENV: process.env.TOPCODER_ENV || 'dev',
-  LABELS: process.env.LABELS || [{ name: 'tcx_OpenForPickup', color: '428BCA' }, { name: 'tcx_Assigned', color: '004E00' }, { name: 'tcx_ReadyForReview', color: 'D1D100' }, { name: 'tcx_Paid', color: '7F8C8D' }, { name: 'tcx_Feedback', color: 'FF0000' }, { name: 'tcx_FixAccepted', color: '69D100' },
-   {name:'tcx_NotReady', color: '000000'}],
+  LABELS: process.env.LABELS || [
+    {name: 'tcx_OpenForPickup', color: '428BCA'},
+    {name: 'tcx_Assigned', color: '004E00'},
+    {name: 'tcx_ReadyForReview', color: 'D1D100'},
+    {name: 'tcx_Paid', color: '7F8C8D'},
+    {name: 'tcx_Feedback', color: 'FF0000'},
+    {name: 'tcx_FixAccepted', color: '69D100'},
+    {name: 'tcx_NotReady', color: '000000'},
+  ],
   ALLOWED_TOPCODER_ROLES: process.env.ALLOWED_TOPCODER_ROLES || ['administrator', 'admin', 'connect manager', 'connect admin', 'copilot', 'connect copilot'],
   COPILOT_ROLE: process.env.COPILOT_ROLE || 'copilot',
   HELP_LINK: process.env.HELP_LINK || 'https://github.com/topcoder-platform/topcoder-x-ui/wiki',
   ADMINISTRATOR_ROLES: process.env.ADMINISTRATOR_ROLES || ['administrator', 'admin'],
+  DYNAMODB: {
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
+    AWS_REGION: process.env.AWS_REGION || '',
+    IS_LOCAL: process.env.IS_LOCAL || '',
+  },
 };

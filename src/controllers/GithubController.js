@@ -8,9 +8,11 @@
  * @author TCSCODER
  * @version 1.0
  */
+
 const superagent = require('superagent');
 const superagentPromise = require('superagent-promise');
 const helper = require('../common/helper');
+const dbHelper = require('../common/db-helper');
 const errors = require('../common/errors');
 const config = require('../config');
 const GithubService = require('../services/GithubService');
@@ -36,11 +38,11 @@ async function ownerUserLogin(req, res) {
   const callbackUri = `${config.WEBSITE}${constants.GITHUB_OWNER_CALLBACK_URL}`;
   res.redirect(`http://github.com/login/oauth/authorize?client_id=${
     config.GITHUB_CLIENT_ID
-    }&redirect_uri=${
+  }&redirect_uri=${
     encodeURIComponent(callbackUri)
-    }&scope=${
+  }&scope=${
     encodeURIComponent('admin:org admin:repo_hook repo')
-    }&state=${req.session.state}`);
+  }&state=${req.session.state}`);
 }
 
 /**
@@ -62,7 +64,7 @@ async function ownerUserLoginCallback(req, res) {
   // exchange code to get token
   const result = await request
     .post('https://github.com/login/oauth/access_token')
-    .query({ client_id: config.GITHUB_CLIENT_ID, client_secret: config.GITHUB_CLIENT_SECRET, code })
+    .query({client_id: config.GITHUB_CLIENT_ID, client_secret: config.GITHUB_CLIENT_SECRET, code})
     .set('Accept', 'application/json')
     .end();
   const token = result.body.access_token;
@@ -110,7 +112,7 @@ async function getTeamRegistrationUrl(req) {
 async function addUserToTeam(req, res) {
   const identifier = req.params.identifier;
   // validate the identifier
-  await helper.ensureExists(OwnerUserTeam, { identifier });
+  await helper.ensureExists(OwnerUserTeam, {identifier}, 'OwnerUserTeam');
 
   // store identifier to session, to be compared in callback
   req.session.identifier = identifier;
@@ -119,9 +121,9 @@ async function addUserToTeam(req, res) {
   const callbackUri = `${config.WEBSITE}/api/${config.API_VERSION}/github/normaluser/callback`;
   res.redirect(`http://github.com/login/oauth/authorize?client_id=${
     config.GITHUB_CLIENT_ID
-    }&redirect_uri=${
+  }&redirect_uri=${
     encodeURIComponent(callbackUri)
-    }&state=${identifier}`);
+  }&state=${identifier}`);
 }
 
 /**
@@ -138,25 +140,33 @@ async function addUserToTeamCallback(req, res) {
   if (!code) {
     throw new errors.ValidationError('Missing code.');
   }
-  const team = await helper.ensureExists(OwnerUserTeam, { identifier });
+  const team = await helper.ensureExists(OwnerUserTeam, {identifier}, 'OwnerUserTeam');
   // exchange code to get token
   const result = await request
     .post('https://github.com/login/oauth/access_token')
-    .query({ client_id: config.GITHUB_CLIENT_ID, client_secret: config.GITHUB_CLIENT_SECRET, code })
+    .query({client_id: config.GITHUB_CLIENT_ID, client_secret: config.GITHUB_CLIENT_SECRET, code})
     .set('Accept', 'application/json')
     .end();
   const token = result.body.access_token;
   // add user to team
   const githubUser = await GithubService.addTeamMember(team.teamId, team.ownerToken, token);
   // associate github username with TC username
-  const topcoderUsername = req.session.tcUsername;
-  const mapping = await UserMapping.findOne({ topcoderUsername });
+  const mapping = await dbHelper.scanOne(UserMapping, {
+    topcoderUsername: {eq: req.session.tcUsername},
+  });
+
   if (mapping) {
-    mapping.githubUsername = githubUser.username;
-    mapping.githubUserId = githubUser.id;
-    await mapping.save();
+    await dbHelper.update(UserMapping, mapping.id, {
+      githubUsername: githubUser.username,
+      githubUserId: githubUser.id,
+    });
   } else {
-    await UserMapping.create({ topcoderUsername, githubUsername: githubUser.username, githubUserId: githubUser.id });
+    await dbHelper.create(UserMapping, {
+      id: helper.generateIdentifier(),
+      topcoderUsername: req.session.tcUsername,
+      githubUsername: githubUser.username,
+      githubUserId: githubUser.id,
+    });
   }
   // redirect to success page
   res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/github`);
