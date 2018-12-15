@@ -30,7 +30,7 @@ The following config parameters are supported, they are defined in `src/config.j
 |AWS_ACCESS_KEY_ID | The Amazon certificate key to use when connecting. Use local dynamodb you can set fake value|FAKE_ACCESS_KEY_ID |
 |AWS_SECRET_ACCESS_KEY | The Amazon certificate access key to use when connecting. Use local dynamodb you can set fake value|FAKE_SECRET_ACCESS_KEY |
 |AWS_REGION | The Amazon certificate region to use when connecting. Use local dynamodb you can set fake value|FAKE_REGION |
-|IS_LOCAL | Use Amazon DynamoDB Local or server. |true |
+|IS_LOCAL | Use Amazon DynamoDB Local or server. |'false' |
 
 ## GitHub OAuth App Setup
 

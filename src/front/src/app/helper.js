@@ -20,7 +20,7 @@ angular.module('topcoderX')
       var tcDomain = baseUrl.indexOf('topcoder.com') > -1 ? 'topcoder.com' : 'topcoder-dev.com';
       return {
         TC_LOGIN_URL: 'https://accounts.' + tcDomain + '/member',
-        TC_USER_PROFILE_URL: 'http://api.' + tcDomain + '/v2/user/profile',
+        TC_USER_PROFILE_URL: 'https://api.' + tcDomain + '/v2/user/profile',
         API_URL: 'https://api.' + tcDomain + '',
         ADMIN_TOOL_URL: 'https://api.' + tcDomain + '/v2',
         ACCOUNTS_CONNECTOR_URL: 'https://accounts.' + tcDomain + '/connector.html',

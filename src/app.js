@@ -16,6 +16,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const jwtDecode = require('jwt-decode');
+// const secure = require('ssl-express-www');
 const config = require('./config');
 const routes = require('./routes');
 const logger = require('./common/logger');
@@ -24,6 +25,7 @@ const constants = require('./common/constants');
 
 const app = express();
 app.use(cors());
+// app.use(secure);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({ secret: config.SESSION_SECRET, resave: false, saveUninitialized: true }));
