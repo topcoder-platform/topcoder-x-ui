@@ -12,7 +12,7 @@ dynamoose.AWS.config.update({
   region: config.DYNAMODB.AWS_REGION,
 });
 
-if (config.DYNAMODB.IS_LOCAL) {
+if (config.DYNAMODB.IS_LOCAL === 'true') {
   dynamoose.local();
 }
 

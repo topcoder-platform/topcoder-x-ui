@@ -38,7 +38,7 @@ Sample from our local development environment:
 AWS_ACCESS_KEY_ID: 'FAKE_ACCESS_KEY_ID'
 AWS_SECRET_ACCESS_KEY: 'FAKE_SECRET_ACCESS_KEY'
 AWS_REGION: 'FAKE_REGION'
-IS_LOCAL: true
+IS_LOCAL: 'true'
 ```
 ## Kafka
 
@@ -185,7 +185,7 @@ TOPIC:                        topcoder-x
 AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
 AWS_REGION: FAKE_REGION
-IS_LOCAL: true
+IS_LOCAL: 'true'
 ```
 
 #### Topcoder-X receiver
@@ -203,7 +203,7 @@ TOPIC:                        topcoder-x
 AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
 AWS_REGION: FAKE_REGION
-IS_LOCAL: true
+IS_LOCAL: 'true'
 ```
 
 #### Topcoder-X UI
@@ -229,5 +229,5 @@ WEBSITE:               https://x.topcoder-dev.com
 AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
 AWS_REGION: FAKE_REGION
-IS_LOCAL: true
+IS_LOCAL: 'true'
 ```

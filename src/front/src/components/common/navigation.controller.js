@@ -23,7 +23,7 @@ angular.module('topcoderX') // eslint-disable-line angular/no-services
 
       const token = $cookies.get('tcjwt');
       const req = {
-        url: 'http://api.' + domain() + '.com/v2/user/profile',
+        url: 'https://api.' + domain() + '.com/v2/user/profile',
         method: 'Get',
         headers: {
           Authorization: 'Bearer ' + token,
