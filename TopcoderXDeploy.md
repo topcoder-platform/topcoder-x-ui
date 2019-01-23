@@ -38,7 +38,7 @@ Sample from our local development environment:
 AWS_ACCESS_KEY_ID: 'FAKE_ACCESS_KEY_ID'
 AWS_SECRET_ACCESS_KEY: 'FAKE_SECRET_ACCESS_KEY'
 AWS_REGION: 'FAKE_REGION'
-IS_LOCAL: 'true'
+IS_LOCAL: true
 ```
 ## Kafka
 
@@ -88,12 +88,12 @@ To this:
 
 ## Local DNS setup
 
-For login to work, your local Topcoder-X-UI deployment needs to have a `*.topcoder-dev.com` DNS name. Our development environment uses `x.topcoder-dev.com`. But for local setup it's better to use another one to not interfere with the one deployed on DEV Topcoder environment. So better to use `topcoderx.topcoder-dev.com` which is already configured in `config.js`.
+For login to work, your local Topcoder-X-UI deployment needs to have a `*.topcoder-dev.com` DNS name.  Our development environment uses `x.topcoder-dev.com`
 
 You can make this change in your local `/etc/hosts` file.
 
 ```
-127.0.0.1   topcoderx.topcoder-dev.com
+127.0.0.1   x.topcoder-dev.com
 ```
 
 You can login with one of these sample accounts:
@@ -185,7 +185,7 @@ TOPIC:                        topcoder-x
 AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
 AWS_REGION: FAKE_REGION
-IS_LOCAL: 'true'
+IS_LOCAL: true
 ```
 
 #### Topcoder-X receiver
@@ -203,7 +203,7 @@ TOPIC:                        topcoder-x
 AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
 AWS_REGION: FAKE_REGION
-IS_LOCAL: 'true'
+IS_LOCAL: true
 ```
 
 #### Topcoder-X UI
@@ -229,5 +229,7 @@ WEBSITE:               https://x.topcoder-dev.com
 AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
 AWS_REGION: FAKE_REGION
-IS_LOCAL: 'true'
+IS_LOCAL: true
+TC_LOGIN_URL: https://accounts.topcoder-dev.com/member
+TC_USER_PROFILE_URL: https://api.topcoder-dev.com/v2/user/profile
 ```

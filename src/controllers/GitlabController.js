@@ -8,7 +8,7 @@
  * @author TCSCODER
  * @version 1.0
  */
-
+const _ = require('lodash');
 const superagent = require('superagent');
 const superagentPromise = require('superagent-promise');
 const helper = require('../common/helper');
@@ -101,7 +101,7 @@ async function listOwnerUserGroups(req) {
   if (!user || !user.accessToken) {
     throw new errors.UnauthorizedError('You have not setup for Gitlab.');
   }
-  return await GitlabService.listOwnerUserGroups(user.accessToken, req.query.page, req.query.perPage);
+  return await GitlabService.listOwnerUserGroups(user.accessToken, req.query.page, req.query.perPage, req.query.getAll);
 }
 
 /**
@@ -195,6 +195,13 @@ async function addUserToGroupCallback(req, res) {
     })
     .end();
   const token = result.body.access_token;
+
+  // get group name
+  const groupsResult = await GitlabService.listOwnerUserGroups(ownerUser.accessToken, 1, constants.MAX_PER_PAGE, true);
+  const currentGroup = _.find(groupsResult.groups, (item) => { // eslint-disable-line arrow-body-style
+    return item.id.toString() === group.groupId.toString();
+  });
+
   // add user to group
   const gitlabUser = await GitlabService.addGroupMember(group.groupId, ownerUser.accessToken, token);
   // associate gitlab username with TC username
@@ -215,7 +222,7 @@ async function addUserToGroupCallback(req, res) {
     });
   }
   // redirect to success page
-  res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/gitlab`);
+  res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/gitlab/${currentGroup.full_path}`);
 }
 
 module.exports = {

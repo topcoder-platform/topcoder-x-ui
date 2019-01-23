@@ -271,6 +271,7 @@ getTeamDetails.schema = Joi.object().keys({
   teamId: Joi.alternatives().try(Joi.string(), Joi.number()).required(),
 });
 
+
 module.exports = {
   ensureOwnerUser,
   listOwnerUserTeams,

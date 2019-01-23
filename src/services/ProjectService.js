@@ -8,7 +8,7 @@
  * @author TCSCODER
  * @version 1.0
  */
-
+/* eslint-disable no-undefined */
 const fs = require('fs');
 const path = require('path');
 const Joi = require('joi');
@@ -42,7 +42,7 @@ const projectSchema = {
     archived: Joi.boolean().required(),
     owner: Joi.string().required(),
     secretWebhookKey: Joi.string().required(),
-    copilot: Joi.string().required(),
+    copilot: Joi.string().allow(null),
     createdAt: Joi.date(),
     updatedAt: Joi.date(),
   },
@@ -54,7 +54,7 @@ const createProjectSchema = {
     title: Joi.string().required(),
     tcDirectId: Joi.number().required(),
     repoUrl: Joi.string().required(),
-    copilot: Joi.string().required(),
+    copilot: Joi.string().allow(null),
     rocketChatWebhook: Joi.string().allow(null),
     rocketChatChannelName: Joi.string().allow(null),
     archived: Joi.boolean().required(),
@@ -69,10 +69,10 @@ const createProjectSchema = {
  */
 async function _validateProjectData(project) {
   const provider = await helper.getProviderType(project.repoUrl);
-  const setting = await userService.getUserSetting(project.copilot);
+  const userRole = project.copilot ? project.copilot : project.owner;
+  const setting = await userService.getUserSetting(userRole);
   if (!setting[provider]) {
-    throw new errors.ValidationError(`User ${project.copilot} doesn't currently have Topcoder-X access setup for ${provider}. 
-    Please have them sign in and set up their ${provider} account with Topcoder-X before adding as copilot`);
+    throw new errors.ValidationError(`User ${userRole} doesn't currently have Topcoder-X access setup for ${provider}. Please have them sign in and set up their ${provider} account with Topcoder-X before adding as ${project.copilot !== undefined ? 'copilot' : 'owner'}`);
   }
 }
 
@@ -89,7 +89,11 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
   if (await securityService.isAdminUser(currentUser.roles)) {
     return dbProject;
   }
-  if (dbProject.owner !== currentUser.handle && dbProject.copilot !== currentUser.handle) {
+  if (
+    (dbProject.copilot !== undefined && dbProject.owner !== currentUser.handle
+        && dbProject.copilot !== currentUser.handle) ||
+    (dbProject.copilot === undefined && dbProject.owner !== currentUser.handle)
+  ) {
     throw new errors.ForbiddenError('You don\'t have access on this project');
   }
   return dbProject;
@@ -102,6 +106,7 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
  * @returns {Object} created project
  */
 async function create(project, currentUserTopcoderHandle) {
+  project.owner = currentUserTopcoderHandle;
   await _validateProjectData(project);
   /**
      * Uncomment below code to enable the function of raising event when 'project was created'
@@ -114,7 +119,7 @@ async function create(project, currentUserTopcoderHandle) {
 
   project.owner = currentUserTopcoderHandle;
   project.secretWebhookKey = guid.raw();
-  project.copilot = project.copilot.toLowerCase();
+  project.copilot = project.copilot ? project.copilot.toLowerCase() : null;
   project.id = helper.generateIdentifier();
   return await dbHelper.create(models.Project, project);
 }
@@ -148,7 +153,7 @@ async function update(project, currentUser) {
      * await kafka.send(JSON.stringify(JSON.stringify(projectUpdateEvent)));
      */
   project.owner = dbProject.owner;
-  project.copilot = project.copilot.toLowerCase();
+  project.copilot = project.copilot !== undefined ? project.copilot.toLowerCase() : null;
   Object.entries(project).map((item) => {
     dbProject[item[0]] = item[1];
     return item;
@@ -210,16 +215,15 @@ getAll.schema = Joi.object().keys({
 async function createLabel(body, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(dbProject.repoUrl);
-  const copilot = await helper.getProjectCopilot(models, dbProject, provider);
+  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, dbProject.copilot !== undefined);
   const results = dbProject.repoUrl.split('/');
-  let index = 1;
+  const index = 1;
   const repoName = results[results.length - index];
-  index += 1;
   const excludePart = 3;
   const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
   if (provider === 'github') {
     try {
-      const client = gitHubApi.client(copilot.accessToken);
+      const client = gitHubApi.client(userRole.accessToken);
       const ghrepo = client.repo(`${repoOwner}/${repoName}`);
       await Promise.all(config.LABELS.map(async (label) => {
         await new Promise((resolve, reject) => {
@@ -248,7 +252,7 @@ async function createLabel(body, currentUser) {
     try {
       const client = new Gitlab({
         url: config.GITLAB_API_BASE_URL,
-        oauthToken: copilot.accessToken,
+        oauthToken: userRole.accessToken,
       });
       await Promise.all(config.LABELS.map(async (label) => {
         await client.Labels.create(`${repoOwner}/${repoName}`, {
@@ -283,16 +287,15 @@ createLabel.schema = Joi.object().keys({
 async function createHook(body, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(dbProject.repoUrl);
-  const copilot = await helper.getProjectCopilot(models, dbProject, provider);
+  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, dbProject.copilot !== undefined);
   const results = dbProject.repoUrl.split('/');
-  let index = 1;
+  const index = 1;
   const repoName = results[results.length - index];
-  index += 1;
   const excludePart = 3;
   const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
   if (provider === 'github') {
     try {
-      const client = gitHubApi.client(copilot.accessToken);
+      const client = gitHubApi.client(userRole.accessToken);
       const ghrepo = client.repo(`${repoOwner}/${repoName}`);
       await new Promise((resolve, reject) => {
         ghrepo.hook({
@@ -333,7 +336,7 @@ async function createHook(body, currentUser) {
     try {
       const client = new Gitlab({
         url: config.GITLAB_API_BASE_URL,
-        oauthToken: copilot.accessToken,
+        oauthToken: userRole.accessToken,
       });
       await client.ProjectHooks.add(`${repoOwner}/${repoName}`,
         `${config.HOOK_BASE_URL}/webhooks/gitlab`, {
@@ -370,17 +373,16 @@ createHook.schema = createLabel.schema;
 async function addWikiRules(body, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(dbProject.repoUrl);
-  const copilot = await helper.getProjectCopilot(models, dbProject, provider);
+  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, dbProject.copilot !== undefined);
   const results = dbProject.repoUrl.split('/');
-  let index = 1;
+  const index = 1;
   const repoName = results[results.length - index];
-  index += 1;
   const excludePart = 3;
   const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
   const content = fs.readFileSync(path.resolve(__dirname, '../assets/WorkingWithTickets.md'), 'utf8'); // eslint-disable-line
   if (provider === 'github') {
     try {
-      const client = gitHubApi.client(copilot.accessToken);
+      const client = gitHubApi.client(userRole.accessToken);
       const ghrepo = client.repo(`${repoOwner}/${repoName}`);
       await new Promise((resolve, reject) => {
         ghrepo.issue({
@@ -400,7 +402,7 @@ async function addWikiRules(body, currentUser) {
     try {
       const client = new Gitlab({
         url: config.GITLAB_API_BASE_URL,
-        oauthToken: copilot.accessToken,
+        oauthToken: userRole.accessToken,
       });
       await client.Wikis.create(`${repoOwner}/${repoName}`,
         {

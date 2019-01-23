@@ -130,7 +130,7 @@ angular.module('topcoderX', [
           resolve: { auth: authenticate }
         })
         .state('membersAdded', {
-          url: '/members/:provider',
+          url: '/members/:provider/:url',
           templateUrl: 'app/members/member.html',
           controller: 'MemberController',
           controllerAs: 'vm',

@@ -156,6 +156,9 @@ async function addUserToTeamCallback(req, res) {
     topcoderUsername: {eq: req.session.tcUsername},
   });
 
+  // get team details
+  const teamDetails = await GithubService.getTeamDetails(team.ownerToken, team.teamId);
+
   if (mapping) {
     await dbHelper.update(UserMapping, mapping.id, {
       githubUsername: githubUser.username,
@@ -173,10 +176,10 @@ async function addUserToTeamCallback(req, res) {
   // check if user is already in the team or not yet
   if (githubUser.state === 'active') {
     // redirect user to the success page, to let user know that he is already in the team
-    res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/github`);
+    const url = `${teamDetails.organization.login}_${teamDetails.name}`;
+    res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/github/${url}`);
   } else {
     // redirect user to organization invitation page
-    const teamDetails = await GithubService.getTeamDetails(team.ownerToken, team.teamId);
     const organizationLogin = _.get(teamDetails, 'organization.login');
     if (!organizationLogin) {
       throw new errors.ValidationError(`Couldn't get organization of the team with id '${team.teamId}'.`);
@@ -184,6 +187,7 @@ async function addUserToTeamCallback(req, res) {
     res.redirect(`https://github.com/orgs/${organizationLogin}/invitation?via_email=1`);
   }
 }
+
 
 module.exports = {
   ownerUserLogin,

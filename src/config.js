@@ -43,6 +43,7 @@ module.exports = {
     {name: 'tcx_Feedback', color: 'FF0000'},
     {name: 'tcx_FixAccepted', color: '69D100'},
     {name: 'tcx_NotReady', color: '000000'},
+    {name: 'tcx_Canceled', color: '000000'},
   ],
   ALLOWED_TOPCODER_ROLES: process.env.ALLOWED_TOPCODER_ROLES || ['administrator', 'admin', 'connect manager', 'connect admin', 'copilot', 'connect copilot'],
   COPILOT_ROLE: process.env.COPILOT_ROLE || 'copilot',
@@ -53,5 +54,15 @@ module.exports = {
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
     AWS_REGION: process.env.AWS_REGION || '',
     IS_LOCAL: process.env.IS_LOCAL || 'false',
+  },
+  TOPCODER_VALUES: {
+    dev: {
+      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts.topcoder-dev.com/member',
+      TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || 'https://api.topcoder-dev.com/v2/user/profile',
+    },
+    prod: {
+      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts.topcoder.com/member',
+      TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || 'https://api.topcoder.com/v2/user/profile',
+    },
   },
 };

@@ -94,13 +94,14 @@ ensureOwnerUser.schema = Joi.object().keys({
  * @param {Number} page the page number (default to be 1). Must be >= 1
  * @param {Number} perPage the page size (default to be constants.GITLAB_DEFAULT_PER_PAGE).
  *   Must be within range [1, constants.GITLAB_MAX_PER_PAGE]
+ * @param {Boolean} getAll get all groups
  * @returns {Promise} the promise result
  */
-async function listOwnerUserGroups(token, page = 1, perPage = constants.GITLAB_DEFAULT_PER_PAGE) {
+async function listOwnerUserGroups(token, page = 1, perPage = constants.GITLAB_DEFAULT_PER_PAGE, getAll = false) {
   try {
     const response = await request
       .get(`${config.GITLAB_API_BASE_URL}/api/v4/groups`)
-      .query({page, per_page: perPage, owned: true})
+      .query({page, per_page: perPage, owned: true, all_available: getAll})
       .set('Authorization', `Bearer ${token}`)
       .end();
 
@@ -133,6 +134,7 @@ listOwnerUserGroups.schema = Joi.object().keys({
   page: Joi.number().integer().min(1).optional(),
   perPage: Joi.number().integer().min(1).max(constants.GITLAB_MAX_PER_PAGE)
     .optional(),
+  getAll: Joi.boolean().optional(),
 });
 
 /**

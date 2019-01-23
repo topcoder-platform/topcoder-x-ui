@@ -36,7 +36,7 @@ const schema = new Schema({
   archived: {type: String, required: true},
   owner: {type: String, required: true},
   secretWebhookKey: {type: String, required: true},
-  copilot: {type: String, required: true},
+  copilot: {type: String, required: false},
 });
 
 module.exports = schema;
