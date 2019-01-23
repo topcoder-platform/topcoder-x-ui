@@ -88,12 +88,12 @@ To this:
 
 ## Local DNS setup
 
-For login to work, your local Topcoder-X-UI deployment needs to have a `*.topcoder-dev.com` DNS name.  Our development environment uses `x.topcoder-dev.com`
+For login to work, your local Topcoder-X-UI deployment needs to have a `*.topcoder-dev.com` DNS name. Our development environment uses `x.topcoder-dev.com`. But for local setup it's better to use another one to not interfere with the one deployed on DEV Topcoder environment. So better to use `topcoderx.topcoder-dev.com` which is already configured in `config.js`.
 
 You can make this change in your local `/etc/hosts` file.
 
 ```
-127.0.0.1   x.topcoder-dev.com
+127.0.0.1   topcoderx.topcoder-dev.com
 ```
 
 You can login with one of these sample accounts:

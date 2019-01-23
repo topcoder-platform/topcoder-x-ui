@@ -9,6 +9,7 @@
  * @version 1.0
  */
 
+const _ = require('lodash');
 const superagent = require('superagent');
 const superagentPromise = require('superagent-promise');
 const helper = require('../common/helper');
@@ -168,8 +169,20 @@ async function addUserToTeamCallback(req, res) {
       githubUserId: githubUser.id,
     });
   }
-  // redirect to success page
-  res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/github`);
+
+  // check if user is already in the team or not yet
+  if (githubUser.state === 'active') {
+    // redirect user to the success page, to let user know that he is already in the team
+    res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/github`);
+  } else {
+    // redirect user to organization invitation page
+    const teamDetails = await GithubService.getTeamDetails(team.ownerToken, team.teamId);
+    const organizationLogin = _.get(teamDetails, 'organization.login');
+    if (!organizationLogin) {
+      throw new errors.ValidationError(`Couldn't get organization of the team with id '${team.teamId}'.`);
+    }
+    res.redirect(`https://github.com/orgs/${organizationLogin}/invitation?via_email=1`);
+  }
 }
 
 module.exports = {

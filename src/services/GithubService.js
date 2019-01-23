@@ -183,6 +183,7 @@ getTeamRegistrationUrl.schema = Joi.object().keys({
 async function addTeamMember(teamId, ownerUserToken, normalUserToken) {
   let username;
   let id;
+  let state;
   try {
     // get normal user name
     const githubNormalUser = new GitHub({
@@ -197,7 +198,8 @@ async function addTeamMember(teamId, ownerUserToken, normalUserToken) {
       token: ownerUserToken,
     });
     const team = github.getTeam(teamId);
-    await team.addMembership(username);
+    const membershipResponse = await team.addMembership(username);
+    state = _.get(membershipResponse, 'data.state')
   } catch (err) {
     // if error is already exists discard
     if (_.chain(err).get('body.errors').countBy({
@@ -208,8 +210,8 @@ async function addTeamMember(teamId, ownerUserToken, normalUserToken) {
       throw helper.convertGitHubError(err, 'Failed to add team member');
     }
   }
-  // return github username
-  return {username, id};
+  // return github username and its state
+  return {username, id, state};
 }
 
 addTeamMember.schema = Joi.object().keys({
@@ -240,12 +242,42 @@ getUserIdByUsername.schema = Joi.object().keys({
   username: Joi.string().required(),
 });
 
+/**
+ * Get team detailed data
+ *
+ * @param {String} token user owner token
+ * @param {String|Number} teamId team id
+ *
+ * @returns {Object} team object, see https://developer.github.com/v3/teams/#get-team
+ */
+async function getTeamDetails(token, teamId) {
+  const teamIdAsNumber = !_.isNumber(teamId) ? parseInt(teamId, 10) : teamId
+  let team;
+
+  try {
+    const github = new GitHub({token});
+    const teamResponse = await github.getTeam(teamIdAsNumber).getTeam();
+
+    team = teamResponse.data;
+  } catch (err) {
+    throw helper.convertGitHubError(err, `Failed to get team with id '${teamId}'.`);
+  }
+
+  return team;
+}
+
+getTeamDetails.schema = Joi.object().keys({
+  token: Joi.string().required(),
+  teamId: Joi.alternatives().try(Joi.string(), Joi.number()).required(),
+});
+
 module.exports = {
   ensureOwnerUser,
   listOwnerUserTeams,
   getTeamRegistrationUrl,
   addTeamMember,
   getUserIdByUsername,
+  getTeamDetails,
 };
 
 helper.buildService(module.exports);
