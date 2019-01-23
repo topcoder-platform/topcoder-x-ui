@@ -66,9 +66,7 @@
             <br />
             <br />
             <label class="form-label">Copilot:</label>
-            <input class="form-control" type="text" ng-model="project.copilot" required />
-            <span ng-show="projectForm.project.copilot.$touched && projectForm.project.copilot.$invalid">The
-              copilot is required.</span>
+            <input class="form-control" type="text" ng-model="project.copilot"/>
             <br />
             <div class="hide" *ng-if="true">
               <label class="form-label">Rocket.chat Webhook URL:</label>

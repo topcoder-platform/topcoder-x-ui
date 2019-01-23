@@ -29,7 +29,7 @@ async function login(req, res) {
     res.redirect(req.session.tcLoginReturnUrl);
   } else {
     const callbackUri = `${config.WEBSITE}${constants.TC_LOGIN_CALLBACK_URL}`;
-    res.redirect(`${constants.TOPCODER_VALUES[config.TOPCODER_ENV].TC_LOGIN_URL}?retUrl=${encodeURIComponent(callbackUri)}`);
+    res.redirect(`${config.TOPCODER_VALUES[config.TOPCODER_ENV].TC_LOGIN_URL}?retUrl=${encodeURIComponent(callbackUri)}`);
   }
 }
 

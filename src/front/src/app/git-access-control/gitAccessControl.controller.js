@@ -31,7 +31,7 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
         var _getOwnerList = function (provider) {
             var config = $scope.tableConfig[provider];
             config.isLoading = true;
-            config.searchMethod.apply(vm, [config.pageNumber, config.pageSize]).then(function (res) {
+            config.searchMethod.apply(vm, [config.pageNumber, config.pageSize, false]).then(function (res) {
                 config.items = provider === 'github' ? res.data.teams : res.data.groups;
                 if (!config.initialized) {
                     config.totalPages = res.data.lastPage;

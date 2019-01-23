@@ -68,6 +68,9 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
 
     // save the project info to database, and go back to project list view.
     $scope.save = function () {
+      if ($scope.project.copilot === '') {
+        $scope.project.copilot = null;
+      }
       if ($scope.editing) {
         ProjectService.update($scope.project).then(function () {
           Alert.info('Project Updated Successfully', $scope);

@@ -1,29 +1,16 @@
 'use strict';
 
 angular.module('topcoderX') // eslint-disable-line angular/no-services
-  .controller('NavController', ['$scope', '$log', '$state', '$cookies', '$http', '$rootScope',
-    function ($scope, $log, $state, $cookies, $http, $rootScope) {
+  .controller('NavController', ['$scope', '$log', '$state', '$cookies', '$http', '$rootScope', 'TC_USER_PROFILE_URL',
+    function ($scope, $log, $state, $cookies, $http, $rootScope, TC_USER_PROFILE_URL) {
       $scope.$state = $state;
       $scope.menuList = false;
       $scope.user = {};
       $scope.appConfig = $rootScope.appConfig;
 
-      /**
-       * detect env and get relevant api domain
-       *
-       * @returns {String} api domain
-       */
-      function domain() {
-        const dev = window.location.origin.includes('.topcoder-dev.com');
-        if (dev) {
-          return 'topcoder-dev';
-        }
-        return 'topcoder';
-      }
-
       const token = $cookies.get('tcjwt');
       const req = {
-        url: 'https://api.' + domain() + '.com/v2/user/profile',
+        url: TC_USER_PROFILE_URL,
         method: 'Get',
         headers: {
           Authorization: 'Bearer ' + token,
@@ -47,5 +34,5 @@ angular.module('topcoderX') // eslint-disable-line angular/no-services
       };
 
       // Click menu item go to another page will close the menu as well
-      angular.element(document.querySelectorAll("a[ui-sref]")).bind('click', $scope.menuOpen);      
+      angular.element(document.querySelectorAll("a[ui-sref]")).bind('click', $scope.menuOpen);
     }]);

@@ -61,7 +61,7 @@ _.forEach(routes, (verbs, path) => {
         }
         req.session.tcLoginReturnUrl = req.originalUrl;
         const callbackUri = `${config.WEBSITE}${constants.TC_LOGIN_CALLBACK_URL}`;
-        return res.redirect(`${constants.TOPCODER_VALUES[config.TOPCODER_ENV].TC_LOGIN_URL}?retUrl=${encodeURIComponent(callbackUri)}`);
+        return res.redirect(`${config.TOPCODER_VALUES[config.TOPCODER_ENV].TC_LOGIN_URL}?retUrl=${encodeURIComponent(callbackUri)}`);
       });
     }
     if (!def.allowNormalUser) {

@@ -14,8 +14,8 @@ angular.module('topcoderX')
          * get gitlab owner groups
          *
          */
-        service.getGitlabOwnerGroups = function (pageNo, pageSize) {
-            return $http.get(baseUrl + '/api/v1/gitlab/owneruser/groups?page=' + pageNo + '&perPage=' + pageSize).then(function (response) {
+        service.getGitlabOwnerGroups = function (pageNo, pageSize, getAll) {
+            return $http.get(baseUrl + '/api/v1/gitlab/owneruser/groups?page=' + pageNo + '&perPage=' + pageSize + '&getAll=' + getAll).then(function (response) {
                 return response;
             });
         };

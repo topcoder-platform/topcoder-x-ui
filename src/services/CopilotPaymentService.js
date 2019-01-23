@@ -199,6 +199,9 @@ async function getExistingChallengeIdIfExists(dbPayment) {
  */
 async function create(topcoderUser, payment) {
   const dbProject = await helper.ensureExists(Project, payment.project, 'Project');
+  if (!dbProject.copilot) {
+    throw new errors.ForbiddenError('The project does not set copilot, can not add a payment');
+  }
   if (dbProject.copilot !== topcoderUser.handle && dbProject.owner !== topcoderUser.handle) {
     throw new errors.ForbiddenError('You do not have permission to edit this payment');
   }

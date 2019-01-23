@@ -48,17 +48,6 @@ const GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION = 3600;
 // The Gitlab refresh token time in seconds before expiration
 const GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION = 300;
 
-const TOPCODER_VALUES = {
-  dev: {
-    TC_LOGIN_URL: 'https://accounts.topcoder-dev.com/member',
-    TC_USER_PROFILE_URL: 'https://api.topcoder-dev.com/v2/user/profile',
-  },
-  prod: {
-    TC_LOGIN_URL: 'https://accounts.topcoder.com/member',
-    TC_USER_PROFILE_URL: 'https://api.topcoder.com/v2/user/profile',
-  },
-};
-
 const GITHUB_OWNER_CALLBACK_URL = '/api/v1/github/owneruser/callback';
 const GITLAB_OWNER_CALLBACK_URL = '/api/v1/gitlab/owneruser/callback';
 
@@ -80,7 +69,6 @@ module.exports = {
   GITLAB_DEFAULT_GROUP_ACCESS_LEVEL,
   GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION,
   GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION,
-  TOPCODER_VALUES,
   GITHUB_OWNER_CALLBACK_URL,
   GITLAB_OWNER_CALLBACK_URL,
   OWNER_USER_LOGIN_SUCCESS_URL,

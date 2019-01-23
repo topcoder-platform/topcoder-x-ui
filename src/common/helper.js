@@ -208,19 +208,20 @@ async function getProviderType(repoUrl) {
 }
 
 /**
- * gets the git username of copilot for a project
+ * gets the git username of copilot/owner for a project
  * @param {Object} models the db models
  * @param {Object} project the db project detail
  * @param {String} provider the git provider
+ * @param {Boolean} isCopilot if true, then get copilot, otherwise get owner
  * @returns {Object} the owner/copilot for the project
  */
-async function getProjectCopilot(models, project, provider) {
+async function getProjectCopilotOrOwner(models, project, provider, isCopilot) {
   const userMapping = await dbHelper.scanOne(models.UserMapping, {
-    topcoderUsername: project.copilot,
+    topcoderUsername: isCopilot ? project.copilot : project.owner,
   });
 
   if (!userMapping || (provider === 'github' && !userMapping.githubUserId) || (provider === 'gitlab' && !userMapping.gitlabUserId)) {
-    throw new Error(`Couldn't find owner username for '${provider}' for this repository.`);
+    throw new Error(`Couldn't find ${isCopilot ? 'copilot' : 'owner'} username for '${provider}' for this repository.`);
   }
 
   return await dbHelper.scanOne(models.User, {
@@ -248,5 +249,5 @@ module.exports = {
   ensureExists,
   generateIdentifier,
   getProviderType,
-  getProjectCopilot,
+  getProjectCopilotOrOwner,
 };
