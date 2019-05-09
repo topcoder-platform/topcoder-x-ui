@@ -15,8 +15,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const jwtDecode = require('jwt-decode');
 const secure = require('ssl-express-www');
+const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 const config = require('./config');
 const routes = require('./routes');
 const logger = require('./common/logger');
@@ -40,18 +40,34 @@ _.forEach(routes, (verbs, path) => {
       throw new Error(`${def.method} is undefined`);
     }
     const actions = [];
+
+    // TODO: Replace this with actually passing the token from
+    // `tc-accounts` as Authorization header
     actions.push((req, res, next) => {
       const v3jwt = _.get(req.cookies, constants.JWT_V3_NAME);
-      if (v3jwt) {
-        const decoded = jwtDecode(v3jwt);
-        req.currentUser = {
-          handle: decoded.handle.toLowerCase(),
-          roles: decoded.roles,
-        };
-      }
+      _.set(req, 'headers.authorization', `Bearer ${v3jwt}`);
       req.signature = `${def.controller}#${def.method}`;
       next();
     });
+
+    // Verify the JWT
+    actions.push(jwtAuth({
+      ..._.pick(config.TOPCODER, [
+        'AUTH_SECRET',
+        'VALID_ISSUERS',
+        'JWT_KEY_CACHE_TIME',
+      ]),
+    }));
+
+    actions.push((req, res, next) => {
+      if (!req.authUser) {
+        return next(new errors.UnauthorizedError('Authorization failed.'));
+      }
+      req.currentUser = req.authUser;
+
+      return next();
+    });
+
     if (def.tcLogin) {
       // middleware to handle TC login
       actions.push((req, res, next) => {

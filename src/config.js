@@ -40,4 +40,9 @@ module.exports = {
   COPILOT_ROLE: process.env.COPILOT_ROLE || 'copilot',
   HELP_LINK: process.env.HELP_LINK || 'https://github.com/topcoder-platform/topcoder-x-ui/wiki',
   ADMINISTRATOR_ROLES: process.env.ADMINISTRATOR_ROLES || ['administrator', 'admin'],
+  TOPCODER: {
+    AUTH_SECRET: process.env.TOPCODER_AUTH_SECRET || 'secret',
+    VALID_ISSUERS: process.env.TOPCODER_VALID_ISSUERS || '["topcoder-dev.com"]',
+    JWT_KEY_CACHE_TIME: process.env.TOPCODER_JWT_KEY_CACHE_TIME || 90, // eslint-disable-line no-magic-numbers
+  },
 };

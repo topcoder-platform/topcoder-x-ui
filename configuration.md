@@ -28,6 +28,9 @@ The following config parameters are supported, they are defined in `src/config.j
 |COPILOT_ROLE| The role to identify copilot|'copilot'|
 |HELP_LINK| The link for help| 'https://github.com/topcoder-platform/topcoder-x-ui/wiki'|
 |ADMINISTRATOR_ROLES| The array of roles to be considered as admin| `['administrator', 'admin']`|
+|TOPCODER_AUTH_SECRET| The auth secret used to sign the JWT| No default - needs to be set up|
+|TOPCODER_VALID_ISSUERS| Stringified array of valid JWT issuers| `'["topcoder-dev.com"]'`|
+|TOPCODER_JWT_KEY_CACHE_TIME| They JWT cache time | 90 |
 
 ## GitHub OAuth App Setup
 
