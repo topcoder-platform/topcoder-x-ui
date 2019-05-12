@@ -28,7 +28,7 @@ const Project = models.Project;
 const currentUserSchema = Joi.object().keys({
   handle: Joi.string().required(),
   roles: Joi.array().required(),
-});
+}).unknown(true);
 const projectSchema = {
   project: {
     id: Joi.string().required(),
