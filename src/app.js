@@ -63,7 +63,11 @@ _.forEach(routes, (verbs, path) => {
       if (!req.authUser) {
         return next(new errors.UnauthorizedError('Authorization failed.'));
       }
-      req.currentUser = req.authUser;
+
+      req.currentUser = {
+        handle: _.get(req, 'authUser.handle', '').toLowerCase(),
+        roles: _.get(req, 'authUser.roles', [])
+      };
 
       return next();
     });
