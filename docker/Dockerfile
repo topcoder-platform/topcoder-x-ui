@@ -9,7 +9,7 @@ WORKDIR /topcoder-x-ui
 
 # Install the dependencies from package.json
 RUN npm install
-RUN npm build
-RUN npm test
+RUN npm run build
+#RUN npm test
 
 CMD npm start
