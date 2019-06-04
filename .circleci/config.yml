@@ -36,9 +36,9 @@ builddeploy_steps: &builddeploy_steps
           command: |
             ./awsconfiguration.sh $DEPLOY_ENV
             source awsenvconf
-            #./buildenv.sh -e $DEPLOY_ENV -b ${DEPLOY_ENV}-${APPNAME}-deployvar
-            #source buildenvvar
-            #./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${DEPLOY_ENV}-${APPNAME}-appvar -i ${APPNAME}
+            ./buildenv.sh -e $DEPLOY_ENV -b ${DEPLOY_ENV}-${APPNAME}-deployvar
+            source buildenvvar
+            ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${DEPLOY_ENV}-global-appvar,${DEPLOY_ENV}-${APPNAME}-appvar -i ${APPNAME}
 
 
 jobs:
@@ -46,14 +46,14 @@ jobs:
   "build-dev":
     <<: *defaults
     environment:
-      DEPLOY_ENV: "DEV"
+      DEPLOY_ENV: "dev"
       APPNAME: "topcoder-x-ui"    
     steps: *builddeploy_steps
 
   "build-prod":
     <<: *defaults
     environment:
-      DEPLOY_ENV: "PROD"    
+      DEPLOY_ENV: "prod"    
       APPNAME: "topcoder-x-ui"  
     steps: *builddeploy_steps
 
