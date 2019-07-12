@@ -43,6 +43,7 @@ module.exports = {
       method: 'addUserToTeam',
       allowNormalUser: true,
       tcLogin: true,
+      allowAnonymous: true,
     },
   },
   '/github/normaluser/callback': {
@@ -50,6 +51,7 @@ module.exports = {
       controller: 'GithubController',
       method: 'addUserToTeamCallback',
       allowNormalUser: true,
+      allowAnonymous: true,
     },
   },
 
@@ -84,6 +86,7 @@ module.exports = {
       method: 'addUserToGroup',
       allowNormalUser: true,
       tcLogin: true,
+      allowAnonymous: true,
     },
   },
   '/gitlab/normaluser/callback': {
@@ -91,6 +94,7 @@ module.exports = {
       controller: 'GitlabController',
       method: 'addUserToGroupCallback',
       allowNormalUser: true,
+      allowAnonymous: true,
     },
   },
 
