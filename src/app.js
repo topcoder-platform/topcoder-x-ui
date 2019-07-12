@@ -40,18 +40,20 @@ _.forEach(routes, (verbs, path) => {
       throw new Error(`${def.method} is undefined`);
     }
     const actions = [];
-    actions.push((req, res, next) => {
-      const v3jwt = _.get(req.cookies, constants.JWT_V3_NAME);
-      if (v3jwt) {
-        const decoded = jwtDecode(v3jwt);
-        req.currentUser = {
-          handle: decoded.handle.toLowerCase(),
-          roles: decoded.roles,
-        };
-      }
-      req.signature = `${def.controller}#${def.method}`;
-      next();
-    });
+    if (!def.allowAnonymous) {
+      actions.push((req, res, next) => {
+        const v3jwt = _.get(req.cookies, constants.JWT_V3_NAME);
+        if (v3jwt) {
+          const decoded = jwtDecode(v3jwt);
+          req.currentUser = {
+            handle: decoded.handle.toLowerCase(),
+            roles: decoded.roles,
+          };
+        }
+        req.signature = `${def.controller}#${def.method}`;
+        next();
+      });
+    }
     if (def.tcLogin) {
       // middleware to handle TC login
       actions.push((req, res, next) => {
