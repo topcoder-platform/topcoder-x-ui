@@ -109,12 +109,13 @@ async function getTeamRegistrationUrl(req) {
  */
 async function addUserToTeam(req, res) {
   const identifier = req.params.identifier;
+  console.log(`addUserToTeam called for ${identifier}`); /* eslint-disable-line no-console */
   // validate the identifier
   await helper.ensureExists(OwnerUserTeam, { identifier });
 
   // store identifier to session, to be compared in callback
   req.session.identifier = identifier;
-
+  console.log(`addUserToTeam OwnerUserTeam ${JSON.stringify(OwnerUserTeam)}`); /* eslint-disable-line no-console */
   // redirect to GitHub OAuth
   const callbackUri = `${config.WEBSITE}/api/${config.API_VERSION}/github/normaluser/callback`;
   res.redirect(`http://github.com/login/oauth/authorize?client_id=${
