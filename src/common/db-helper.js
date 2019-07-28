@@ -1,3 +1,5 @@
+const logger = require('./logger');
+
 /*
  * Copyright (c) 2018 TopCoder, Inc. All rights reserved.
  */
@@ -17,6 +19,7 @@ async function getById(model, id) {
   return await new Promise((resolve, reject) => {
     model.query('id').eq(id).exec((err, result) => {
       if (err) {
+        logger.error(`DynamoDB getById error ${err}`);
         reject(err);
       }
 
@@ -35,6 +38,7 @@ async function scan(model, scanParams) {
   return await new Promise((resolve, reject) => {
     model.scan(scanParams).exec((err, result) => {
       if (err) {
+        logger.error(`DynamoDB scan error ${err}`);
         reject(err);
       }
 
@@ -53,6 +57,7 @@ async function scanOne(model, scanParams) {
   return await new Promise((resolve, reject) => {
     model.scan(scanParams).exec((err, result) => {
       if (err) {
+        logger.error(`DynamoDB scanOne error ${err}`);
         reject(err);
       }
 
@@ -72,6 +77,7 @@ async function create(Model, data) {
     const dbItem = new Model(data);
     dbItem.save((err) => {
       if (err) {
+        logger.error(`DynamoDB create error ${err}`);
         reject(err);
       }
 
@@ -95,6 +101,7 @@ async function update(Model, id, data) {
   return await new Promise((resolve, reject) => {
     dbItem.save((err) => {
       if (err) {
+        logger.error(`DynamoDB update error ${err}`);
         reject(err);
       }
 
@@ -113,6 +120,7 @@ async function remove(Model, queryParams) {
   await new Promise((resolve, reject) => {
     dbItem.delete((err) => {
       if (err) {
+        logger.error(`DynamoDB remove error ${err}`);
         reject(err);
       }
 
