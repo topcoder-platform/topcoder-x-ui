@@ -28,7 +28,7 @@ fs.readdirSync(__dirname).forEach((file) => { // eslint-disable-line no-sync
   if (file !== 'index.js') {
     const filename = file.split('.')[0];
     const schema = require(Path.join(__dirname, filename)); // eslint-disable-line global-require
-    const model = dynamoose.model(filename, schema);
+    const model = dynamoose.model('Topcoder_X.' + filename, schema);
     models[filename] = model;
   }
 });
