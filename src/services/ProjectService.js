@@ -293,33 +293,44 @@ async function createHook(body, currentUser) {
   const repoName = results[results.length - index];
   const excludePart = 3;
   const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
+  const updateExisting = dbProject.registeredWebhookId !== undefined;
   if (provider === 'github') {
     try {
       const client = gitHubApi.client(userRole.accessToken);
       const ghrepo = client.repo(`${repoOwner}/${repoName}`);
       await new Promise((resolve, reject) => {
-        ghrepo.hook({
-          name: 'web',
-          active: true,
-          events: [
-            'push',
-            'pull_request',
-            'create',
-            'commit_comment',
-            'issue_comment',
-            'issues',
-            'label',
-          ],
-          config: {
-            url: `${config.HOOK_BASE_URL}/webhooks/github`,
-            content_type: 'json',
-            secret: dbProject.secretWebhookKey,
-          },
-        }, (error) => {
-          if (error) {
-            return reject(error);
+        ghrepo.hooks(async (err, hooks) => {
+          if(!err && dbProject.registeredWebhookId && 
+            _.find(hooks, {id: parseInt(dbProject.registeredWebhookId, 10)})) {
+              await ghrepo.deleteHookAsync(dbProject.registeredWebhookId);
           }
-          return resolve();
+          ghrepo.hook({
+            name: 'web',
+            active: true,
+            events: [
+              'push',
+              'pull_request',
+              'create',
+              'commit_comment',
+              'issue_comment',
+              'issues',
+              'label',
+            ],
+            config: {
+              url: `${config.HOOK_BASE_URL}/webhooks/github`,
+              content_type: 'json',
+              secret: dbProject.secretWebhookKey,
+            },
+          }, (error, hook) => {          
+            if (error) {
+              return reject(error);
+            }
+            if (hook && hook.id) {
+              dbProject.registeredWebhookId = hook.id.toString();
+              update(dbProject, currentUser);
+            }
+            return resolve();
+          });
         });
       });
     } catch (err) {
@@ -338,7 +349,12 @@ async function createHook(body, currentUser) {
         url: config.GITLAB_API_BASE_URL,
         oauthToken: userRole.accessToken,
       });
-      await client.ProjectHooks.add(`${repoOwner}/${repoName}`,
+      let hooks = await client.ProjectHooks.all(`${repoOwner}/${repoName}`);
+      if(hooks && dbProject.registeredWebhookId &&
+        _.find(hooks, {id: parseInt(dbProject.registeredWebhookId, 10)})) {
+          await client.ProjectHooks.remove(`${repoOwner}/${repoName}`, dbProject.registeredWebhookId);
+      }
+      let hook = await client.ProjectHooks.add(`${repoOwner}/${repoName}`,
         `${config.HOOK_BASE_URL}/webhooks/gitlab`, {
           push_events: true,
           issues_events: true,
@@ -352,12 +368,17 @@ async function createHook(body, currentUser) {
           token: dbProject.secretWebhookKey,
         }
       );
+      if (hook && hook.id) {
+        dbProject.registeredWebhookId = hook.id.toString();
+        await update(dbProject, currentUser);
+      }
     } catch (err) {
       throw helper.convertGitLabError(err, 'Failed to create webhook.');
     }
   }
   return {
     success: true,
+    updated: updateExisting
   };
 }
 

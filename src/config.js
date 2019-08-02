@@ -26,7 +26,7 @@ module.exports = {
   // kafka configuration
   TOPIC: process.env.TOPIC || 'tc-x-events',
   KAFKA_OPTIONS: {
-    connectionString: process.env.KAFKA_HOST || 'localhost:9092',
+    connectionString: process.env.KAFKA_URL || 'localhost:9092',
     ssl: {
       cert: process.env.KAFKA_CLIENT_CERT || fs.readFileSync('./kafka_client.cer'), // eslint-disable-line no-sync
       key: process.env.KAFKA_CLIENT_CERT_KEY || fs.readFileSync('./kafka_client.key'), // eslint-disable-line no-sync
@@ -50,10 +50,10 @@ module.exports = {
   HELP_LINK: process.env.HELP_LINK || 'https://github.com/topcoder-platform/topcoder-x-ui/wiki',
   ADMINISTRATOR_ROLES: process.env.ADMINISTRATOR_ROLES || ['administrator', 'admin'],
   DYNAMODB: {
-    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
-    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
-    AWS_REGION: process.env.AWS_REGION || '',
-    IS_LOCAL: process.env.IS_LOCAL || 'false',
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+    AWS_REGION: process.env.AWS_REGION,
+    IS_LOCAL: process.env.IS_LOCAL
   },
   TOPCODER_VALUES: {
     dev: {

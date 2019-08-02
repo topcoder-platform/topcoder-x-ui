@@ -37,6 +37,7 @@ const schema = new Schema({
   owner: {type: String, required: true},
   secretWebhookKey: {type: String, required: true},
   copilot: {type: String, required: false},
+  registeredWebhookId: {type: String, required: false} 
 });
 
 module.exports = schema;

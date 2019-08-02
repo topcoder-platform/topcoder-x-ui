@@ -59,7 +59,7 @@ KAFKA_CLIENT_CERT: <cert string>
 
 KAFKA_CLIENT_CERT_KEY: <cert string>
 
-KAFKA_HOST: silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
+KAFKA_URL: silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
 
 TOPIC: topcoder-x
 ```
@@ -70,7 +70,7 @@ So it would be updated from this:
 
 ```
   KAFKA_OPTIONS: {
-    connectionString: process.env.KAFKA_HOST || 'localhost:9092',
+    connectionString: process.env.KAFKA_URL || 'localhost:9092',
     ssl: {
       cert: process.env.KAFKA_CLIENT_CERT || fs.readFileSync('./kafka_client.cer'), // eslint-disable-line no-sync
       key: process.env.KAFKA_CLIENT_CERT_KEY || fs.readFileSync('./kafka_client.key'), // eslint-disable-line no-sync
@@ -82,7 +82,7 @@ To this:
 
 ```
   KAFKA_OPTIONS: {
-    connectionString: process.env.KAFKA_HOST || 'localhost:9092'
+    connectionString: process.env.KAFKA_URL || 'localhost:9092'
   },
 ```
 
@@ -168,7 +168,7 @@ EMAIL_SENDER_ADDRESS:         bidbot@mail.x.topcoder-dev.com
 ISSUE_BID_EMAIL_RECEIVER:     cwd@topcoder.com
 KAFKA_CLIENT_CERT: <cert>
 KAFKA_CLIENT_CERT_KEY: <key>
-KAFKA_HOST:                   silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
+KAFKA_URL:                   silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
 LOG_LEVEL:                    debug
 MAILGUN_API_KEY:              key-5ebe7a0fae37a9008721ec0bfe5bdd95
 MAILGUN_DOMAIN:               sandbox3fcf4920781449f2a5293f8ef18e4bb6.mailgun.org
@@ -195,7 +195,7 @@ Justins-Mac-Pro:~ justingasper$ heroku config --app topcoder-x-receiver-dev
 === topcoder-x-receiver-dev Config Vars
 KAFKA_CLIENT_CERT: <cert>
 KAFKA_CLIENT_CERT_KEY: <key>
-KAFKA_HOST:                   silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
+KAFKA_URL:                   silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
 LOG_LEVEL:                    debug
 NODE_ENV:                     development
 NODE_TLS_REJECT_UNAUTHORIZED: 0
@@ -219,7 +219,7 @@ GITLAB_CLIENT_SECRET:  70367d8255e160828ae47f35ff71723202afc7be1f29a4c7319bc82c4
 HOOK_BASE_URL:         https://topcoder-x-receiver-dev.herokuapp.com
 KAFKA_CLIENT_CERT:  <cert>
 KAFKA_CLIENT_CERT_KEY: <key>
-KAFKA_HOST:            silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
+KAFKA_URL:            silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
 NPM_CONFIG_PRODUCTION: false
 SESSION_SECRET:        kjsdfkj34857
 TC_LOGIN_URL:          https://accounts.topcoder-dev.com/member
