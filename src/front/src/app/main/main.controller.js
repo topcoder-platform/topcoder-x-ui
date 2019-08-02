@@ -138,4 +138,5 @@ angular.module('topcoderX')
         $scope.tableConfig[provider].pageNumber = 1;
         _search(provider);
       };
+
     }]);

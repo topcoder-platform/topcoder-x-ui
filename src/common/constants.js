@@ -13,7 +13,7 @@
 const DEFAULT_PER_PAGE = 30;
 
 // The max page size
-const MAX_PER_PAGE = 100;
+const MAX_PER_PAGE = Number.MAX_SAFE_INTEGER;
 
 // The service error
 const SERVICE_ERROR = 'SERVICE_ERROR';
@@ -35,8 +35,8 @@ const USER_TYPES = {
 // The default page size for Gitlab API
 const GITLAB_DEFAULT_PER_PAGE = 20;
 
-// The max page size for Gitlab API
-const GITLAB_MAX_PER_PAGE = 100;
+// The max page size for Gitlab API. Increased to max num for local search purpose.
+const GITLAB_MAX_PER_PAGE = Number.MAX_SAFE_INTEGER;
 
 // The gitlab default group member access level,
 // the access level can be: 10 - GUEST, 20 - REPORTER, 30 - DEVELOPER, 40 - MASTER, 50 - OWNER

@@ -50,8 +50,14 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
 
     // function to add hooks to the current project.
     $scope.addHooks = function () {
-      ProjectService.createHooks({ projectId: $scope.project.id }).then(function () {
-        Alert.info('Webhook Added Successfully', $scope);
+      ProjectService.createHooks({ projectId: $scope.project.id }).then(function (result) {
+        if (result && result.data.updated === true) {
+            Alert.info('Existing Webhook Updated Successfully', $scope);
+        }
+        else {
+          Alert.info('Webhook Added Successfully', $scope);
+        }
+
       }).catch(function (error) {
         Alert.error(error.data.message, $scope);
       });

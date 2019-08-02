@@ -16,7 +16,19 @@
                                 <br/>
                                 <div ng-if="settings.github==true">
                                     <div ng-show="tableConfig.github.initialized">
-                                        <table ng-if="tableConfig.github.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
+                                        <div ng-if="tableConfig.github.items.length!=0 || tableConfig.github.allItems.length!=0" class="row">
+                                            <div class="col-lg-3">
+                                                <div class="input-group custom-search-form">
+                                                    <input ng-model="searchText" type="text" class="form-control" placeholder="Find teams" ng-change="onSearchChange('github', this)">
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default" type="button" ng-click="onSearchIconClicked('github')">
+                                                            <span class="glyphicon glyphicon-search"></span>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>        
+                                        <table ng-if="tableConfig.github.items.length!=0 || tableConfig.github.allItems.length!=0" class="footable table table-stripped toggle-arrow-tiny">
                                             <thead>
                                                 <tr>
                                                     <th class="col-lg-2" data-sort-ignore="true">Team Name</th>
@@ -72,7 +84,7 @@
                                             </tfoot>
                                         </table>
                                     </div>
-                                    <div ng-if="tableConfig.github.items.length==0 && tableConfig.github.initialized">
+                                    <div ng-if="tableConfig.github.items.length==0 && tableConfig.github.allItems.length==0 && tableConfig.github.initialized">
                                         You don't appear to have any Github teams available to manage through Topcoder X. Topcoder X is used to give Topcoder
                                         members access to specific teams using your ownership credentials. If you
                                         don't have any teams, Topcoder X won't be able to manage access for you.
@@ -91,8 +103,20 @@
                             <uib-tab index="1" heading="Gitlab" select="tabChanged('gitlab')">
                                 <br/>
                                 <div ng-if="settings.gitlab==true">
-                                    <div ng-show="tableConfig.gitlab.initialized">
-                                        <table ng-show="tableConfig.gitlab.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
+                                    <div ng-show="tableConfig.gitlab.initialized">                                        
+                                        <div ng-if="tableConfig.gitlab.items.length!=0 || tableConfig.gitlab.allItems.length!=0" class="row">
+                                            <div class="col-lg-3">
+                                                <div class="input-group custom-search-form">
+                                                    <input ng-model="searchText" type="text" class="form-control" placeholder="Find groups"  ng-change="onSearchChange('gitlab', this)">
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default" type="button" ng-click="onSearchIconClicked('gitlab')">
+                                                            <span class="glyphicon glyphicon-search"></span>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <table ng-show="tableConfig.gitlab.items.length!=0 || tableConfig.gitlab.allItems.length!=0" class="footable table table-stripped toggle-arrow-tiny">
                                             <thead>
                                                 <tr>
                                                     <th class="col-lg-2" data-sort-ignore="true">Group Name</th>
@@ -148,7 +172,7 @@
                                             </tfoot>
                                         </table>
                                     </div>
-                                    <div ng-if="tableConfig.gitlab.items.length==0 && tableConfig.gitlab.initialized">
+                                    <div ng-if="tableConfig.gitlab.items.length==0 && tableConfig.gitlab.allItems.length==0 && tableConfig.gitlab.initialized">
                                         You don't appear to have any Gitlab groups available to manage through Topcoder X. Topcoder X is used to give Topcoder
                                         members access to specific group using your ownership credentials. If you
                                         don't have any group, Topcoder X won't be able to manage access for you.

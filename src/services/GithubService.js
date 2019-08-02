@@ -87,15 +87,16 @@ ensureOwnerUser.schema = Joi.object().keys({
  * @param {Number} perPage the page size (default to be constants.DEFAULT_PER_PAGE). Must be within range [1, constants.MAX_PER_PAGE]
  * @returns {Promise} the promise result
  */
-async function listOwnerUserTeams(token, page = 1, perPage = constants.DEFAULT_PER_PAGE) {
+async function listOwnerUserTeams(token, page = 1, perPage = constants.DEFAULT_PER_PAGE) {  
   try {
     const github = new GitHub({token});
     const user = github.getUser();
+    
     const response = await user._request('GET', '/user/teams', {
       page,
       per_page: perPage,
     });
-
+    
     const result = {
       page,
       perPage,

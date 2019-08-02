@@ -5,26 +5,31 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
         $scope.settings = {};
         var vm = this;
         $scope.isLoaded = false;
+        $scope.isLoadingSearchData = false;
         $scope.tableConfig = {
             github: {
                 pageNumber: 1,
                 pageSize: 10,
                 isLoading: false,
                 items: [],
+                allItems: [],
                 totalPages: 1,
                 searchMethod: GitAccessControlService.getGithubOwnerTeams,
                 initialized: false,
                 accessLinkMethod: GitAccessControlService.getGithubShareableLink,
+                query: ''
             },
             gitlab: {
                 pageNumber: 1,
                 pageSize: 10,
                 isLoading: false,
                 items: [],
+                allItems: [],
                 totalPages: 1,
                 searchMethod: GitAccessControlService.getGitlabOwnerGroups,
                 initialized: false,
                 accessLinkMethod: GitAccessControlService.getGitlabShareableLink,
+                query: ''
             }
         }
 
@@ -89,7 +94,14 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
                 return false;
             }
             $scope.tableConfig[provider].pageNumber = pageNumber;
-            _getOwnerList(provider);
+
+            var config = $scope.tableConfig[provider];
+            if (config.query.length === 0) {
+                _getOwnerList(provider);
+            }
+            else {
+                _searchLocal(config, config.query, provider);
+            }
         };
         // get the number array that shows the pagination bar
         $scope.getPageArray = function (provider) {
@@ -119,5 +131,57 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
             if ($scope.settings[provider]) {
                 _getOwnerList(provider);
             }
+        }
+
+        $scope.onSearchChange = function (provider, obj) {
+            var config = $scope.tableConfig[provider];
+            config.query = obj.searchText;
+            if (config.allItems.length === 0 && !$scope.isLoadingSearchData) {
+                $scope.isLoadingSearchData = true;
+                config.searchMethod.apply(vm, [1, Number.MAX_SAFE_INTEGER, true]).then(function (res) {
+                    config.allItems = provider === 'github' ? res.data.teams : res.data.groups;
+                    $log.log(config.allItems);
+                    $scope.isLoadingSearchData = false;
+                    _searchLocal(config, obj.searchText, provider);
+                    if (config.pageNumber > 1) {
+                        $scope.changePage(1, provider);
+                    }    
+                }).catch(function (err) {
+                    _handleError(err, 'An error occurred while getting the data for ' + provider + '.');
+                    $scope.isLoadingSearchData = false;
+                });    
+            }
+            else if (config.allItems.length > 0) {
+                _searchLocal(config, obj.searchText, provider);
+                if (config.pageNumber > 1) {
+                    $scope.changePage(1, provider);
+                }
+            }
+
+            if (config.query.length === 0) {
+                $scope.changePage(1, provider);
+            }
+        };
+
+        $scope.onSearchIconClicked = function (provider) {
+            var config = $scope.tableConfig[provider];
+            if (config.pageNumber > 1) {
+                $scope.changePage(1, provider);
+            }
+            if (config.query.length > 0) {
+                _searchLocal(config, config.query, provider);
+            }
+        };
+
+        function _searchLocal(config, query, provider) {
+            config.items = config.allItems.filter(function(value) {
+                if (provider === 'github') {
+                    return value['name'].toLowerCase().includes(query.toLowerCase());
+                }
+                return value['full_name'].toLowerCase().includes(query.toLowerCase());
+            })
+            config.totalPages = Math.ceil(config.items.length / config.pageSize);
+            config.items = config.items
+                .slice((config.pageNumber - 1)*config.pageSize, (config.pageNumber - 1)*config.pageSize + config.pageSize);
         }
     }]);
