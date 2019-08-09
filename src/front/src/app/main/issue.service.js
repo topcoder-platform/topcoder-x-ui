@@ -19,5 +19,15 @@ angular.module('topcoderX')
             });
         };
 
+        /**
+         * Create an Issue
+         * @param issue  the issue to be created
+         */
+        service.create = function (issue) {
+            return $http.post(Helper.baseUrl + '/api/v1/issues', issue).then(function (response) {
+                return response;
+            });
+        };
+
         return service;
     }]);

@@ -45,6 +45,7 @@ module.exports = {
     {name: 'tcx_NotReady', color: '000000'},
     {name: 'tcx_Canceled', color: '000000'},
   ],
+  OPEN_FOR_PICKUP_ISSUE_LABEL: process.env.OPEN_FOR_PICKUP_ISSUE_LABEL || 'tcx_OpenForPickup',
   ALLOWED_TOPCODER_ROLES: process.env.ALLOWED_TOPCODER_ROLES || ['administrator', 'admin', 'connect manager', 'connect admin', 'copilot', 'connect copilot'],
   COPILOT_ROLE: process.env.COPILOT_ROLE || 'copilot',
   HELP_LINK: process.env.HELP_LINK || 'https://github.com/topcoder-platform/topcoder-x-ui/wiki',

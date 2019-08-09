@@ -26,6 +26,11 @@ angular.module('topcoderX')
         $state.go('app.project');
       };
 
+      //go to a add issue page
+      $scope.goIssue = function () {
+        $state.go('app.issue');
+      };
+
       //the actived project list
       $scope.projects = [];
       //the archived project list

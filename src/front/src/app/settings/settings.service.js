@@ -20,6 +20,15 @@ angular.module('topcoderX')
         };
 
         /**
+         * Revoke user setting on github or gitlab
+         */
+        service.revokeUserSetting = function (handle, provider) {
+            return $http.delete(Helper.baseUrl + '/api/v1/users/setting?topcoderUsername=' + handle + '&provider=' + provider).then(function (response) {
+                return response;
+            });
+        };
+
+        /**
         * tryAuth Try to authenticate the user based on code & state params
         * @param {string} code  from github oAuth
         * @param {string} state from github oAuth

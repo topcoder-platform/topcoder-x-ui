@@ -86,6 +86,25 @@ To this:
   },
 ```
 
+## Machine-to-machine (M2M) Token generation
+The `topcoder-x-processor` uses the Topcoder m2m token to interact with others Topcoder service.
+It needs to be configured properly. Please make sure the following items is configured:
+
+- `AUTH0_URL` The Auth0 URL for generating Machine-to-machine token
+- `AUTH0_AUDIENCE` The audience of Auth0 to generate M2M Token
+- `AUTH0_CLIENT_ID` The Auth0 ClientID for generating Machine-to-machine token
+- `AUTH0_CLIENT_SECRET` The Auth0 Client Secret for generating Machine-to-machine token
+
+
+For local deployment, configuring M2M token generation can use this provided account:
+```
+export AUTH0_URL=https://topcoder-dev.auth0.com/oauth/token
+export AUTH0_AUDIENCE=https://m2m.topcoder-dev.com/
+export AUTH0_CLIENT_ID=LU2Nt7YPHQ3lxrFNKitJ82syB4wIMR7G
+export AUTH0_CLIENT_SECRET=O8S2YOb-0lI4NS3smR4d4uf0VM9BN0y1Ra4ABRktGUPOXc34mUO25uJrCpU-TBAT
+```
+
+
 ## Local DNS setup
 
 For login to work, your local Topcoder-X-UI deployment needs to have a `*.topcoder-dev.com` DNS name.  Our development environment uses `x.topcoder-dev.com`
@@ -186,6 +205,10 @@ AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
 AWS_REGION: FAKE_REGION
 IS_LOCAL: true
+AUTH0_URL:                    https://topcoder-dev.auth0.com/oauth/token
+AUTH0_AUDIENCE:               https://m2m.topcoder-dev.com/
+AUTH0_CLIENT_ID:              LU2Nt7YPHQ3lxrFNKitJ82syB4wIMR7G
+AUTH0_CLIENT_SECRET:          O8S2YOb-0lI4NS3smR4d4uf0VM9BN0y1Ra4ABRktGUPOXc34mUO25uJrCpU-TBAT
 ```
 
 #### Topcoder-X receiver
