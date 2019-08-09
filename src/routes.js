@@ -186,6 +186,10 @@ module.exports = {
       controller: 'UserController',
       method: 'getUserSetting',
     },
+    delete: {
+      controller: 'UserController',
+      method: 'revokeUserSetting'
+    }
   },
   '/users/accessToken': {
     get: {
@@ -204,6 +208,10 @@ module.exports = {
     get: {
       controller: 'IssueController',
       method: 'search',
+    },
+    post: {
+      controller: 'IssueController',
+      method: 'create',
     },
   },
   '/appConfig': {

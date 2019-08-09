@@ -131,6 +131,19 @@ app.use((err, req, res, next) => {
   res.status(resultErr.statusCode || 500).json(resObj); // eslint-disable-line no-magic-numbers
 });
 
+process.on('uncaughtException', (err) => {
+  // Check if error related to Dynamodb conn
+  if (err.code === 'NetworkingError' && err.region) {
+    logger.error('DynamoDB connection failed.');
+  }
+  logger.logFullError(err, 'system');
+});
+
+// handle and log unhanled rejection
+process.on('unhandledRejection', (err) => {
+  logger.logFullError(err, 'system');
+});
+
 const port = config.PORT;
 app.listen(port, '0.0.0.0');
 logger.info('Topcoder X server listening on port %d', port);

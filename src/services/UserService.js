@@ -66,6 +66,48 @@ getUserSetting.schema = Joi.object().keys({
   handle: Joi.string().required(),
 });
 
+
+
+/**
+ * revoke user setting
+ * @param {String} handle the topcoder handle
+ * @param {String} provider the provider (github/gitlab)
+ * @returns {Boolean} the execution status success or failed
+ */
+async function revokeUserSetting(handle, provider) {
+  const mapping = await dbHelper.scanOne(UserMapping, {
+    topcoderUsername: handle.toLowerCase(),
+  });
+
+  if (!mapping) {
+    return false;
+  }
+
+  if (provider === 'github' && mapping.githubUsername) {
+    dbHelper.remove(User, {
+      username: mapping.githubUsername,
+      type: constants.USER_TYPES.GITHUB,
+    });
+    return true;
+  }
+
+  if (provider === 'gitlab' && mapping.gitlabUsername) {
+    dbHelper.remove(User, {
+      username: mapping.gitlabUsername,
+      type: constants.USER_TYPES.GITLAB,
+    });
+    return true;
+  }
+  return false;
+}
+
+revokeUserSetting.schema = Joi.object().keys({
+  handle: Joi.string().required(),
+  provider: Joi.string().required()
+});
+
+
+
 /**
  * gets user token
  * @param {String} username the user name
@@ -114,6 +156,7 @@ getUserToken.schema = Joi.object().keys({
 
 module.exports = {
   getUserSetting,
+  revokeUserSetting,
   getUserToken,
   getAccessTokenByHandle,
 };

@@ -206,7 +206,11 @@ angular.module('topcoderX')
           }
           AuthService.PermissionDenied = true;
           return $q.reject(AuthService.ERROR.NO_PERMISSIONS);
-        }).catch(function (err) { return $q.reject(err); });
+        }).catch(function (err) {
+          AuthService.logout();
+          $state.go('auth');
+          return $q.reject(err);
+        });
       }
 
       /**
