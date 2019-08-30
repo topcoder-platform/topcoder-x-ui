@@ -132,7 +132,7 @@ function buildController(controller) {
  * @returns {Error} converted error
  */
 function convertGitHubError(err, message) {
-  let resMsg = `${message}. ${err.message}.`;
+  let resMsg = `${message}. ${err.message}.\n`;
   const detail = _.get(err, 'response.body.message');
   if (detail) {
     resMsg += ` Detail: ${detail}`;
@@ -152,7 +152,7 @@ function convertGitHubError(err, message) {
  * @returns {Error} converted error
  */
 function convertGitLabError(err, message) {
-  let resMsg = `${message}. ${err.message}.`;
+  let resMsg = `${message}. ${err.message}.\n`;
   const detail = _.get(err, 'response.body.message');
   if (detail) {
     resMsg += ` Detail: ${detail}`;

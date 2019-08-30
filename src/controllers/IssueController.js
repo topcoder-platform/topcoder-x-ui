@@ -31,9 +31,22 @@ async function create(req) {
   return await IssueService.create(req.body, req.currentUser);
 }
 
+/**
+ * recreate an issue
+ * Remove the related db record.
+ * Recreate new record and create new challenge.
+ * @param {Object} req the request
+ * @param {Object} res the response
+ * @returns {Object} the result
+ */
+async function recreate(req) {
+  return await IssueService.recreate(req.body, req.currentUser);
+}
+
 module.exports = {
   search,
-  create
+  create,
+  recreate
 };
 
 helper.buildController(module.exports);

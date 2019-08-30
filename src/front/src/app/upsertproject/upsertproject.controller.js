@@ -94,6 +94,25 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       }
     };
 
+    $scope.openRecreateDialog = function () {
+      $uibModal.open({
+        size: 'md',
+        templateUrl: 'app/upsertproject/recreate-dialog.html',
+        controller: 'RecreateDialogController',
+        resolve: {
+          currentUser: function () {
+            return currentUser;
+          },
+          appConfig: function () {
+            return $rootScope.appConfig;
+          },
+          project: function () {
+            return $scope.project;
+          },
+        },
+      });
+    };
+
     $scope.openTransferOwnershipDialog = function () {
       $uibModal.open({
         size: 'md',

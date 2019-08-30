@@ -26,6 +26,9 @@ angular.module('topcoderX').controller('SettingController', ['currentUser', '$sc
 
         // Revoke gitlab or github account
         $scope.revoke = function(provider) {
+            $rootScope.dialog = {
+                proceed: false
+            };
             $scope.$on('dialog.finished', function (event, args) {
                 if (args.proceed) {
                     SettingService.revokeUserSetting(currentUser.handle, provider).then(function () {

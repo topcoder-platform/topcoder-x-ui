@@ -214,6 +214,12 @@ module.exports = {
       method: 'create',
     },
   },
+  '/issues/recreate': {
+    post: {
+      controller: 'IssueController',
+      method: 'recreate'
+    }
+  },
   '/appConfig': {
     get: {
       controller: 'AppConfigController',
