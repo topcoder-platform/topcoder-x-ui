@@ -29,5 +29,15 @@ angular.module('topcoderX')
             });
         };
 
+        /**
+         * Recreate an Issue
+         * @param issue  the issue to be created
+         */
+        service.recreate = function (issue) {
+            return $http.post(Helper.baseUrl + '/api/v1/issues/recreate', issue).then(function (response) {
+                return response;
+            });
+        };
+
         return service;
     }]);

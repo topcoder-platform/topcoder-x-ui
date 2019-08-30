@@ -17,6 +17,7 @@ const Gitlab = require('gitlab/dist/es5').default;
 const config = require('../config');
 const errors = require('../common/errors');
 const helper = require('../common/helper');
+const kafka = require('../utils/kafka');
 const dbHelper = require('../common/db-helper');
 const models = require('../models');
 
@@ -124,7 +125,7 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
 async function create(issue, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(issue.projectId, currentUser);
   const provider = await helper.getProviderType(dbProject.repoUrl);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, dbProject.copilot !== undefined);
+  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
   const results = dbProject.repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];
@@ -205,9 +206,118 @@ create.schema = {
   currentUser: currentUserSchema,
 };
 
+/**
+ * recreate issue
+ * @param {Object} issue the issue detail
+ * @param {String} currentUser the topcoder current user
+ * @returns {Object} created issue
+ */
+async function recreate(issue, currentUser) {
+  const dbProject = await _ensureEditPermissionAndGetInfo(issue.projectId, currentUser);
+  const provider = await helper.getProviderType(dbProject.repoUrl);
+  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
+  const results = dbProject.repoUrl.split('/');
+  const index = 1;
+  const repoName = results[results.length - index];
+  const excludePart = 3;
+  const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
+
+  const issueNumber = issue.number;
+  
+  const dbIssue = await helper.ensureExists(models.Issue, 
+    { 
+      number: issueNumber, 
+      projectId: issue.projectId 
+    }, 
+    'Issue');
+  
+  const createEvent = {
+    event: 'issue.recreated',
+    provider,
+    data: {
+      issue: {
+        number: issueNumber,
+        body: dbIssue.body
+      },
+      repository: {
+        id: dbIssue.repositoryId,
+        name: repoName,
+        full_name: `${repoOwner}/${repoName}`
+      }
+    },
+  };
+
+  const labels = [];
+
+  if (provider === 'github') {
+    try {
+      const client = gitHubApi.client(userRole.accessToken);
+      var ghissue = client.issue(`${repoOwner}/${repoName}`, issueNumber);
+      const remoteIssue = await new Promise((resolve, reject) => {
+        ghissue.info((error, resp) => {
+          if (error) {
+            return reject(error);
+          }
+          return resolve(resp);
+        });
+      });
+      createEvent.data.issue.title = remoteIssue.title;
+      createEvent.data.issue.body = remoteIssue.body;
+      createEvent.data.issue.owner = { id: remoteIssue.user.id };
+      createEvent.data.issue.assignees = _.map(remoteIssue.assignees, function(o) { return _.pick(o, 'id'); });
+      if (remoteIssue.labels && remoteIssue.labels.length > 0) {
+        remoteIssue.labels.forEach(label => {
+          labels.push(label.name);
+        });
+      }
+    } catch (err) {
+      throw helper.convertGitHubError(err, 'Failed to find the issue.');
+    }
+  } else {
+    try {
+      const client = new Gitlab({
+        url: config.GITLAB_API_BASE_URL,
+        oauthToken: userRole.accessToken,
+      });
+      const remoteIssue = await client.Issues.show(`${repoOwner}/${repoName}`, issueNumber);
+
+      createEvent.data.issue.title = remoteIssue.title;
+      createEvent.data.issue.body = remoteIssue.description;
+      createEvent.data.issue.owner = { id: remoteIssue.author.id };
+      createEvent.data.issue.assignees = _.map(remoteIssue.assignees, function(o) { return _.pick(o, 'id'); });
+      if (remoteIssue.labels && remoteIssue.labels.length > 0) {
+        remoteIssue.labels.forEach(label => {
+          labels.push(label);
+        });
+      }
+    } catch (err) {
+      throw helper.convertGitLabError(err, 'Failed to get issue.');
+    }
+  }
+
+  if (labels.length > 0) {
+    createEvent.data.issue.labels = labels;
+  }
+  await kafka.send(JSON.stringify(createEvent));
+
+  return {
+    success: true,
+  };
+}
+
+recreate.schema = {
+  issue: {
+    projectId: Joi.string().required(),
+    number: Joi.number().required(),
+    url: Joi.string().required()
+  },
+  currentUser: currentUserSchema
+};
+
 module.exports = {
   search,
-  create
+  create,
+  recreate
 };
 
 helper.buildService(module.exports);

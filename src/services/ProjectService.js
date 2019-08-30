@@ -215,7 +215,7 @@ getAll.schema = Joi.object().keys({
 async function createLabel(body, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(dbProject.repoUrl);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, dbProject.copilot !== undefined);
+  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
   const results = dbProject.repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];
@@ -287,7 +287,7 @@ createLabel.schema = Joi.object().keys({
 async function createHook(body, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(dbProject.repoUrl);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, dbProject.copilot !== undefined);
+  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
   const results = dbProject.repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];
@@ -340,7 +340,11 @@ async function createHook(body, currentUser) {
       }).get('true')
         .isUndefined()
         .value()) {
-        throw helper.convertGitHubError(err, 'Failed to create webhook.');
+          let errMsg = 'Failed to create webhook';
+          if (err.statusCode === 404) { // eslint-disable-line no-magic-numbers
+            err.message = `The repository is not found or doesn't have access to create webhook`;
+          }
+          throw helper.convertGitHubError(err, errMsg);
       }
     }
   } else {
@@ -373,7 +377,11 @@ async function createHook(body, currentUser) {
         await update(dbProject, currentUser);
       }
     } catch (err) {
-      throw helper.convertGitLabError(err, 'Failed to create webhook.');
+      let errMsg = 'Failed to create webhook';
+      if (err.statusCode === 404) { // eslint-disable-line no-magic-numbers
+        err.message = `The repository is not found or doesn't have access to create webhook`;
+      }
+      throw helper.convertGitHubError(err, errMsg);
     }
   }
   return {

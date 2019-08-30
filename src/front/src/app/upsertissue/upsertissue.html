@@ -21,7 +21,7 @@
             <br />
             <br />
             <label class="form-label">Prize ($):</label>
-            <input class="form-control" type="number" ng-model="issue.prize" required />
+            <input class="form-control" type="number" ng-model="issue.prize" min="0" required />
             <small class="form-hint">The price amount of the issue</small>
             <span ng-show="issueForm.issue.prize.$touched && issueForm.issue.prize.$invalid">The
               price is required.</span>

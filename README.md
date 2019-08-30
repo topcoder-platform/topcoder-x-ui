@@ -47,7 +47,10 @@ npm run lint
 - post /projects/hook - create webhooks in the project repository
 - GET /users/settings - gets the current user's setup
 - GET /users/accessToken - gets the user's access token
-  
+
+- POST /issues - create an issue to Gitlab/Github
+- POST /issues/recreate - recreate an issue DB and its challenge
+
 ## Configuration
 
 please see [configuration.md](configuration.md).
@@ -63,11 +66,11 @@ Server should be started at port 80.
 ## Heroku Deployment
 Follow the below steps to deploy the app to heroku
 1. `heroku login`
-1. `heroku create`
-1. `heroku addons:create mongolab`
-1. `heroku config:set NPM_CONFIG_PRODUCTION=false` so that heroku will install dev dependencies
-1. `git push heroku master` or `git push heroku develop:master` to deploy develop branch
-1. `heroku open` to load the app on browser
+2. `heroku create`
+3. `heroku addons:create mongolab`
+4. `heroku config:set NPM_CONFIG_PRODUCTION=false` so that heroku will install dev dependencies
+5. `git push heroku master` or `git push heroku develop:master` to deploy develop branch
+6. `heroku open` to load the app on browser
 
 Note: heroku domain should match subdomain of topcoder-dev or topcoder depending upon target topcoder environment
 
