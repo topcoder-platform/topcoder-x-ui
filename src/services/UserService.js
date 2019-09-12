@@ -29,6 +29,7 @@ async function getUserSetting(handle) {
   const setting = {
     github: false,
     gitlab: false,
+    expired: {}
   };
 
   if (!mapping) {
@@ -58,6 +59,10 @@ async function getUserSetting(handle) {
 
   _.forEach(constants.USER_TYPES, (item) => {
     setting[item] = !!users.find((i) => i.type === item && i.accessToken);
+    if (setting[item]) {
+      setting['expired'][item] = !!users.find((i) =>
+        i.type === item && i.accessTokenExpiration && i.accessTokenExpiration <= new Date().getTime());
+    }
   });
   return setting;
 }
