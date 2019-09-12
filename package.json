@@ -62,7 +62,7 @@
         "guid": "0.0.12",
         "icheck": "1.0.2",
         "joi": "^10.6.0",
-        "jquery": "^3.4.1",
+        "jquery": "^3.4.0",
         "jsonwebtoken": "^7.4.3",
         "jwt-decode": "^2.2.0",
         "lodash": "^4.17.4",
