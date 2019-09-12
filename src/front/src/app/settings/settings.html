@@ -16,8 +16,9 @@
                         <div class="col-xs-6 col-md-2">Github</div>
                         <div class="col-xs-6 col-md-2" ng-if='isLoaded'>
                             <div ng-if='settings.github'>
-                                <i class="btn fa fa-check green-check-icon"></i>&nbsp;&nbsp;
-                                <i class="btn btn-sm btn-danger fa fa-remove white-remove-icon" ng-click="revoke('github')"></i>
+                                <i ng-if='!settings.expired.github' class="btn fa fa-check green-check-icon"></i>
+                                <i ng-if='settings.expired.github' class="btn fa fa-warning orange-warning-icon" ng-click="renew('github')" title="Renew the token"></i>&#09;
+                                <i class="btn btn-sm btn-danger fa fa-remove white-remove-icon" ng-click="revoke('github')" title="Revoke"></i>
                             </div>
                             <div ng-if='!settings.github'>
                                 <a class="btn btn-sm btn-info" ng-href="{{loginUrl.github}}">
@@ -30,8 +31,9 @@
                         <div class="col-xs-6 col-md-2">Gitlab</div>
                         <div class="col-xs-6 col-md-2"  ng-if='isLoaded'>
                             <div ng-if='settings.gitlab'>
-                                <i class="btn fa fa-check green-check-icon"></i>&nbsp;&nbsp;
-                                <i class="btn btn-sm btn-danger fa fa-remove white-remove-icon" ng-click="revoke('gitlab')"></i>
+                                <i ng-if='!settings.expired.gitlab' class="btn fa fa-check green-check-icon"></i>
+                                <i ng-if='settings.expired.gitlab' class="btn fa fa-warning orange-warning-icon" ng-click="renew('gitlab')" title="Renew the token"></i>&#09;
+                                <i class="btn btn-sm btn-danger fa fa-remove white-remove-icon" ng-click="revoke('gitlab')" title="Revoke"></i>
                             </div>
                             <div ng-if='!settings.gitlab'>
                                 <a class="btn btn-sm btn-info" ng-href="{{loginUrl.gitlab}}" target="_self">

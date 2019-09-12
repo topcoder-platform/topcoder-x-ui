@@ -381,7 +381,7 @@ async function createHook(body, currentUser) {
       if (err.statusCode === 404) { // eslint-disable-line no-magic-numbers
         err.message = `The repository is not found or doesn't have access to create webhook`;
       }
-      throw helper.convertGitHubError(err, errMsg);
+      throw helper.convertGitLabError(err, errMsg);
     }
   }
   return {

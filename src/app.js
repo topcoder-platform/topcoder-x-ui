@@ -101,8 +101,9 @@ _.forEach(routes, (verbs, path) => {
 
 // static content
 app.use(express.static(Path.join(__dirname, 'public')));
-// mount the angular app
-app.use('*', express.static(Path.join(__dirname, 'public')));
+app.use('*', (req, res) => {
+  res.redirect('/');
+});
 
 // Error handler
 app.use((err, req, res, next) => {
