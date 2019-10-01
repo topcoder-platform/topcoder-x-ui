@@ -10,6 +10,7 @@
  */
 const config = require('../config');
 const helper = require('../common/helper');
+const errors = require('../common/errors');
 const { DynamoDB } = require('../models');
 
 /**
