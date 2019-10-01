@@ -7,9 +7,9 @@ const dynamoose = require('dynamoose');
 const config = require('../config');
 
 dynamoose.AWS.config.update({
-  accessKeyId: config.DYNAMODB.AWS_ACCESS_KEY_ID,
-  secretAccessKey: config.DYNAMODB.AWS_SECRET_ACCESS_KEY,
-  region: config.DYNAMODB.AWS_REGION,
+  // accessKeyId: config.DYNAMODB.AWS_ACCESS_KEY_ID,
+  // secretAccessKey: config.DYNAMODB.AWS_SECRET_ACCESS_KEY,
+  region: config.DYNAMODB.AWS_REGION
 });
 
 if (config.DYNAMODB.IS_LOCAL === 'true') {
