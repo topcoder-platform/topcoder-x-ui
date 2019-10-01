@@ -55,7 +55,7 @@ module.exports = {
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
     AWS_REGION: process.env.AWS_REGION,
     IS_LOCAL: process.env.IS_LOCAL,
-    TIMEOUT: process.env.TIMEOUT || 10000, // eslint-disable-line no-magic-numbers
+    TIMEOUT: process.env.AWS_CONNECTION_TIMEOUT || 10000, // eslint-disable-line no-magic-numbers
   },
   TOPCODER_VALUES: {
     dev: {
