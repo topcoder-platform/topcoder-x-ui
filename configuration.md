@@ -31,6 +31,7 @@ The following config parameters are supported, they are defined in `src/config.j
 |TOPCODER_AUTH_SECRET| The auth secret used to sign the JWT| No default - needs to be set up|
 |TOPCODER_VALID_ISSUERS| Stringified array of valid JWT issuers| `'["topcoder-dev.com"]'`|
 |TOPCODER_JWT_KEY_CACHE_TIME| They JWT cache time | 90 |
+|MONGODB_TIMEOUT | The timeout used to check if the app is healthy. |10000 |
 
 ## GitHub OAuth App Setup
 
