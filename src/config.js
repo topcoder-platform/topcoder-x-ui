@@ -13,6 +13,7 @@ module.exports = {
   API_VERSION: process.env.API_VERSION || 'v1',
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/topcoderx',
+  MONGODB_TIMEOUT: process.env.MONGODB_TIMEOUT || 10000, // eslint-disable-line no-magic-numbers
   SESSION_SECRET: process.env.SESSION_SECRET || 'kjsdfkj34857',
   // Github and gitlab client id and secret
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || 'ae39bea2a2a23f1dd032',

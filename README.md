@@ -48,6 +48,8 @@ npm run lint
 - GET /users/settings - gets the current user's setup
 - GET /users/accessToken - gets the user's access token
   
+- GET /health - gets the app health
+
 ## Configuration
 
 please see [configuration.md](configuration.md).
