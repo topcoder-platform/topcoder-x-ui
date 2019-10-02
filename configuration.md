@@ -32,6 +32,7 @@ The following config parameters are supported, they are defined in `src/config.j
 |AWS_SECRET_ACCESS_KEY | The Amazon certificate access key to use when connecting. Use local dynamodb you can set fake value|FAKE_SECRET_ACCESS_KEY |
 |AWS_REGION | The Amazon certificate region to use when connecting. Use local dynamodb you can set fake value|FAKE_REGION |
 |IS_LOCAL | Use Amazon DynamoDB Local or server. |true |
+|AWS_CONNECTION_TIMEOUT | The timeout used to check if the app is healthy. |10000 |
 |TC_LOGIN_URL | TC login url | |
 |TC_USER_PROFILE_URL | TC user profile url | |
 
