@@ -226,10 +226,4 @@ module.exports = {
       method: 'getAppConfig',
     },
   },
-  '/health': {
-    get: {
-      controller: 'AppHealthController',
-      method: 'getAppHealth',
-    },
-  },
 };
