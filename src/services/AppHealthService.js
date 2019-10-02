@@ -21,7 +21,7 @@ async function getAppHealth() {
   const checkMongoDB = new Promise((resolve, reject) => {
     User.findOne({}, (err, data) => {
       if (err) {
-        return reject(new errors.ServiceUnavailable('MongoDB instance cannot be reached'));
+        return reject(new errors.ServiceUnavailable('MongoDB instance cannot be reached' + data));
       }
       return resolve();
     });
