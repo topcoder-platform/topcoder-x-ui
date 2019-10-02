@@ -22,6 +22,7 @@ const routes = require('./routes');
 const logger = require('./common/logger');
 const errors = require('./common/errors');
 const constants = require('./common/constants');
+const {getAppHealth} = require('./controllers/AppHealthController');
 
 const app = express();
 app.use(cors());
@@ -116,6 +117,8 @@ _.forEach(routes, (verbs, path) => {
     app[verb](`/api/${config.API_VERSION}${path}`, actions);
   });
 });
+
+app.get(`/api/${config.API_VERSION}/health`, getAppHealth);
 
 // static content
 app.use(express.static(Path.join(__dirname, 'public')));
