@@ -33,4 +33,6 @@ fs.readdirSync(__dirname).forEach((file) => { // eslint-disable-line no-sync
   }
 });
 
+models.DynamoDB = dynamoose.ddb();
+
 module.exports = models;

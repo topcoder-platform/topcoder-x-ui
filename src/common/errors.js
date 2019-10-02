@@ -54,10 +54,19 @@ class ForbiddenError extends ApiError {
   }
 }
 
+// The forbidden error
+class ServiceUnavailable extends ApiError {
+  constructor(message, details) {
+    super(503, 'SERVICE_UNAVAILABLE', message);
+    this.details = details;
+  }
+}
+
 module.exports = {
   ApiError,
   ValidationError,
   NotFoundError,
   UnauthorizedError,
   ForbiddenError,
+  ServiceUnavailable,
 };

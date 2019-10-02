@@ -51,6 +51,8 @@ npm run lint
 - POST /issues - create an issue to Gitlab/Github
 - POST /issues/recreate - recreate an issue DB and its challenge
 
+- GET /health - gets the app health
+
 ## Configuration
 
 please see [configuration.md](configuration.md).
