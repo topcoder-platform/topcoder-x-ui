@@ -21,7 +21,7 @@ async function getAppHealth() {
   const checkDynamoDB = new Promise((resolve, reject) => {
     DynamoDB.listTables({}, (err, data) => {
       if (err) {
-        return reject(new errors.ServiceUnavailable('DynamoDB instance cannot be reached'));
+        return reject(new errors.ServiceUnavailable('DynamoDB instance cannot be reached' + data));
       }
       return resolve();
     });
@@ -32,7 +32,7 @@ async function getAppHealth() {
   });
 
   await Promise.race([checkDynamoDB, timeOutBreak]);
-
+  
   return {
     checksRun: 1,
   };
