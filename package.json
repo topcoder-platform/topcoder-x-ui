@@ -23,7 +23,7 @@
         "heroku-postbuild": "gulp build"
     },
     "dependencies": {
-        "angular": "~1.4.4",
+        "angular": "~1.6.0",
         "angular-animate": "~1.4.4",
         "angular-clipboard": "~1.2.1",
         "angular-cookies": "~1.4.4",
