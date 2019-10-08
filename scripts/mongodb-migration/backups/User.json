@@ -1,0 +1,650 @@
+[
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 21790,
+    "username": "jmgasper",
+    "accessToken": "0defba12a12cf9fe938d00af2906d3ea4c0edc0c",
+    "id": "5b4e7af10331a300042ce6e5"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 61174,
+    "username": "jmgasper",
+    "accessToken": "07406893de5cfb1679e8724f2e65eb629e915acec6a97f9f401dd019eb31e95d",
+    "accessTokenExpiration": "2019-02-15T16:59:20.091Z",
+    "refreshToken": "f2716ef45022890c15bcd13bc197a92f27cc62ead47ef5171775a3cc57eb226c",
+    "id": "5b4e7afc0331a300042ce6e6"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 3812270,
+    "username": "ajefts",
+    "accessToken": "4584cb2a35c550919f2254b63da01da0c033ca3a",
+    "id": "5b4ea05f0331a300042ce6e9"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 38038,
+    "username": "lazybaer",
+    "accessToken": "b20943e6261a9bc17d43d891830d3603fc995fa6f022c6a2c513a85d264fb336",
+    "accessTokenExpiration": "2018-12-12T04:22:41.000Z",
+    "refreshToken": "f4b45eeb6a0bbdcc3a88e949b4c81fafc4900e7d498ff63459134fcc220da898",
+    "id": "5b6de5f9064f6300043f88ae"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 4612921,
+    "username": "ThomasKranitsas",
+    "accessToken": "86cec6b1e3762163972b68a6c023559646fea9af",
+    "id": "5b6decdd064f6300043f88b2"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 42515,
+    "username": "rootelement",
+    "accessToken": "ea0235287b398e4a446c48c6492cfaaefd8907b81477834a3e149c76635e71a1",
+    "accessTokenExpiration": "2019-03-15T13:11:07.705Z",
+    "refreshToken": "e67c0fe77e0d935068c93a0e6ec972f85d51b6cd6a8bbae4aa7f49535ccb9f6f",
+    "id": "5b734fe51ad82a00048c2751"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 31354656,
+    "username": "sanjaytopcoder",
+    "accessToken": "15c8b8775a6a63af63f5dca947d41013051f16d9",
+    "id": "5b743c4d1ad82a00048c2754"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 1576263,
+    "username": "sskushwaha",
+    "accessToken": "a86c3cf04efaa5f19fc6593f4a1b2cd3ff93769f894c8bcc272fb7c7a6fc86fa",
+    "accessTokenExpiration": "2018-08-15T15:45:00.380Z",
+    "refreshToken": "6501c6257ddf41678a0ee69511a2a461814114a66edfbbc4ef145b4a140418cc",
+    "id": "5b743c6c1ad82a00048c2755"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 41392313,
+    "username": "dustinTopcoder",
+    "accessToken": "4bfdc8bcddc573b3bd041d0403a56d5c286088ec",
+    "id": "5b7453031ad82a00048c2757"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 4476442,
+    "username": "dedywahyudi",
+    "accessToken": "38c6c100386ad3ecdc53e860e205d569cebf6f98",
+    "id": "5b811dc57c97de0004dfd3dc"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 47821,
+    "username": "lunarkid",
+    "accessToken": "e772bca289a433f15a7ec878f3d0b813d151f4bd573b862505a12b280cc42148",
+    "accessTokenExpiration": "2019-05-05T09:13:57.514Z",
+    "refreshToken": "ebd4ba61d2c95536e2f6d5a6fd641161107029f3e16f65933dc2d4854b12b9a4",
+    "id": "5b811ddb7c97de0004dfd3dd"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 2272129,
+    "username": "vijay.86",
+    "accessToken": "1a865c4c6c42575984ac06b536077d3c8a0b21da6a7551ada021762f19b5e4b9",
+    "accessTokenExpiration": "2018-09-05T20:44:03.517Z",
+    "refreshToken": "7a2fbc4d763fa25f4017e14f3c7323f0f7f6aa2bb5b7b48f5db8016bfbe9b85d",
+    "id": "5b83f76b87dd75000401ab75"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 4030950,
+    "username": "alamora",
+    "accessToken": "017bb5e381fea57a3cb992d8bd8cc56b03c3a2a9",
+    "id": "5b8f4dd9f121410004c88f7d"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 48465,
+    "username": "alamora",
+    "accessToken": "0c0aaf4a77b6c93ef10242829fa2fdefa2bfe6957ac22d4886120978247b0a2a",
+    "accessTokenExpiration": "2018-09-05T04:30:39.684Z",
+    "refreshToken": "40a4050903ee040ce0381a2c822daad4039febf43c3eb5c224774a6a8c420b36",
+    "id": "5b8f4ddff121410004c88f7e"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 324299,
+    "username": "thomaskranitsas",
+    "accessToken": "5ea533534eead08e89865da3a0c22420bb17032d7b676455d2ec647cbbc4a04f",
+    "accessTokenExpiration": "2019-01-17T20:54:42.045Z",
+    "refreshToken": "91358df7f8f59ba1d8cb5a2422c6cc668ee55ae7db2ae3a81fb29ce5f31f1e73",
+    "id": "5b96dc28dd66dd00048782db"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 5657467,
+    "username": "billsedison",
+    "accessToken": "51b183b084c7fecfdef3e8f9e896697f9f187dc9",
+    "id": "5b9b6226e86b0c0004a28569"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 219442,
+    "username": "billsedison",
+    "accessToken": "df8d9155944b265217d687d0e801871fa88e003731a4aaa18d0852170e201760",
+    "accessTokenExpiration": "2019-05-30T17:04:14.323Z",
+    "refreshToken": "5e84335716c84789bc3f7c5281ae7cb9f7c62f1c5307c04b9b2e7e661dacf013",
+    "id": "5b9b6306e86b0c0004a2856a"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 6296738,
+    "username": "harshitmehta123",
+    "accessToken": "dfad1be1f9b6052d2ea318a42b4275211be6e260",
+    "id": "5b9e9cc22bfdc90004411760"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 48452,
+    "username": "pvmagacho",
+    "accessToken": "0c6535464ebd629ab11d4bab7f90b9ee1300ff2c0ca8d1592e3ce17aeef94530",
+    "accessTokenExpiration": "2019-03-14T18:42:58.764Z",
+    "refreshToken": "2ccbb13282524250222c1184d6f331d38bfa5f32a74ec00db80b2d20fc4e134a",
+    "id": "5ba023454f893c0004cd906b"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 4592712,
+    "username": "sdgun",
+    "accessToken": "0fa491a045ed5f30ea42c160c01f275438af6c4f",
+    "id": "5bb24b85c0203a0004671d12"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 1504607,
+    "username": "cwdcwd",
+    "accessToken": "1115a4e2818d18d1af96d64219e1919a0ce6a89c",
+    "id": "5c11e9273ab1bf0004b69245"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 36665,
+    "username": "sdgun",
+    "accessToken": "b25042fbf58086109f60975485dfea55296145c8ac6f3647ed0e45392497a365",
+    "accessTokenExpiration": "2018-10-01T17:31:13.957Z",
+    "refreshToken": "3b498d2fc79c3f9df36ad60dcda37409285d2fcb89eacc8e31f59b089e36d417",
+    "id": "5bb24bd1c0203a0004671d13"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 5807576,
+    "username": "rsial2",
+    "accessToken": "b78a75ef9d57cfd6628dfc1431ccd81f8113e051",
+    "id": "5bb397d9cf31ca0004a174ea"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 148951,
+    "username": "rsial2",
+    "accessToken": "d7599c033d2a78f75564c3c97b1ca2b8118fa45308d8814482ee987c249fcaee",
+    "accessTokenExpiration": "2019-05-23T18:10:29.573Z",
+    "refreshToken": "0d63a28b5c81b04ddadae6af19469d8547282139a40cfb5fdb4cd7876cb18637",
+    "id": "5bb397e4cf31ca0004a174eb"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 1621715,
+    "username": "elkhawajah",
+    "accessToken": "84c83b858447fced1d747a1f3e5b9694b1818116",
+    "id": "5bb3cb19cf31ca0004a174ed"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 76135,
+    "username": "elkhawajah",
+    "accessToken": "5a8081e2e30b5d9b019b25e719e07a0d33287218e7b967054e993a3edee866e7",
+    "accessTokenExpiration": "2018-10-02T20:47:01.696Z",
+    "refreshToken": "c02806454d247cdc4959b105075c42d49963fcc176e6e38401a15ce6dc10da9b",
+    "id": "5bb3cb35cf31ca0004a174ee"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 29911110,
+    "username": "urwithat",
+    "accessToken": "e78aa7e4dddb5eebb87df282f5e6ce890c8e128a",
+    "id": "5bb48010199ac50004106968"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 39215,
+    "username": "talesforce",
+    "accessToken": "de34fae8905e0c567a3646d14ed2dbff0543d6a959ccd7868a54cff3937a11d2",
+    "accessTokenExpiration": "2018-10-06T12:05:28.376Z",
+    "refreshToken": "9ee0522f7c4aa402d5cf8fa9bb78c3f6e7846d64ac7d3be49c8293fd5e6bc16e",
+    "id": "5bb896f8fcf16600043c0f02"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 2027377,
+    "username": "talesforce",
+    "accessToken": "a82501d14ac8d07a1c44b420d11c13c3512e1abf",
+    "id": "5bb89720fcf16600043c0f03"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 664840,
+    "username": "dmessing",
+    "accessToken": "2d6a14dec13d99d61a724fac144e527190f2225b",
+    "id": "5bce1aa9f512740004ff488a"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 683231,
+    "username": "sushilshinde",
+    "accessToken": "e5046dbe3cedb8daff683e10b2aaaedd7ed1f19b",
+    "id": "5c09444bcb674b0004f41604"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 5437419,
+    "username": "Schpotsky",
+    "accessToken": "aa1cf3a2d495a9d4648508561806166896a761bb",
+    "id": "5c11212616ce0e0004d768d9"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 53138,
+    "username": "Schpotsky",
+    "accessToken": "886bc73024216140e2fb09d1c78eba2a3f5ed70b2ae101e47c3def152cb73dd2",
+    "accessTokenExpiration": "2018-12-12T15:54:56.541Z",
+    "refreshToken": "03fd7f686946439d9b5329ab96e34aeec47216edf6c821d5611eee3191e8c31d",
+    "id": "5c11214016ce0e0004d768da"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 5114190,
+    "username": "nithyaasworld",
+    "accessToken": "2cef159020794adff9f44d55c30fa824477f5ced",
+    "id": "5c140288287c990004d04262"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 70150,
+    "username": "nithyaasworld",
+    "accessToken": "338b9c1831b961e64e87fd494602551dfb1934d6c406284bd38a62ba614012a9",
+    "accessTokenExpiration": "2018-12-14T20:20:54.462Z",
+    "refreshToken": "1d4fe200d63751f8dcb6cc7653e67a0971ff2e0983d4850156e9385e6845ca15",
+    "id": "5c140296287c990004d04263"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 14849242,
+    "username": "colleenlavin",
+    "accessToken": "0b36e05b655f479429a5b4d837edb0b011fb54e8",
+    "id": "5c140796287c990004d04266"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 2830455,
+    "username": "colleenmlavin",
+    "accessToken": "e2b750c67c07311e4cc7b6ee2caed6955a6aed77cbc7407819f4258cc421c897",
+    "accessTokenExpiration": "2018-12-14T20:42:29.934Z",
+    "refreshToken": "d6a60500119a3d42f70feb4f4921dfbae6bb9aa99aa3a75755bdf23f636b1cfa",
+    "id": "5c1407a5287c990004d04267"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 28678836,
+    "username": "ksmacleod99",
+    "accessToken": "e0565442aca3091d3253a7e26e98e24cd880c72b",
+    "id": "5c141c95287c990004d04268"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 45351155,
+    "username": "jsriz",
+    "accessToken": "1dc55fa5185f8bb412bacbb0155abf2e1fb8a99d",
+    "id": "5c1515afb5a86000049aaefa"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 2961629,
+    "username": "jsriz",
+    "accessToken": "a624cfa84544da8342a18763200987daee321301ced69c13d548173ba17b6ea4",
+    "accessTokenExpiration": "2019-02-25T18:26:06.070Z",
+    "refreshToken": "da01a967e29062430733d4b18c117c5e95045802c63acbaa15f6abe396cf19ef",
+    "id": "5c1515c1b5a86000049aaefb"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 46507,
+    "username": "callmekatootie",
+    "accessToken": "807c681e9c305367a8de2bc208f9c7f690af756499620e4f9b4f93ff884aa763",
+    "accessTokenExpiration": "2018-12-16T12:24:06.693Z",
+    "refreshToken": "456c1ba89ea433032ea330a63a72f344387f54abb4818b669356f2463c4b6184",
+    "id": "5c1635d68baf23000448ac3f"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 3277727,
+    "username": "kelly.macleod",
+    "accessToken": "95fb9e6fb7d14382cc46dca6a6ac0897b976e4687fcb2f34ca2dfc5752926f9f",
+    "accessTokenExpiration": "2019-05-31T08:10:24.497Z",
+    "refreshToken": "47b9340c319c6f3dc3e73bb9fc33038d66cd6ba678b465444c99c6aecbeba698",
+    "id": "5c17cc7bdfb1d70004c442d4"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 181912,
+    "username": "googlesmkm",
+    "accessToken": "04626ac185665efde44fc75671413564734696404ed054b36a669d573f17f118",
+    "accessTokenExpiration": "2018-12-17T17:29:03.728Z",
+    "refreshToken": "6e0bea14bbc8c0fb1a078548ab1357b63e0aceb63a11e5939400018962100503",
+    "id": "5c17cecfdfb1d70004c442d6"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 7229676,
+    "username": "googlesmkm",
+    "accessToken": "c0aec69b1fff41c0db502bbd7c50f2d22a17b9ce",
+    "id": "5c17cfb4dfb1d70004c442d7"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 2875203,
+    "username": "LieutenantRoger",
+    "accessToken": "c82514d514f162a2fe3659f924dabe37682cc25f",
+    "id": "5c18c2b6160f7c000407a514"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 61659,
+    "username": "LieutenantRoger",
+    "accessToken": "cc60a3c41f25c1f2f9d16b66f5e014b2b10f45aec5677d753252cb8c794998fe",
+    "accessTokenExpiration": "2018-12-18T10:49:52.451Z",
+    "refreshToken": "a101db3629bb537abae56799ed36e43641581161e080eee9e9deacb8b772bad7",
+    "id": "5c18c2c0160f7c000407a515"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 58106,
+    "username": "skyhit",
+    "accessToken": "2791542ef210bf5b0400154db88b5476384e3c82",
+    "id": "5c19e1c684080500041bee0c"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 118897,
+    "username": "luizrrodrigues",
+    "accessToken": "c7f2629bfe41559e7663832f9cac6e3e69fdf4f3c788c607bd34cc596a42d741",
+    "accessTokenExpiration": "2018-12-20T03:54:47.284Z",
+    "refreshToken": "97a1efa445f0ce510b3e1899d86a20b1fc8a897a59f2a2a28ffc9de66facfd38",
+    "id": "5c1b047784080500041bee4a"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 7029641,
+    "username": "luizrrodrigues",
+    "accessToken": "1af3c59ea366f9dc5648958f13233a24bc18be7e",
+    "id": "5c1b048684080500041bee4b"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 62344,
+    "username": "cyberjag",
+    "accessToken": "b27cab4fae6f78d3c6521f721b4efa89d44ceca4be7cee1fca6c3bed17438a4f",
+    "accessTokenExpiration": "2018-12-31T04:35:54.618Z",
+    "refreshToken": "bbaa93c3f03331cf074edfdb134eed3f820a9955e90b2f1a668ee471c7b23740",
+    "id": "5c298e9a0280e800049e7f4b"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 4492389,
+    "username": "cyberjag",
+    "accessToken": "6a5d1a52b73b8527bbe13f32328a2d92dcb0eb3c",
+    "id": "5c298eb20280e800049e7f4e"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 4952611,
+    "username": "iversonLv",
+    "accessToken": "f4ee7017046b63a92b260fb5b034fef8dba37609",
+    "id": "5c353c6b15c1c80004613d78"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 42145,
+    "username": "iversonLv",
+    "accessToken": "663aa2b535d827e3f21e37c29b12eebf166f930808e9b00fe0f7376847de5a0b",
+    "accessTokenExpiration": "2019-01-09T01:12:43.853Z",
+    "refreshToken": "4da4adcb616e0f8463818ef2de54ea195cd6abd98fc898f3777534c47da15696",
+    "id": "5c353c7b15c1c80004613d79"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 36300,
+    "username": "TonyJ",
+    "accessToken": "dfd8d1e7b64dbddc5ad2c3ded7582fe5bd121a2df5c24681bb56592baebe4ddd",
+    "accessTokenExpiration": "2019-04-06T21:49:01.479Z",
+    "refreshToken": "8713b6d03f81e20ec20a96a948774fdeeead3b2fafc0deee8881673ea0811981",
+    "id": "5c379bf45b2bff00041bea95"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 15819,
+    "username": "kkart",
+    "accessToken": "8b3f587435bf5bd74e3a7f47e56802f2a3109b0b398f651681c54e7c307b10cc",
+    "accessTokenExpiration": "2019-05-08T17:58:20.765Z",
+    "refreshToken": "f969c2a6d7db300a41478bd0a4f3d16003f13e72adfbceeae2430af369a19161",
+    "id": "5c49daccd4e09f0004b147b4"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 2214734,
+    "username": "standlove",
+    "accessToken": "e321a14f999f954ad62dc4bbe267c962c19d2b4b",
+    "id": "5c6d7715e990ec000442c32f"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 62661,
+    "username": "standlove",
+    "accessToken": "6166353ae72ed8665d42fddc0bf0beafd53d90576452ce2d4c42d59d6cfe5108",
+    "accessTokenExpiration": "2019-02-20T16:49:51.887Z",
+    "refreshToken": "b3d1a01a78dcac9cb311a63ab2ff6516f1e6afe5507cffe38be9f4184af71d48",
+    "id": "5c6d771fe990ec000442c330"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 52235,
+    "username": "huangqun",
+    "accessToken": "f6e2eb28c037f9e8b9882159deda976c41cd4c58d9682a488e4da0d96b0f3d1d",
+    "accessTokenExpiration": "2019-05-31T08:42:00.183Z",
+    "refreshToken": "12ebd44e3f2b3864ecd6a14f5a5695ab39f29212774db5b69bb7bb9d5bd3ae3d",
+    "id": "5c726a6880900a00047c8efe"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 66231,
+    "username": "gondzo",
+    "accessToken": "5375c40f71e6f66476d18f67eb1d6b20dad75d620936cb671692e18d9f719b54",
+    "accessTokenExpiration": "2019-04-09T10:21:26.762Z",
+    "refreshToken": "19d8cfaea86da36c899d58c1710f99a8e4e9841cbfb76fb63d44df3a7da55f19",
+    "id": "5c76ab3abaf0b30004e086c9"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 3652329,
+    "username": "Sande3p",
+    "accessToken": "fd467f9d7cfd5851d34adba6f3c97caf50a9831f",
+    "id": "5c79428ad2375d000493d9c8"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 39504,
+    "username": "Sande3p",
+    "accessToken": "0edf29bf89c5ae5ef26479b95da19ed3e6a50476d9918beadae81ea1fee2aa3b",
+    "accessTokenExpiration": "2019-05-30T16:46:19.796Z",
+    "refreshToken": "47771881dc666b7f5b5cf46e45aa4f87b0c1736663fc6f6d6dec475079d1295c",
+    "id": "5c79429bd2375d000493d9c9"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 296336,
+    "username": "maxceem",
+    "accessToken": "c56ce20e9f98099ed68befd1af07bdba15a86ab1855d293584a90bc390d65779",
+    "accessTokenExpiration": "2019-05-29T17:13:01.679Z",
+    "refreshToken": "3ab49bd2dec8835392105dbe1b6c49c5b680d79a4eaf8289e4de198046318fef",
+    "id": "5c835015c9384d00044fd280"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 3808863,
+    "username": "ourbit666",
+    "accessToken": "e599229743730922b30a1bcfb3f0750798551960654d9ef95fe17af426ff5c12",
+    "accessTokenExpiration": "2019-04-06T21:30:32.168Z",
+    "refreshToken": "0d35f926111595886eae2c2b049187d5a51d16e2b6336eb470cc71025394c854",
+    "id": "5ca90c68942d9500048bf848"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 3172405,
+    "username": "tanuj.pathak",
+    "accessToken": "2f7e05794fe77df15276c247efbea40b8ac375c62f05aea27a9a46deba2429eb",
+    "accessTokenExpiration": "2019-04-09T10:32:08.614Z",
+    "refreshToken": "266c02f0740e83c6e03e1953082e54e03286143fb02b37072bc6a0d00ab3fc3d",
+    "id": "5cac6698a7f56c000440cdd3"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 41984980,
+    "username": "wakudoki-tp",
+    "accessToken": "743e5f595e594564f2da4efc845a5af819a9e328",
+    "id": "5cac68b7a7f56c000440cdd4"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 25185079,
+    "username": "Dara-K",
+    "accessToken": "f09271e1f52126860c9348171b02d2d3ec2c0778",
+    "id": "5cd19bfbcefb5e0004794210"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 1606766,
+    "username": "binarygeek",
+    "accessToken": "88327b92cb22e5b5a1e32738c5308d9c0516a204cd2785679324bc53500fe63a",
+    "accessTokenExpiration": "2019-05-14T11:44:32.606Z",
+    "refreshToken": "259bd6bc131e6d11a664e7f00a0590ec50a1c336e90fd3c876bf591da4f75ef4",
+    "id": "5cda9c0fc35ba10004bd90c0"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 14284629,
+    "username": "gurmeetb",
+    "accessToken": "b6d4dabaec91ff039af743b4362c9a11e855c529",
+    "id": "5cdbc02d1f23d60004372892"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 8484061,
+    "username": "vic-topcoder",
+    "accessToken": "06275cbd622a0ee68406779d34661e0c7c600341",
+    "id": "5cdf248dd677ba000432317b"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 35376779,
+    "username": "PereViki",
+    "accessToken": "28d92ca16ac16000e1712a3f5739c2ca781628fd",
+    "id": "5ce025bde952c700044daeaf"
+  },
+  {
+    "role": "owner",
+    "type": "github",
+    "userProviderId": 7723558,
+    "username": "sharathkumaranbu",
+    "accessToken": "6c790b2d6afc5896ec244ffd6aeeab6789b82931",
+    "id": "5ce69001514b1c0004dc9ed8"
+  },
+  {
+    "role": "owner",
+    "type": "gitlab",
+    "userProviderId": 1096893,
+    "username": "sharathkumaranbu",
+    "accessToken": "191a2f6d27b4705a7b0e4a473d86f3e6714f5d6b20e44612a20714d491eb4107",
+    "accessTokenExpiration": "2019-05-23T13:20:40.507Z",
+    "refreshToken": "71f98cb941cbe9e92279580c1e727f04b9100490b6ecb92e231cc72488fa21ab",
+    "id": "5ce69018514b1c0004dc9ed9"
+  }
+]
