@@ -77,4 +77,4 @@ workflows:
             branches:
               only:
                 - master
-                - dev-ci-intteg              
+            
