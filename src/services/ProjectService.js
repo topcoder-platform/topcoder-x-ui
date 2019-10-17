@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /*
  * Copyright (c) 2018 TopCoder, Inc. All rights reserved.
  */
@@ -59,7 +60,7 @@ const createProjectSchema = {
     rocketChatChannelName: Joi.string().allow(null),
     archived: Joi.boolean().required(),
   },
-  currentUserTopcoderHandle: Joi.string().required(),
+  currentUser: currentUserSchema
 };
 
 /**
@@ -102,10 +103,11 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
 /**
  * creates project
  * @param {Object} project the project detail
- * @param {String} currentUserTopcoderHandle the topcoder handle of current user
+ * @param {Object} currentUser the topcoder current user
  * @returns {Object} created project
  */
-async function create(project, currentUserTopcoderHandle) {
+async function create(project, currentUser) {
+  const currentUserTopcoderHandle = currentUser.handle;
   project.owner = currentUserTopcoderHandle;
   await _validateProjectData(project);
   /**
@@ -121,7 +123,14 @@ async function create(project, currentUserTopcoderHandle) {
   project.secretWebhookKey = guid.raw();
   project.copilot = project.copilot ? project.copilot.toLowerCase() : null;
   project.id = helper.generateIdentifier();
-  return await dbHelper.create(models.Project, project);
+
+  const createdProject = await dbHelper.create(models.Project, project);
+
+  await createLabel({projectId: project.id}, currentUser);
+  await createHook({projectId: project.id}, currentUser);
+  await addWikiRules({projectId: project.id}, currentUser);
+
+  return createdProject;
 }
 
 create.schema = createProjectSchema;
@@ -413,17 +422,31 @@ async function addWikiRules(body, currentUser) {
     try {
       const client = gitHubApi.client(userRole.accessToken);
       const ghrepo = client.repo(`${repoOwner}/${repoName}`);
-      await new Promise((resolve, reject) => {
-        ghrepo.issue({
-          title: 'Github ticket rules',
-          body: content,
-        }, (error) => {
+
+      const issues = await new Promise((resolve, reject) => {
+        ghrepo.issues((error, data) => {
           if (error) {
             return reject(error);
           }
-          return resolve();
+          return resolve(data);
         });
       });
+
+      const wikiIssue = _.find(issues, { title: 'Github ticket rules' });
+      if (!wikiIssue || wikiIssue.body !== content) {
+        await new Promise((resolve, reject) => {
+          ghrepo.issue({
+            title: 'Github ticket rules',
+            body: content,
+          }, (error) => {
+            if (error) {
+              return reject(error);
+            }
+            return resolve();
+          });
+        });
+      }
+
     } catch (err) {
       throw helper.convertGitHubError(err, 'Failed to add wiki rules.');
     }

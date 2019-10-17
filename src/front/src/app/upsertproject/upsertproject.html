@@ -4,43 +4,43 @@
     <div class="col-lg-4">
       <h2>{{title}}</h2>
     </div>
-    <div class="pull-right col-lg-8" ng-if="editing">
-      <div class="col-lg-2" ng-if="!isAdminUser"></div>
-      <div class="col-lg-2 with-button">
-        <button class="btn btn-sm btn-info" ng-click="openRecreateDialog()">
-          <strong>Recreate an Issue</strong>
-        </button>
+
+    <div class="pull-right" ng-if="editing">
+      <div class="pull-right col-lg-8" ng-if="editing">
+        <div class="pull-right col-lg-2" ng-if="!isAdminUser"></div>
+        <div class="pull-right col-lg-2 with-button btn-top" ng-if="isAdminUser">
+          <button class="btn btn-sm btn-info btn-top" ng-click="openTransferOwnershipDialog()">
+            <strong>
+              Transfer ownership
+            </strong>
+          </button>
+        </div>
+        <div class="pull-right col-lg-2 with-button btn-top">
+          <button class="btn btn-sm btn-info btn-top" ng-click="openRecreateDialog()">
+            <strong>Recreate an Issue</strong>
+          </button>
+        </div>
       </div>
-      <div class="col-lg-2 with-button">
-        <button class="btn btn-sm btn-info" ng-click="addLabels()">
-          <strong>Add Labels</strong>
-        </button>
-      </div>
-      <div class="col-lg-2 with-button">
-        <button class="btn btn-sm btn-info" ng-click="addLabels()">
-          <strong>Add Labels</strong>
-        </button>
-      </div>
-      <div class="col-lg-2 with-button">
-        <button class="btn btn-sm btn-info" ng-click="addHooks()">
-          <strong>
-            Add Webhook
-          </strong>
-        </button>
-      </div>
-      <div class="col-lg-2 with-button">
-        <button class="btn btn-sm btn-info" ng-click="addWikiRules()">
-          <strong>
-            Add Wiki Rules
-          </strong>
-        </button>
-      </div>
-      <div class="col-lg-2 with-button" ng-if="isAdminUser">
-        <button class="btn btn-sm btn-info" ng-click="openTransferOwnershipDialog()">
-          <strong>
-            Transfer ownership
-          </strong>
-        </button>
+      <div class="pull-right col-lg-8" ng-if="editing">
+        <div class="pull-right col-lg-2 with-button btn-top">
+          <button class="btn btn-sm btn-info btn-top" ng-click="addWikiRules()">
+            <strong>
+              Add Wiki Rules
+            </strong>
+          </button>
+        </div>
+        <div class="pull-right col-lg-2 with-button btn-top">
+          <button class="btn btn-sm btn-info btn-top" ng-click="addHooks()">
+            <strong>
+              Add Webhook
+            </strong>
+          </button>
+        </div>
+        <div class="pull-right col-lg-2 with-button btn-top">
+          <button class="btn btn-sm btn-info btn-top" ng-click="addLabels()">
+            <strong>Add Labels</strong>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -106,3 +106,4 @@
     </div>
   </div>
 </div>
+<div ng-include src="'components/tutorial/tutorial.html'"></div>

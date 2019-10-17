@@ -223,35 +223,52 @@ async function recreate(issue, currentUser) {
   const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
 
   const issueNumber = issue.number;
-  
-  const dbIssue = await helper.ensureExists(models.Issue, 
-    { 
-      number: issueNumber, 
-      projectId: issue.projectId 
-    }, 
-    'Issue');
-  
+
   const createEvent = {
     event: 'issue.recreated',
     provider,
     data: {
       issue: {
-        number: issueNumber,
-        body: dbIssue.body
+        number: issueNumber
       },
       repository: {
-        id: dbIssue.repositoryId,
         name: repoName,
         full_name: `${repoOwner}/${repoName}`
       }
     },
   };
 
+  const dbIssue = await dbHelper.scanOne(models.Issue, {
+    number: issueNumber,
+    projectId: issue.projectId
+  });
+
+  if (!issue.recreate) {
+    if (dbIssue) dbIssue.delete();
+    return {
+      success: true
+    };
+  }
+
+  if (!dbIssue) {
+    createEvent.event = 'issue.created';
+  }
+
   const labels = [];
 
   if (provider === 'github') {
     try {
       const client = gitHubApi.client(userRole.accessToken);
+      var ghrepo = client.repo(`${repoOwner}/${repoName}`);
+      const remoteRepo = await new Promise((resolve, reject) => {
+        ghrepo.info((error, resp) => {
+          if (error) {
+            return reject(error);
+          }
+          return resolve(resp);
+        });
+      });
+
       var ghissue = client.issue(`${repoOwner}/${repoName}`, issueNumber);
       const remoteIssue = await new Promise((resolve, reject) => {
         ghissue.info((error, resp) => {
@@ -261,6 +278,8 @@ async function recreate(issue, currentUser) {
           return resolve(resp);
         });
       });
+
+      createEvent.data.repository.id = remoteRepo.id;
       createEvent.data.issue.title = remoteIssue.title;
       createEvent.data.issue.body = remoteIssue.body;
       createEvent.data.issue.owner = { id: remoteIssue.user.id };
@@ -281,6 +300,7 @@ async function recreate(issue, currentUser) {
       });
       const remoteIssue = await client.Issues.show(`${repoOwner}/${repoName}`, issueNumber);
 
+      createEvent.data.repository.id = remoteIssue.project_id;
       createEvent.data.issue.title = remoteIssue.title;
       createEvent.data.issue.body = remoteIssue.description;
       createEvent.data.issue.owner = { id: remoteIssue.author.id };
@@ -309,7 +329,8 @@ recreate.schema = {
   issue: {
     projectId: Joi.string().required(),
     number: Joi.number().required(),
-    url: Joi.string().required()
+    url: Joi.string().required(),
+    recreate: Joi.boolean().required()
   },
   currentUser: currentUserSchema
 };

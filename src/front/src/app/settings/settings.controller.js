@@ -2,8 +2,9 @@
 
 angular.module('topcoderX').controller('SettingController', ['currentUser', '$scope', 'OWNER_LOGIN_GITHUB_URL',
     'OWNER_LOGIN_GITLAB_URL', 'SettingService', '$rootScope', 'Dialog', 'Alert', 'Helper', '$window',
+    'Tutorial',
     function (currentUser, $scope, OWNER_LOGIN_GITHUB_URL,
-        OWNER_LOGIN_GITLAB_URL, SettingService, $rootScope, Dialog, Alert, Helper, $window) {
+        OWNER_LOGIN_GITLAB_URL, SettingService, $rootScope, Dialog, Alert, Helper, $window, Tutorial) {
         $scope.settings = {};
         $scope.isLoaded = false;
 
@@ -54,6 +55,18 @@ angular.module('topcoderX').controller('SettingController', ['currentUser', '$sc
                 var errMsg = error.data ? error.data.message : "An error occurred while renewing the token."
                 Alert.error(errMsg, $scope);
             });
+        }
+
+        var tutorial = $window.localStorage.getItem('tutorial');
+        if (tutorial) {
+            setTimeout(function() {
+                var dialog = {
+                    message: 'Connect your Gitlab or Github account into Topcoder-X by pressing "Setup" button',
+                    action: 'app.project'
+                };
+                $rootScope.tutorial = dialog;
+                Tutorial.show(dialog, $scope);
+            }, 2500);
         }
 
     }]);

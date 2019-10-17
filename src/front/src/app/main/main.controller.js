@@ -1,8 +1,10 @@
 'use strict';
 
 angular.module('topcoderX')
-  .controller('MainController', ['$scope', '$rootScope', 'Alert', '$state', 'AuthService', 'IssueService', 'SettingService', '$log',
-    function ($scope, $rootScope, Alert, $state, AuthService, IssueService, SettingService, $log) {
+  .controller('MainController', ['$scope', '$rootScope', 'Alert', '$state', 'AuthService', 'IssueService',
+  'SettingService', 'Tutorial', 'ProjectService', '$log', '$location',
+    function ($scope, $rootScope, Alert, $state, AuthService, IssueService, SettingService, Tutorial, 
+      ProjectService, $log, $location) {
       $scope.isLoaded = false;
       $scope.tableConfig = {
         readyForReview: {
@@ -140,8 +142,6 @@ angular.module('topcoderX')
       };
 
       SettingService.userSetting($rootScope.currentUser.handle).then(function (response) {
-        $log.log('logku');
-        $log.log(response);
         if (response.data.expired.github) {
           Alert.error('Your Github token has expired. Please go to settings to renew your token', $scope);
         }
@@ -149,5 +149,40 @@ angular.module('topcoderX')
           Alert.error('Your Gitlab token has expired. Please go to settings to renew your token', $scope);
         }
       });
+
+      //private function to get projects.
+      $scope.getProjects = function (status) {
+        ProjectService.getProjects(status, false).then(function (response) {
+          $scope.projects = response.data;
+          if (!$scope.projects || $scope.projects.length === 0) {
+            $scope.showTutorial();
+          }
+        }).catch(function () {
+          $scope.showTutorial();
+        });
+      };
+      $scope.getProjects('active');
+      $scope.showTutorial = function () {
+        $rootScope.dialog = {
+          proceed: false
+        };
+        var tutorialMessage = 'Welcome to Topcoder-X! You can find full documentation here: <a href="https://github.com/topcoder-platform/topcoder-x-ui/wiki" target="_blank">https://github.com/topcoder-platform/topcoder-x-ui/wiki</a>\n' +
+        '<br>' +
+        '<br>' +
+        'Next steps include:\n' +
+        '<br>' +
+        'Authorize GitHub / GitLab <Should be a link to the Settings>\n' +
+        '<br>' +
+        'Add a Project <Should be a link to the Projects>\n' +
+        '<br>' +
+        'Add Labels and Webhooks to your project';
+        var dialog = {
+          message: tutorialMessage,
+          action: 'close'
+        };
+        if ($location.path() === '/app/main') {
+          Tutorial.show(dialog, $scope);
+        }
+      }
 
     }]);

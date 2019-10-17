@@ -6,9 +6,9 @@
 'use strict';
 
 angular.module('topcoderX').controller('ProjectController', ['currentUser', '$scope', '$timeout', 'ProjectService',
-  '$rootScope', '$state', 'Alert', '$uibModal', 'Helper',
+  '$rootScope', '$state', 'Alert', '$uibModal', 'Helper', 'Tutorial', '$window',
   function (currentUser, $scope, $timeout, ProjectService, $rootScope, $state,
-    Alert, $uibModal, Helper) {
+    Alert, $uibModal, Helper, Tutorial, $window) {
     // Maintain the navigation state.
     $timeout(function () {
       angular.element('#projectsManagement').addClass('active');
@@ -72,8 +72,13 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       });
     };
 
+    var tutorial = $window.localStorage.getItem('tutorial');
+
     // save the project info to database, and go back to project list view.
     $scope.save = function () {
+      if (tutorial) {
+        $window.localStorage.removeItem('tutorial');
+      }
       if ($scope.project.copilot === '') {
         $scope.project.copilot = null;
       }
@@ -86,7 +91,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
         });
       } else {
         ProjectService.create($scope.project).then(function () {
-          Alert.info('Project Created Successfully', $scope);
+          Alert.info('Project has been added successfully, and Topcoder X issue labels, webhook, and wiki rules have been added to the repository', $scope);
           $state.go('app.projects');
         }).catch(function (error) {
           Alert.error(error.data.message, $scope);
@@ -131,4 +136,15 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
         },
       });
     };
+
+    if (tutorial) {
+        setTimeout(function() {
+            var dialog = {
+                message: 'Add your first project. Fill the project name, Direct ID, Repo URL of your Gitlab/Github Repository and the copilot.',
+                action: 'close'
+            };
+            Tutorial.show(dialog, $scope);
+        }, 2500);
+    }
+
   }]);
