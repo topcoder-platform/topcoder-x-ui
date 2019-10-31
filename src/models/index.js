@@ -6,11 +6,16 @@ const fs = require('fs');
 const dynamoose = require('dynamoose');
 const config = require('../config');
 
-dynamoose.AWS.config.update({
-  // accessKeyId: config.DYNAMODB.AWS_ACCESS_KEY_ID,
-  // secretAccessKey: config.DYNAMODB.AWS_SECRET_ACCESS_KEY,
-  region: config.DYNAMODB.AWS_REGION
-});
+const dynamooseConfig = {
+    region: config.DYNAMODB.AWS_REGION
+}
+
+if (config.DYNAMODB.AWS_ACCESS_KEY_ID) {
+    dynamooseConfig.accessKeyId = config.DYNAMODB.AWS_ACCESS_KEY_ID;
+    dynamooseConfig.secretAccessKey = config.DYNAMODB.AWS_SECRET_ACCESS_KEY;
+}
+
+dynamoose.AWS.config.update(dynamooseConfig);
 
 if (config.DYNAMODB.IS_LOCAL === 'true') {
   dynamoose.local();
