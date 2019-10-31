@@ -12,7 +12,7 @@
     "dynamoose": "^1.1.0",
     "lodash": "^4.17.11",
     "moment": "^2.22.2",
-    "mongoose": "^4.11.9",
+    "mongoose": "^5.7.5",
     "path": "^0.12.7",
     "uuid": "^3.3.2",
     "winston": "^2.3.1"
