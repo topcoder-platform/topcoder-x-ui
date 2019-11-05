@@ -44,6 +44,7 @@ const projectSchema = {
     owner: Joi.string().required(),
     secretWebhookKey: Joi.string().required(),
     copilot: Joi.string().allow(null),
+    registeredWebhookId: Joi.string().allow(null),
     createdAt: Joi.date(),
     updatedAt: Joi.date(),
   },
