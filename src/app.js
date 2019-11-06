@@ -15,8 +15,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const secure = require('ssl-express-www');
-const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
+const jwtDecode = require('jwt-decode');
+// const secure = require('ssl-express-www');
 const config = require('./config');
 const routes = require('./routes');
 const logger = require('./common/logger');
@@ -26,7 +26,7 @@ const {getAppHealth} = require('./controllers/AppHealthController');
 
 const app = express();
 app.use(cors());
-app.use(secure);
+// app.use(secure);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({ secret: config.SESSION_SECRET, resave: false, saveUninitialized: true }));
@@ -41,38 +41,20 @@ _.forEach(routes, (verbs, path) => {
       throw new Error(`${def.method} is undefined`);
     }
     const actions = [];
-
-    // TODO: Replace this with actually passing the token from
-    // `tc-accounts` as Authorization header
-    actions.push((req, res, next) => {
-      const v3jwt = _.get(req.cookies, constants.JWT_V3_NAME);
-      _.set(req, 'headers.authorization', `Bearer ${v3jwt}`);
-      req.signature = `${def.controller}#${def.method}`;
-      next();
-    });
-
-    // Verify the JWT
-    actions.push(jwtAuth({
-      ..._.pick(config.TOPCODER, [
-        'AUTH_SECRET',
-        'VALID_ISSUERS',
-        'JWT_KEY_CACHE_TIME',
-      ]),
-    }));
-
-    actions.push((req, res, next) => {
-      if (!req.authUser) {
-        return next(new errors.UnauthorizedError('Authorization failed.'));
-      }
-
-      req.currentUser = {
-        handle: _.get(req, 'authUser.handle', '').toLowerCase(),
-        roles: _.get(req, 'authUser.roles', [])
-      };
-
-      return next();
-    });
-
+    if (!def.allowAnonymous) {
+      actions.push((req, res, next) => {
+        const v3jwt = _.get(req.cookies, constants.JWT_V3_NAME);
+        if (v3jwt) {
+          const decoded = jwtDecode(v3jwt);
+          req.currentUser = {
+            handle: decoded.handle.toLowerCase(),
+            roles: decoded.roles,
+          };
+        }
+        req.signature = `${def.controller}#${def.method}`;
+        next();
+      });
+    }
     if (def.tcLogin) {
       // middleware to handle TC login
       actions.push((req, res, next) => {
@@ -82,7 +64,7 @@ _.forEach(routes, (verbs, path) => {
         }
         req.session.tcLoginReturnUrl = req.originalUrl;
         const callbackUri = `${config.WEBSITE}${constants.TC_LOGIN_CALLBACK_URL}`;
-        return res.redirect(`${constants.TOPCODER_VALUES[config.TOPCODER_ENV].TC_LOGIN_URL}?retUrl=${encodeURIComponent(callbackUri)}`);
+        return res.redirect(`${config.TOPCODER_VALUES[config.TOPCODER_ENV].TC_LOGIN_URL}?retUrl=${encodeURIComponent(callbackUri)}`);
       });
     }
     if (!def.allowNormalUser) {
@@ -122,8 +104,9 @@ app.get(`/api/${config.API_VERSION}/health`, getAppHealth);
 
 // static content
 app.use(express.static(Path.join(__dirname, 'public')));
-// mount the angular app
-app.use('*', express.static(Path.join(__dirname, 'public')));
+app.use('*', (req, res) => {
+  res.redirect('/');
+});
 
 // Error handler
 app.use((err, req, res, next) => {
@@ -150,6 +133,19 @@ app.use((err, req, res, next) => {
     resObj.details = resultErr.details;
   }
   res.status(resultErr.statusCode || 500).json(resObj); // eslint-disable-line no-magic-numbers
+});
+
+process.on('uncaughtException', (err) => {
+  // Check if error related to Dynamodb conn
+  if (err.code === 'NetworkingError' && err.region) {
+    logger.error('DynamoDB connection failed.');
+  }
+  logger.logFullError(err, 'system');
+});
+
+// handle and log unhanled rejection
+process.on('unhandledRejection', (err) => {
+  logger.logFullError(err, 'system');
 });
 
 const port = config.PORT;

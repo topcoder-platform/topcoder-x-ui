@@ -94,6 +94,14 @@ angular.module('topcoderX', [
           data: { pageTitle: 'Project Management' },
           resolve: { auth: authenticate }
         })
+        .state('app.issue', {
+          url: '/upsertissue',
+          controller: 'IssueController',
+          controllerAs: 'vm',
+          templateUrl: 'app/upsertissue/upsertissue.html',
+          data: { pageTitle: 'Project Management' },
+          resolve: { auth: authenticate }
+        })
         // following code is commented to hide the menu
         // un comment this when pages are developed
         // .state('app.challenges', {
@@ -130,7 +138,7 @@ angular.module('topcoderX', [
           resolve: { auth: authenticate }
         })
         .state('membersAdded', {
-          url: '/members/:provider',
+          url: '/members/:provider/:url',
           templateUrl: 'app/members/member.html',
           controller: 'MemberController',
           controllerAs: 'vm',

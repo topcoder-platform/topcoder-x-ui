@@ -13,7 +13,7 @@
 const DEFAULT_PER_PAGE = 30;
 
 // The max page size
-const MAX_PER_PAGE = 100;
+const MAX_PER_PAGE = Number.MAX_SAFE_INTEGER;
 
 // The service error
 const SERVICE_ERROR = 'SERVICE_ERROR';
@@ -35,8 +35,8 @@ const USER_TYPES = {
 // The default page size for Gitlab API
 const GITLAB_DEFAULT_PER_PAGE = 20;
 
-// The max page size for Gitlab API
-const GITLAB_MAX_PER_PAGE = 100;
+// The max page size for Gitlab API. Increased to max num for local search purpose.
+const GITLAB_MAX_PER_PAGE = Number.MAX_SAFE_INTEGER;
 
 // The gitlab default group member access level,
 // the access level can be: 10 - GUEST, 20 - REPORTER, 30 - DEVELOPER, 40 - MASTER, 50 - OWNER
@@ -47,17 +47,6 @@ const GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION = 3600;
 
 // The Gitlab refresh token time in seconds before expiration
 const GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION = 300;
-
-const TOPCODER_VALUES = {
-  dev: {
-    TC_LOGIN_URL: 'https://accounts.topcoder-dev.com/member',
-    TC_USER_PROFILE_URL: 'https://api.topcoder-dev.com/v2/user/profile',
-  },
-  prod: {
-    TC_LOGIN_URL: 'https://accounts.topcoder.com/member',
-    TC_USER_PROFILE_URL: 'https://api.topcoder.com/v2/user/profile',
-  },
-};
 
 const GITHUB_OWNER_CALLBACK_URL = '/api/v1/github/owneruser/callback';
 const GITLAB_OWNER_CALLBACK_URL = '/api/v1/gitlab/owneruser/callback';
@@ -80,7 +69,6 @@ module.exports = {
   GITLAB_DEFAULT_GROUP_ACCESS_LEVEL,
   GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION,
   GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION,
-  TOPCODER_VALUES,
   GITHUB_OWNER_CALLBACK_URL,
   GITLAB_OWNER_CALLBACK_URL,
   OWNER_USER_LOGIN_SUCCESS_URL,

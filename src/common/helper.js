@@ -8,12 +8,13 @@
  * @author TCSCODER
  * @version 1.0
  */
+
 const util = require('util');
 const _ = require('lodash');
+const uuid = require('uuid/v4');
 const Joi = require('joi');
 const getParams = require('get-parameter-names');
 const bluebird = require('bluebird');
-const uuid = require('uuid/v4');
 const bcrypt = require('bcryptjs');
 const parseDomain = require('parse-domain');
 const config = require('../config');
@@ -22,6 +23,7 @@ const errors = require('./errors');
 const constants = require('./constants');
 const NotFoundError = require('./errors').NotFoundError;
 const ValidationError = require('./errors').ValidationError;
+const dbHelper = require('./db-helper');
 
 bluebird.promisifyAll(bcrypt);
 bluebird.promisifyAll(parseDomain);
@@ -85,7 +87,7 @@ function _decorateWithValidators(service) {
     const params = getParams(method);
     service[name] = async function serviceMethodWithValidation(...args) {
       const value = _combineObject(params, args);
-      const normalized = Joi.attempt(value, method.schema, { abortEarly: false });
+      const normalized = Joi.attempt(value, method.schema, {abortEarly: false});
       // Joi will normalize values
       // for example string number '1' to 1
       // if schema type is number
@@ -130,7 +132,7 @@ function buildController(controller) {
  * @returns {Error} converted error
  */
 function convertGitHubError(err, message) {
-  let resMsg = `${message}. ${err.message}.`;
+  let resMsg = `${message}. ${err.message}.\n`;
   const detail = _.get(err, 'response.body.message');
   if (detail) {
     resMsg += ` Detail: ${detail}`;
@@ -150,7 +152,7 @@ function convertGitHubError(err, message) {
  * @returns {Error} converted error
  */
 function convertGitLabError(err, message) {
-  let resMsg = `${message}. ${err.message}.`;
+  let resMsg = `${message}. ${err.message}.\n`;
   const detail = _.get(err, 'response.body.message');
   if (detail) {
     resMsg += ` Detail: ${detail}`;
@@ -167,24 +169,25 @@ function convertGitLabError(err, message) {
  * Ensure entity exists for given criteria. Return error if no result.
  * @param {Object} Model the mongoose model to query
  * @param {Object|String|Number} criteria the criteria (if object) or id (if string/number)
+ * @param {String} modelName the name of model
  * @returns {Object} the found entity
  */
-async function ensureExists(Model, criteria) {
+async function ensureExists(Model, criteria, modelName) {
   let query;
   let byId = true;
   if (_.isObject(criteria)) {
     byId = false;
-    query = Model.findOne(criteria);
+    query = dbHelper.scanOne(Model, criteria);
   } else {
-    query = Model.findById(criteria);
+    query = dbHelper.getById(Model, criteria);
   }
   const result = await query;
   if (!result) {
     let msg;
     if (byId) {
-      msg = util.format('%s not found with id: %s', Model.modelName, criteria);
+      msg = util.format('%s not found with id: %s', modelName, criteria);
     } else {
-      msg = util.format('%s not found with criteria: %j', Model.modelName, criteria);
+      msg = util.format('%s not found with criteria: %j', modelName, criteria);
     }
     throw new NotFoundError(msg);
   }
@@ -205,26 +208,26 @@ async function getProviderType(repoUrl) {
 }
 
 /**
- * gets the git username of copilot for a project
+ * gets the git username of copilot/owner for a project
  * @param {Object} models the db models
  * @param {Object} project the db project detail
  * @param {String} provider the git provider
+ * @param {Boolean} isCopilot if true, then get copilot, otherwise get owner
  * @returns {Object} the owner/copilot for the project
  */
-async function getProjectCopilot(models, project, provider) {
-  const userMapping = await models.UserMapping.findOne({
-    topcoderUsername: project.copilot,
+async function getProjectCopilotOrOwner(models, project, provider, isCopilot) {
+  const userMapping = await dbHelper.scanOne(models.UserMapping, {
+    topcoderUsername: isCopilot ? project.copilot : project.owner,
   });
 
   if (!userMapping || (provider === 'github' && !userMapping.githubUserId) || (provider === 'gitlab' && !userMapping.gitlabUserId)) {
-    throw new Error(`Couldn't find owner username for '${provider}' for this repository.`);
+    throw new Error(`Couldn't find ${isCopilot ? 'copilot' : 'owner'} username for '${provider}' for this repository.`);
   }
 
-  const copilot = await models.User.findOne({
+  return await dbHelper.scanOne(models.User, {
     username: provider === 'github' ? userMapping.githubUsername : userMapping.gitlabUsername,
     type: provider,
   });
-  return copilot;
 }
 
 
@@ -246,5 +249,5 @@ module.exports = {
   ensureExists,
   generateIdentifier,
   getProviderType,
-  getProjectCopilot,
+  getProjectCopilotOrOwner,
 };

@@ -1,0 +1,7 @@
+version: '3'
+services:
+  topcoder-x-ui:
+    image: topcoder-x-ui:latest
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile

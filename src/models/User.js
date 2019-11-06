@@ -1,25 +1,65 @@
 /**
  * This defines user model.
  */
+
 const _ = require('lodash');
-const mongoose = require('mongoose');
+const dynamoose = require('dynamoose');
 const constants = require('../common/constants');
 
-const Schema = mongoose.Schema;
+const Schema = dynamoose.Schema;
 
 const schema = new Schema({
-  userProviderId: {type: Number, required: true},
-  username: {type: String, required: true},
-  role: {type: String, required: true, enum: _.values(constants.USER_ROLES)},
-  type: {type: String, required: true, enum: _.values(constants.USER_TYPES)},
+  id: {
+    type: String,
+    hashKey: true,
+    required: true,
+  },
+  userProviderId: {
+    type: Number,
+    required: true,
+    index: {
+      global: true,
+      rangeKey: 'id',
+      project: true,
+      name: 'UsesProviderIdIndex',
+    },
+  },
+  username: {
+    type: String,
+    required: true,
+    index: {
+      global: true,
+      rangeKey: 'id',
+      project: true,
+      name: 'UsernameIndex',
+    },
+  },
+  role: {
+    type: String,
+    required: true,
+    enum: _.values(constants.USER_ROLES),
+    index: {
+      global: true,
+      project: true,
+      name: 'RoleIndex',
+      rangeKey: 'id',
+    },
+  },
+  type: {
+    type: String,
+    required: true,
+    enum: _.values(constants.USER_TYPES),
+    index: {
+      global: true,
+      rangeKey: 'id',
+      name: 'TypeIndex',
+      project: true,
+    },
+  },
   // gitlab token data
-  accessToken: String,
-  accessTokenExpiration: Date,
-  refreshToken: String,
+  accessToken: {type: String, required: false},
+  accessTokenExpiration: {type: Date, required: false},
+  refreshToken: {type: String, required: false},
 });
-schema.index({userProviderId: 1});
-schema.index({username: 1});
-schema.index({role: 1});
-schema.index({type: 1});
 
 module.exports = schema;

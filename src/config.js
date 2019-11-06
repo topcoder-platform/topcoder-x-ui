@@ -11,9 +11,8 @@ const fs = require('fs');
 module.exports = {
   PORT: process.env.PORT || 80, // eslint-disable-line no-magic-numbers
   API_VERSION: process.env.API_VERSION || 'v1',
-  LOG_LEVEL: process.env.LOG_LEVEL || 'info',
-  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/topcoderx',
-  MONGODB_TIMEOUT: process.env.MONGODB_TIMEOUT || 10000, // eslint-disable-line no-magic-numbers
+  LOG_LEVEL: process.env.LOG_LEVEL || 'debug',
+  // MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/topcoderx',
   SESSION_SECRET: process.env.SESSION_SECRET || 'kjsdfkj34857',
   // Github and gitlab client id and secret
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || 'ae39bea2a2a23f1dd032',
@@ -27,7 +26,7 @@ module.exports = {
   // kafka configuration
   TOPIC: process.env.TOPIC || 'tc-x-events',
   KAFKA_OPTIONS: {
-    connectionString: process.env.KAFKA_HOST || 'localhost:9092',
+    connectionString: process.env.KAFKA_URL || 'localhost:9092',
     ssl: {
       cert: process.env.KAFKA_CLIENT_CERT || fs.readFileSync('./kafka_client.cer'), // eslint-disable-line no-sync
       key: process.env.KAFKA_CLIENT_CERT_KEY || fs.readFileSync('./kafka_client.key'), // eslint-disable-line no-sync
@@ -36,14 +35,36 @@ module.exports = {
   },
   HOOK_BASE_URL: process.env.HOOK_BASE_URL || 'http://topcoderx.topcoder-dev.com',
   TOPCODER_ENV: process.env.TOPCODER_ENV || 'dev',
-  LABELS: process.env.LABELS || [{ name: 'tcx_OpenForPickup', color: '428BCA' }, { name: 'tcx_Assigned', color: '004E00' }, { name: 'tcx_ReadyForReview', color: 'D1D100' }, { name: 'tcx_Paid', color: '7F8C8D' }, { name: 'tcx_Feedback', color: 'FF0000' }, { name: 'tcx_FixAccepted', color: '69D100' }],
+  LABELS: process.env.LABELS || [
+    {name: 'tcx_OpenForPickup', color: '428BCA'},
+    {name: 'tcx_Assigned', color: '004E00'},
+    {name: 'tcx_ReadyForReview', color: 'D1D100'},
+    {name: 'tcx_Paid', color: '7F8C8D'},
+    {name: 'tcx_Feedback', color: 'FF0000'},
+    {name: 'tcx_FixAccepted', color: '69D100'},
+    {name: 'tcx_NotReady', color: '000000'},
+    {name: 'tcx_Canceled', color: '000000'},
+  ],
+  OPEN_FOR_PICKUP_ISSUE_LABEL: process.env.OPEN_FOR_PICKUP_ISSUE_LABEL || 'tcx_OpenForPickup',
   ALLOWED_TOPCODER_ROLES: process.env.ALLOWED_TOPCODER_ROLES || ['administrator', 'admin', 'connect manager', 'connect admin', 'copilot', 'connect copilot'],
   COPILOT_ROLE: process.env.COPILOT_ROLE || 'copilot',
   HELP_LINK: process.env.HELP_LINK || 'https://github.com/topcoder-platform/topcoder-x-ui/wiki',
   ADMINISTRATOR_ROLES: process.env.ADMINISTRATOR_ROLES || ['administrator', 'admin'],
-  TOPCODER: {
-    AUTH_SECRET: process.env.TOPCODER_AUTH_SECRET || 'secret',
-    VALID_ISSUERS: process.env.TOPCODER_VALID_ISSUERS || '["topcoder-dev.com"]',
-    JWT_KEY_CACHE_TIME: process.env.TOPCODER_JWT_KEY_CACHE_TIME || 90, // eslint-disable-line no-magic-numbers
+  DYNAMODB: {
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+    AWS_REGION: process.env.AWS_REGION,
+    IS_LOCAL: process.env.IS_LOCAL,
+    TIMEOUT: process.env.AWS_CONNECTION_TIMEOUT || 10000, // eslint-disable-line no-magic-numbers
+  },
+  TOPCODER_VALUES: {
+    dev: {
+      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts.topcoder-dev.com/member',
+      TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || 'https://api.topcoder-dev.com/v2/user/profile',
+    },
+    prod: {
+      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts.topcoder.com/member',
+      TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || 'https://api.topcoder.com/v2/user/profile',
+    },
   },
 };

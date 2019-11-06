@@ -4,32 +4,43 @@
     <div class="col-lg-4">
       <h2>{{title}}</h2>
     </div>
-    <div class="pull-right col-lg-7">
-      <div class="col-lg-3 with-button" ng-show="editing">
-        <button class="btn btn-sm btn-info" ng-click="addLabels()">
-          <strong>Add Labels</strong>
-        </button>
+
+    <div class="pull-right" ng-if="editing">
+      <div class="pull-right col-lg-8" ng-if="editing">
+        <div class="pull-right col-lg-2" ng-if="!isAdminUser"></div>
+        <div class="pull-right col-lg-2 with-button btn-top" ng-if="isAdminUser">
+          <button class="btn btn-sm btn-info btn-top" ng-click="openTransferOwnershipDialog()">
+            <strong>
+              Transfer ownership
+            </strong>
+          </button>
+        </div>
+        <div class="pull-right col-lg-2 with-button btn-top">
+          <button class="btn btn-sm btn-info btn-top" ng-click="openRecreateDialog()">
+            <strong>Recreate an Issue</strong>
+          </button>
+        </div>
       </div>
-      <div class="col-lg-3 with-button" ng-show="editing">
-        <button class="btn btn-sm btn-info" ng-click="addHooks()">
-          <strong>
-            Add Webhook
-          </strong>
-        </button>
-      </div>
-      <div class="col-lg-3 with-button" ng-show="editing">
-        <button class="btn btn-sm btn-info" ng-click="addWikiRules()">
-          <strong>
-            Add Wiki Rules
-          </strong>
-        </button>
-      </div>
-      <div class="col-lg-3 with-button" ng-show="editing" ng-if="isAdminUser">
-        <button class="btn btn-sm btn-info" ng-click="openTransferOwnershipDialog()">
-          <strong>
-            Transfer ownership
-          </strong>
-        </button>
+      <div class="pull-right col-lg-8" ng-if="editing">
+        <div class="pull-right col-lg-2 with-button btn-top">
+          <button class="btn btn-sm btn-info btn-top" ng-click="addWikiRules()">
+            <strong>
+              Add Wiki Rules
+            </strong>
+          </button>
+        </div>
+        <div class="pull-right col-lg-2 with-button btn-top">
+          <button class="btn btn-sm btn-info btn-top" ng-click="addHooks()">
+            <strong>
+              Add Webhook
+            </strong>
+          </button>
+        </div>
+        <div class="pull-right col-lg-2 with-button btn-top">
+          <button class="btn btn-sm btn-info btn-top" ng-click="addLabels()">
+            <strong>Add Labels</strong>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -41,23 +52,31 @@
           <form name="projectForm">
             <label class="form-label">Project Name:</label>
             <input class="form-control" type="text" ng-model="project.title" required />
+            <small class="form-hint">The project name can be anything you'd like. This should be a simple descriptor
+              of the project</small>
             <span ng-show="projectForm.project.title.$touched && projectForm.project.title.$invalid">The
               project Title is required.</span>
             <br />
+            <br />
             <label class="form-label">Direct ID:</label>
             <input class="form-control" type="number" ng-model="project.tcDirectId" required />
+            <small class="form-hint">The Topcoder Direct ID of the project. You can obtain this through the URL to the
+              project in Topcoder Direct. For example:
+              "https://www.topcoder.com/direct/projectOverview?formData.projectId=16901" - Enter ID "16901"</small>
             <span ng-show="projectForm.project.tcDirectId.$touched && projectForm.project.tcDirectId.$invalid">The
               TC Direct ID is required.</span>
             <br />
+            <br />
             <label class="form-label">Repo URL:</label>
             <input class="form-control" type="url" ng-model="project.repoUrl" required />
+            <small class="form-hint"> The URL to the repository on Github or Gitlab. For example:
+              "https://github.com/topcoder-platform/topcoder-x-receiver"</small>
             <span ng-show="projectForm.project.repoUrl.$touched && projectForm.project.repoUrl.$invalid">The
               TC Repo URL is required.</span>
             <br />
+            <br />
             <label class="form-label">Copilot:</label>
-            <input class="form-control" type="text" ng-model="project.copilot" required />
-            <span ng-show="projectForm.project.copilot.$touched && projectForm.project.copilot.$invalid">The
-              copilot is required.</span>
+            <input class="form-control" type="text" ng-model="project.copilot"/>
             <br />
             <div class="hide" *ng-if="true">
               <label class="form-label">Rocket.chat Webhook URL:</label>
@@ -87,3 +106,4 @@
     </div>
   </div>
 </div>
+<div ng-include src="'components/tutorial/tutorial.html'"></div>

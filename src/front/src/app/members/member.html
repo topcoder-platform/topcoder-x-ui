@@ -12,11 +12,12 @@
             <div class="ibox float-e-margins">
                 <div class="ibox-content">
                     <div class="text-center m-t-lg" ng-if="provider==='github'">
-                        <h3>You were successfully invited to the team!</h3>
-                        <p>An invitation email will be sent to you if you are not already in the team.</p>
+                        <p>You are already in the team!</p>
+                        <a href="{{link}}">{{link}}</a>
                     </div>
                     <div class="text-center m-t-lg" ng-if="provider==='gitlab'">
                         <p>You were successfully added to the group!</p>
+                        <a href="{{link}}">{{link}}</a>
                     </div>
                 </div>
             </div>

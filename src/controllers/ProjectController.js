@@ -18,7 +18,7 @@ const ProjectService = require('../services/ProjectService');
  * @returns {Object} the result
  */
 async function create(req) {
-  return await ProjectService.create(req.body, req.currentUser.handle);
+  return await ProjectService.create(req.body, req.currentUser);
 }
 
 /**

@@ -1,0 +1,32 @@
+<div class="inmodal">
+    <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="close()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="reg-dialog-label">Recreate an Issue</h4>
+    </div>
+    <div class="modal-body" style="background-color: #fff;">
+        <div class="row">
+            <label class="form-label">Issue URL:</label>
+            <input class="form-control" type="text" ng-model="url" required />
+            <br />
+        </div>
+        <div class="row">
+            <label>
+                <input type="checkbox" ng-model="isRecreate" ng-true-value="1" ng-false-value="0"> Recreate
+            </label>
+            <br />
+        </div>
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1" ng-include src="'components/alert/alert.html'"></div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-info" ng-click="recreate()">
+            OK
+        </button>
+        <button type="button" class="btn btn-white" ng-click="close()">
+            Cancel
+        </button>
+    </div>
+</div>

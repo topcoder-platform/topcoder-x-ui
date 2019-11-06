@@ -8,17 +8,18 @@
  * @author TCSCODER
  * @version 1.0
  */
+
 const GitHub = require('github-api');
 const Joi = require('joi');
 const _ = require('lodash');
 const config = require('../config');
 const constants = require('../common/constants');
 const helper = require('../common/helper');
+const dbHelper = require('../common/db-helper');
 const User = require('../models').User;
 const UserMapping = require('../models').UserMapping;
 const OwnerUserTeam = require('../models').OwnerUserTeam;
 const errors = require('../common/errors');
-
 
 /**
  * Ensure the owner user is in database.
@@ -29,46 +30,48 @@ const errors = require('../common/errors');
 async function ensureOwnerUser(token, topcoderUsername) {
   let userProfile;
   try {
-    const github = new GitHub({ token });
+    const github = new GitHub({token});
     const user = await github.getUser().getProfile();
     userProfile = user.data;
   } catch (err) {
     throw helper.convertGitHubError(err, 'Failed to ensure valid owner user.');
   }
-
-  let user = await User.findOne({
+  const user = await dbHelper.scanOne(User, {
     username: userProfile.login,
     type: constants.USER_TYPES.GITHUB,
     role: constants.USER_ROLES.OWNER,
   });
 
-  const userMapping = await UserMapping.findOne({ topcoderUsername });
+  const userMapping = await dbHelper.scanOne(UserMapping, {topcoderUsername});
   if (!userMapping) {
-    await UserMapping.create({
+    await dbHelper.create(UserMapping, {
+      id: helper.generateIdentifier(),
       topcoderUsername,
       githubUserId: userProfile.id,
       githubUsername: userProfile.login,
     });
   } else {
-    userMapping.githubUserId = userProfile.id;
-    userMapping.githubUsername = userProfile.login;
-    await userMapping.save();
+    await dbHelper.update(UserMapping, userMapping.id, {
+      githubUserId: userProfile.id,
+      githubUsername: userProfile.login,
+    });
   }
   if (!user) {
-    user = {
+    return await dbHelper.create(User, {
+      id: helper.generateIdentifier(),
       role: constants.USER_ROLES.OWNER,
       type: constants.USER_TYPES.GITHUB,
       userProviderId: userProfile.id,
       username: userProfile.login,
       accessToken: token,
-    };
-    return await User.create(user);
+    });
   }
-  user.userProviderId = userProfile.id;
-  user.username = userProfile.login;
   // save user token data
-  user.accessToken = token;
-  return await user.save();
+  return await dbHelper.update(User, user.id, {
+    userProviderId: userProfile.id,
+    username: userProfile.login,
+    accessToken: token,
+  });
 }
 
 ensureOwnerUser.schema = Joi.object().keys({
@@ -84,12 +87,16 @@ ensureOwnerUser.schema = Joi.object().keys({
  * @param {Number} perPage the page size (default to be constants.DEFAULT_PER_PAGE). Must be within range [1, constants.MAX_PER_PAGE]
  * @returns {Promise} the promise result
  */
-async function listOwnerUserTeams(token, page = 1, perPage = constants.DEFAULT_PER_PAGE) {
+async function listOwnerUserTeams(token, page = 1, perPage = constants.DEFAULT_PER_PAGE) {  
   try {
-    const github = new GitHub({ token });
+    const github = new GitHub({token});
     const user = github.getUser();
-    const response = await user._request('GET', '/user/teams', { page, per_page: perPage });
-
+    
+    const response = await user._request('GET', '/user/teams', {
+      page,
+      per_page: perPage,
+    });
+    
     const result = {
       page,
       perPage,
@@ -132,7 +139,7 @@ async function getTeamRegistrationUrl(token, ownerUsername, teamId) {
   // check whether owner user can add team member to the team
   let membershipData;
   try {
-    const github = new GitHub({ token });
+    const github = new GitHub({token});
     const team = github.getTeam(teamId);
     const response = await team.getMembership(ownerUsername);
     membershipData = response.data;
@@ -147,7 +154,8 @@ async function getTeamRegistrationUrl(token, ownerUsername, teamId) {
   const identifier = helper.generateIdentifier();
 
   // create owner user team
-  await OwnerUserTeam.create({
+  await dbHelper.create(OwnerUserTeam, {
+    id: helper.generateIdentifier(),
     ownerUsername,
     type: constants.USER_TYPES.GITHUB,
     teamId,
@@ -157,7 +165,7 @@ async function getTeamRegistrationUrl(token, ownerUsername, teamId) {
 
   // construct URL
   const url = `${config.WEBSITE}/api/${config.API_VERSION}/github/teams/registration/${identifier}`;
-  return { url };
+  return {url};
 }
 
 getTeamRegistrationUrl.schema = Joi.object().keys({
@@ -176,25 +184,35 @@ getTeamRegistrationUrl.schema = Joi.object().keys({
 async function addTeamMember(teamId, ownerUserToken, normalUserToken) {
   let username;
   let id;
+  let state;
   try {
     // get normal user name
-    const githubNormalUser = new GitHub({ token: normalUserToken });
+    const githubNormalUser = new GitHub({
+      token: normalUserToken,
+    });
     const normalUser = await githubNormalUser.getUser().getProfile();
     username = normalUser.data.login;
     id = normalUser.data.id;
 
     // add normal user to team
-    const github = new GitHub({ token: ownerUserToken });
+    const github = new GitHub({
+      token: ownerUserToken,
+    });
     const team = github.getTeam(teamId);
-    await team.addMembership(username);
+    const membershipResponse = await team.addMembership(username);
+    state = _.get(membershipResponse, 'data.state')
   } catch (err) {
     // if error is already exists discard
-    if (_.chain(err).get('body.errors').countBy({ code: 'already_exists' }).get('true').isUndefined().value()) {
+    if (_.chain(err).get('body.errors').countBy({
+      code: 'already_exists',
+    }).get('true')
+      .isUndefined()
+      .value()) {
       throw helper.convertGitHubError(err, 'Failed to add team member');
     }
   }
-  // return github username
-  return {username, id};
+  // return github username and its state
+  return {username, id, state};
 }
 
 addTeamMember.schema = Joi.object().keys({
@@ -225,12 +243,43 @@ getUserIdByUsername.schema = Joi.object().keys({
   username: Joi.string().required(),
 });
 
+/**
+ * Get team detailed data
+ *
+ * @param {String} token user owner token
+ * @param {String|Number} teamId team id
+ *
+ * @returns {Object} team object, see https://developer.github.com/v3/teams/#get-team
+ */
+async function getTeamDetails(token, teamId) {
+  const teamIdAsNumber = !_.isNumber(teamId) ? parseInt(teamId, 10) : teamId
+  let team;
+
+  try {
+    const github = new GitHub({token});
+    const teamResponse = await github.getTeam(teamIdAsNumber).getTeam();
+
+    team = teamResponse.data;
+  } catch (err) {
+    throw helper.convertGitHubError(err, `Failed to get team with id '${teamId}'.`);
+  }
+
+  return team;
+}
+
+getTeamDetails.schema = Joi.object().keys({
+  token: Joi.string().required(),
+  teamId: Joi.alternatives().try(Joi.string(), Joi.number()).required(),
+});
+
+
 module.exports = {
   ensureOwnerUser,
   listOwnerUserTeams,
   getTeamRegistrationUrl,
   addTeamMember,
   getUserIdByUsername,
+  getTeamDetails,
 };
 
 helper.buildService(module.exports);

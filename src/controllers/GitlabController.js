@@ -8,9 +8,11 @@
  * @author TCSCODER
  * @version 1.0
  */
+const _ = require('lodash');
 const superagent = require('superagent');
 const superagentPromise = require('superagent-promise');
 const helper = require('../common/helper');
+const dbHelper = require('../common/db-helper');
 const errors = require('../common/errors');
 const constants = require('../common/constants');
 const config = require('../config');
@@ -76,10 +78,12 @@ async function ownerUserLoginCallback(req, res) {
   // ensure the user is valid owner user
   const ownerUser = await GitlabService.ensureOwnerUser(accessToken, topcoderUsername);
   // save user token data
-  ownerUser.accessToken = accessToken;
-  ownerUser.accessTokenExpiration = new Date(new Date().getTime() + expiresIn * MS_PER_SECOND);
-  ownerUser.refreshToken = refreshToken;
-  await ownerUser.save();
+  await dbHelper.update(User, ownerUser.id, {
+    accessToken,
+    accessTokenExpiration: new Date(new Date().getTime() + expiresIn * MS_PER_SECOND),
+    refreshToken,
+  });
+
   // refresh token periodically
   // store username to session
   req.session.gitlabOwnerUsername = ownerUser.username;
@@ -97,7 +101,7 @@ async function listOwnerUserGroups(req) {
   if (!user || !user.accessToken) {
     throw new errors.UnauthorizedError('You have not setup for Gitlab.');
   }
-  return await GitlabService.listOwnerUserGroups(user.accessToken, req.query.page, req.query.perPage);
+  return await GitlabService.listOwnerUserGroups(user.accessToken, req.query.page, req.query.perPage, req.query.getAll);
 }
 
 /**
@@ -121,7 +125,7 @@ async function getGroupRegistrationUrl(req) {
 async function addUserToGroup(req, res) {
   const identifier = req.params.identifier;
   // validate the identifier
-  await helper.ensureExists(OwnerUserGroup, {identifier});
+  await helper.ensureExists(OwnerUserGroup, {identifier}, 'OwnerUserGroup');
 
   // store identifier to session, to be compared in callback
   req.session.identifier = identifier;
@@ -152,10 +156,10 @@ async function addUserToGroupCallback(req, res) {
   if (!code) {
     throw new errors.ValidationError('Missing code.');
   }
-  const group = await helper.ensureExists(OwnerUserGroup, {identifier});
+  const group = await helper.ensureExists(OwnerUserGroup, {identifier}, 'OwnerUserGroup');
   // get owner user
   const ownerUser = await helper.ensureExists(User,
-    {username: group.ownerUsername, type: constants.USER_TYPES.GITLAB, role: constants.USER_ROLES.OWNER});
+    {username: group.ownerUsername, type: constants.USER_TYPES.GITLAB, role: constants.USER_ROLES.OWNER}, 'User');
 
   // refresh the owner user access token if needed
   if (ownerUser.accessTokenExpiration.getTime() <=
@@ -171,11 +175,12 @@ async function addUserToGroupCallback(req, res) {
       })
       .end();
     // save user token data
-    ownerUser.accessToken = refreshTokenResult.body.access_token;
     const expiresIn = refreshTokenResult.body.expires_in || constants.GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION;
-    ownerUser.accessTokenExpiration = new Date(new Date().getTime() + expiresIn * MS_PER_SECOND);
-    ownerUser.refreshToken = refreshTokenResult.body.refresh_token;
-    await ownerUser.save();
+    await dbHelper.update(User, ownerUser.id, {
+      accessToken: refreshTokenResult.body.access_token,
+      accessTokenExpiration: new Date(new Date().getTime() + expiresIn * MS_PER_SECOND),
+      refreshToken: refreshTokenResult.body.refresh_token,
+    });
   }
 
   // exchange code to get normal user token
@@ -190,20 +195,34 @@ async function addUserToGroupCallback(req, res) {
     })
     .end();
   const token = result.body.access_token;
+
+  // get group name
+  const groupsResult = await GitlabService.listOwnerUserGroups(ownerUser.accessToken, 1, constants.MAX_PER_PAGE, true);
+  const currentGroup = _.find(groupsResult.groups, (item) => { // eslint-disable-line arrow-body-style
+    return item.id.toString() === group.groupId.toString();
+  });
+
   // add user to group
   const gitlabUser = await GitlabService.addGroupMember(group.groupId, ownerUser.accessToken, token);
   // associate gitlab username with TC username
-  const topcoderUsername = req.session.tcUsername;
-  const mapping = await UserMapping.findOne({topcoderUsername});
+  const mapping = await dbHelper.scanOne(UserMapping, {
+    topcoderUsername: {eq: req.session.tcUsername},
+  });
   if (mapping) {
-    mapping.gitlabUsername = gitlabUser.username;
-    mapping.gitlabUserId = gitlabUser.id;
-    await mapping.save();
+    await dbHelper.update(UserMapping, mapping.id, {
+      gitlabUsername: gitlabUser.username,
+      gitlabUserId: gitlabUser.id,
+    });
   } else {
-    await UserMapping.create({topcoderUsername, gitlabUsername: gitlabUser.username, gitlabUserId: gitlabUser.id});
+    await dbHelper.create(UserMapping, {
+      id: helper.generateIdentifier(),
+      topcoderUsername: req.session.tcUsername,
+      gitlabUsername: gitlabUser.username,
+      gitlabUserId: gitlabUser.id,
+    });
   }
   // redirect to success page
-  res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/gitlab`);
+  res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/gitlab/${currentGroup.full_path}`);
 }
 
 module.exports = {

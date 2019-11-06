@@ -151,10 +151,10 @@ angular.module('topcoderX')
         // save loggingOut promise to be accessed any time
         AuthService.logginOut = proxyCall(LOGOUT_REQUEST, LOGOUT_SUCCESS, LOGOUT_FAILURE).then(function () {
           AuthService.logginOut = null;
+          // remove only token V3, which we set from the script manually
+          // token V2 will be removed automatically during logout server request
+          $cookies.remove(JWT_V3_NAME, { path: '/' });
         });
-        // remove only token V3, which we set from the script manually
-        // token V2 will be removed automatically during logout server request
-        $cookies.remove(JWT_V3_NAME);
 
         return AuthService.logginOut;
       }
@@ -206,7 +206,11 @@ angular.module('topcoderX')
           }
           AuthService.PermissionDenied = true;
           return $q.reject(AuthService.ERROR.NO_PERMISSIONS);
-        }).catch(function (err) { return $q.reject(err); });
+        }).catch(function (err) {
+          AuthService.logout();
+          $state.go('auth');
+          return $q.reject(err);
+        });
       }
 
       /**

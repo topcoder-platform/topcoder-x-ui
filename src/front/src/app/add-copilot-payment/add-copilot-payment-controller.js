@@ -61,6 +61,6 @@ angular.module('topcoderX')
                         _handleError(error, 'An error occurred while updating Payment.');
                     });
                 }
-            };            
+            };
         }
     ]);

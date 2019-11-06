@@ -8,6 +8,7 @@
  * @author TCSCODER
  * @version 1.0
  */
+
 const Joi = require('joi');
 const superagent = require('superagent');
 const superagentPromise = require('superagent-promise');
@@ -15,11 +16,11 @@ const _ = require('lodash');
 const config = require('../config');
 const constants = require('../common/constants');
 const helper = require('../common/helper');
+const dbHelper = require('../common/db-helper');
 const errors = require('../common/errors');
 const User = require('../models').User;
 const UserMapping = require('../models').UserMapping;
 const OwnerUserGroup = require('../models').OwnerUserGroup;
-
 const request = superagentPromise(superagent, Promise);
 
 /**
@@ -43,41 +44,43 @@ async function ensureOwnerUser(token, topcoderUsername) {
   if (!userProfile) {
     throw new errors.UnauthorizedError('Can not get user from the access token.');
   }
-  let user = await User.findOne({
+  const user = await dbHelper.scanOne(User, {
     username: userProfile.username,
     type: constants.USER_TYPES.GITLAB,
     role: constants.USER_ROLES.OWNER,
   });
 
-  const userMapping = await UserMapping.findOne({ topcoderUsername });
-
+  const userMapping = await dbHelper.scanOne(UserMapping, {topcoderUsername});
   if (!userMapping) {
-    await UserMapping.create({
+    await dbHelper.create(UserMapping, {
+      id: helper.generateIdentifier(),
       topcoderUsername,
       gitlabUserId: userProfile.id,
       gitlabUsername: userProfile.username,
     });
   } else {
-    userMapping.gitlabUserId = userProfile.id;
-    userMapping.gitlabUsername = userProfile.username;
-    await userMapping.save();
+    await dbHelper.update(UserMapping, userMapping.id, {
+      gitlabUserId: userProfile.id,
+      gitlabUsername: userProfile.username,
+    });
   }
 
   if (!user) {
-    user = {
+    return await dbHelper.create(User, {
+      id: helper.generateIdentifier(),
       role: constants.USER_ROLES.OWNER,
       type: constants.USER_TYPES.GITLAB,
       userProviderId: userProfile.id,
       username: userProfile.username,
-      accessToken: token
-    };
-    return await User.create(user);
+      accessToken: token,
+    });
   }
-  user.userProviderId = userProfile.id;
-  user.username = userProfile.username;
   // save user token data
-  user.accessToken = token;
-  return await user.save();
+  return await dbHelper.update(User, user.id, {
+    userProviderId: userProfile.id,
+    username: userProfile.username,
+    accessToken: token,
+  });
 }
 
 ensureOwnerUser.schema = Joi.object().keys({
@@ -91,13 +94,14 @@ ensureOwnerUser.schema = Joi.object().keys({
  * @param {Number} page the page number (default to be 1). Must be >= 1
  * @param {Number} perPage the page size (default to be constants.GITLAB_DEFAULT_PER_PAGE).
  *   Must be within range [1, constants.GITLAB_MAX_PER_PAGE]
+ * @param {Boolean} getAll get all groups
  * @returns {Promise} the promise result
  */
-async function listOwnerUserGroups(token, page = 1, perPage = constants.GITLAB_DEFAULT_PER_PAGE) {
+async function listOwnerUserGroups(token, page = 1, perPage = constants.GITLAB_DEFAULT_PER_PAGE, getAll = false) {
   try {
     const response = await request
       .get(`${config.GITLAB_API_BASE_URL}/api/v4/groups`)
-      .query({ page, per_page: perPage, owned: true })
+      .query({page, per_page: perPage, owned: true, all_available: getAll})
       .set('Authorization', `Bearer ${token}`)
       .end();
 
@@ -130,6 +134,7 @@ listOwnerUserGroups.schema = Joi.object().keys({
   page: Joi.number().integer().min(1).optional(),
   perPage: Joi.number().integer().min(1).max(constants.GITLAB_MAX_PER_PAGE)
     .optional(),
+  getAll: Joi.boolean().optional(),
 });
 
 /**
@@ -143,7 +148,8 @@ async function getGroupRegistrationUrl(ownerUsername, groupId) {
   const identifier = helper.generateIdentifier();
 
   // create owner user group
-  await OwnerUserGroup.create({
+  await dbHelper.create(OwnerUserGroup, {
+    id: helper.generateIdentifier(),
     ownerUsername,
     type: constants.USER_TYPES.GITLAB,
     groupId,
@@ -152,7 +158,7 @@ async function getGroupRegistrationUrl(ownerUsername, groupId) {
 
   // construct URL
   const url = `${config.WEBSITE}/api/${config.API_VERSION}/gitlab/groups/registration/${identifier}`;
-  return { url };
+  return {url};
 }
 
 getGroupRegistrationUrl.schema = Joi.object().keys({
@@ -189,7 +195,10 @@ async function addGroupMember(groupId, ownerUserToken, normalUserToken) {
       .send(`user_id=${userId}&access_level=${constants.GITLAB_DEFAULT_GROUP_ACCESS_LEVEL}`)
       .end();
     // return gitlab username
-    return { username: res.body.username, id: res.body.id };
+    return {
+      username: res.body.username,
+      id: res.body.id,
+    };
   } catch (err) {
     if (_.get(JSON.parse(err.response.text), 'message') !== 'Member already exists') {
       if (err instanceof errors.ApiError) {

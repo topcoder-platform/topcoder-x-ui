@@ -23,7 +23,7 @@
             <div class="col-lg-12">
                 <div class="ibox float-e-margins">
                     <div class="ibox-content">
-                        <div class="row" ng-hide="payments.length===0 || status==='closed'">
+                        <div class="row" ng-show="tableConfig.active.items.length!=0 && tableConfig.active.initialized && totalPendingAmounts!=0">
                             <div class="col-lg-12">
                                 <p class="text-right font-bold">${{totalPendingAmounts}} total pending
                                     payments
@@ -32,10 +32,10 @@
                         </div>
                         <div class="row">
                             <uib-tabset active="active">
-                                <uib-tab index="0" heading="Active" select="getPayments('active')">
-                                    <br/>
-                                    <div ng-if="isLoaded">
-                                        <div ng-show="payments.length===0">
+                                <uib-tab index="0" heading="Active" select="tabChanged('active')">
+                                    <br />
+                                    <div ng-show="tableConfig.active.initialized">
+                                        <div ng-if="tableConfig.active.items.length==0 && tableConfig.active.initialized">
                                             <div class="text-center m-t-lg">
                                                 <h4>You don't have any active payments, Please
                                                     <button class="btn btn-sm btn-info" ng-click="goPayment()">
@@ -46,81 +46,137 @@
                                                 </h4>
                                             </div>
                                         </div>
-                                        <div ng-hide="payments.length===0">
-                                            <table class="footable table table-stripped toggle-arrow-tiny" data-page-navigation=".pagination" data-page-size="10"
-                                                ng-init="init()">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="col-lg-2">Project</th>
-                                                        <th class="col-lg-2">Amount</th>
-                                                        <th data-sort-ignore="true" class="col-lg-2">Description</th>
-                                                        <th class="col-lg-2">Challenge</th>
-                                                        <th data-sort-ignore="true" class="col-lg-2">Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr ng-repeat="payment in payments" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
-                                                        <td class="col-lg-2">{{payment.project.title}}</td>
-                                                        <td class="col-lg-2">${{payment.amount}}</td>
-                                                        <td class="col-lg-2">{{payment.description}}</td>
-                                                        <td class="col-lg-2">
-                                                            <a href="{{topcoderUrl}}/direct/contest/detail?projectId={{payment.challengeId}}" target="_blank">{{payment.challengeId}}</a>
-                                                        </td>
-                                                        <td class="col-lg-2">
-                                                            <button class="btn btn-sm btn-success" ng-click="goPayment(payment)">
-                                                                <strong>Edit</strong>
-                                                            </button>
-                                                            <button class="btn btn-sm btn-danger" ng-click="deletePayment(payment)">
-                                                                <strong>Delete</strong>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                                <tfoot>
-                                                    <tr>
-                                                        <td colspan="5">
-                                                            <ul class="pagination pull-right"></ul>
-                                                        </td>
-                                                    </tr>
-                                                </tfoot>
-                                            </table>
-                                        </div>
+                                        <table ng-if="tableConfig.active.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
+                                            <thead>
+                                                <tr>
+                                                    <th class="col-lg-2 footable-sortable" ng-click="sort('project', 'active')"
+                                                        ng-class="{'footable-sorted': tableConfig.active.sortBy === 'project' && tableConfig.active.sortDir === 'asc', 'footable-sorted-desc': tableConfig.active.sortBy === 'project' && tableConfig.active.sortDir === 'desc'}">
+                                                        Project
+                                                        <span class="footable-sort-indicator"></span>
+                                                    </th>
+                                                    <th class="col-lg-2 footable-sortable" ng-click="sort('amount', 'active')"
+                                                        ng-class="{'footable-sorted': tableConfig.active.sortBy === 'amount' && tableConfig.active.sortDir === 'asc', 'footable-sorted-desc': tableConfig.active.sortBy === 'amount' && tableConfig.active.sortDir === 'desc'}">
+                                                        Amount
+                                                        <span class="footable-sort-indicator"></span>
+                                                    </th>
+                                                    <th data-sort-ignore="true" class="col-lg-2">Description</th>
+                                                    <th class="col-lg-2 footable-sortable" ng-click="sort('challenge', 'active')"
+                                                        ng-class="{'footable-sorted': tableConfig.active.sortBy === 'challenge' && tableConfig.active.sortDir === 'asc', 'footable-sorted-desc': tableConfig.active.sortBy === 'challenge' && tableConfig.active.sortDir === 'desc'}">
+                                                        Challenge
+                                                        <span class="footable-sort-indicator"></span>
+                                                    </th>
+                                                    <th data-sort-ignore="true" class="col-lg-2">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="payment in tableConfig.active.items" ng-class-even="'footable-even'"
+                                                    ng-class-odd="'footable-odd'">
+                                                    <td class="col-lg-2">{{payment.project.title}}</td>
+                                                    <td class="col-lg-2">${{payment.amount}}</td>
+                                                    <td class="col-lg-2">{{payment.description}}</td>
+                                                    <td class="col-lg-2">
+                                                        <a href="{{topcoderUrl}}/direct/contest/detail?projectId={{payment.challengeId}}"
+                                                            target="_blank">{{payment.challengeId}}</a>
+                                                    </td>
+                                                    <td class="col-lg-2">
+                                                        <button class="btn btn-sm btn-success" ng-click="goPayment(payment)">
+                                                            <strong>Edit</strong>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-danger" ng-click="deletePayment(payment)">
+                                                            <strong>Delete</strong>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="5">
+                                                        <ul class="pagination pull-right">
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.active.pageNumber === 1}">
+                                                                <a ng-click="changePage(1, 'active')">«</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.active.pageNumber === 1}">
+                                                                <a ng-click="changePage(tableConfig.active.pageNumber - 1, 'active')">‹</a>
+                                                            </li>
+                                                            <li class="footable-page" ng-class="{'active' : item === tableConfig.active.pageNumber}"
+                                                                ng-repeat="item in getPageArray('active')">
+                                                                <a ng-click="changePage(item, 'active')">{{item}}</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.active.pageNumber === tableConfig.active.pages}">
+                                                                <a ng-click="changePage(tableConfig.active.pageNumber + 1, 'active')">›</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.active.pageNumber === tableConfig.active.pages}">
+                                                                <a ng-click="changePage(tableConfig.active.pages, 'active')">»</a>
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
                                     </div>
                                 </uib-tab>
-                                <uib-tab index="1" heading="Closed" select="getPayments('closed')">
-                                    <br/>
-                                    <div ng-if="isLoaded">
-                                        <div ng-show="payments.length===0" class="text-center m-t-lg">
-                                            <p>No closed payments yet.</p>
-                                        </div>
-                                        <div ng-hide="payments.length===0">
-                                            <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="10">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="col-lg-2">Project</th>
-                                                        <th class="col-lg-2">Amount</th>
-                                                        <th data-sort-ignore="true" class="col-lg-2">Description</th>
-                                                        <th class="col-lg-2">Challenge</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr ng-repeat="payment in payments">
-                                                        <td class="col-lg-2">{{payment.project.title}}</td>
-                                                        <td class="col-lg-2">${{payment.amount}}</td>
-                                                        <td class="col-lg-2">{{payment.description}}</td>
-                                                        <td class="col-lg-2"><a href="{{topcoderUrl}}/direct/contest/detail?projectId={{payment.challengeId}}"
-                                                                target="_blank">{{payment.challengeId}}</a></td>
-                                                    </tr>
-                                                </tbody>
-                                                <tfoot>
-                                                    <tr>
-                                                        <td colspan="5">
-                                                            <ul class="pagination pull-right"></ul>
-                                                        </td>
-                                                    </tr>
-                                                </tfoot>
-                                            </table>
-                                        </div>
+                                <uib-tab index="1" heading="Closed" select="tabChanged('inactive')">
+                                    <br />
+                                    <div ng-show="tableConfig.inactive.items.length==0 && tableConfig.inactive.initialized"
+                                        class="text-center m-t-lg">
+                                        <p>No closed payments yet.</p>
+                                    </div>
+                                    <div ng-show="tableConfig.inactive.initialized">
+                                        <table ng-if="tableConfig.inactive.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
+                                            <thead>
+                                                <tr>
+                                                    <th class="col-lg-2 footable-sortable" ng-click="sort('project', 'inactive')"
+                                                        ng-class="{'footable-sorted': tableConfig.inactive.sortBy === 'project' && tableConfig.inactive.sortDir === 'asc', 'footable-sorted-desc': tableConfig.inactive.sortBy === 'project' && tableConfig.inactive.sortDir === 'desc'}">
+                                                        Project
+                                                        <span class="footable-sort-indicator"></span>
+                                                    </th>
+                                                    <th class="col-lg-2 footable-sortable" ng-click="sort('amount', 'inactive')"
+                                                        ng-class="{'footable-sorted': tableConfig.inactive.sortBy === 'amount' && tableConfig.inactive.sortDir === 'asc', 'footable-sorted-desc': tableConfig.inactive.sortBy === 'amount' && tableConfig.inactive.sortDir === 'desc'}">
+                                                        Amount
+                                                        <span class="footable-sort-indicator"></span>
+                                                    </th>
+                                                    <th data-sort-ignore="true" class="col-lg-2">Description</th>
+                                                    <th class="col-lg-2 footable-sortable" ng-click="sort('challenge', 'inactive')"
+                                                        ng-class="{'footable-sorted': tableConfig.inactive.sortBy === 'challenge' && tableConfig.inactive.sortDir === 'asc', 'footable-sorted-desc': tableConfig.inactive.sortBy === 'challenge' && tableConfig.inactive.sortDir === 'desc'}">
+                                                        Challenge
+                                                        <span class="footable-sort-indicator"></span>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="payment in tableConfig.inactive.items">
+                                                    <td class="col-lg-2">{{payment.project.title}}</td>
+                                                    <td class="col-lg-2">${{payment.amount}}</td>
+                                                    <td class="col-lg-2">{{payment.description}}</td>
+                                                    <td class="col-lg-2"><a href="{{topcoderUrl}}/direct/contest/detail?projectId={{payment.challengeId}}"
+                                                            target="_blank">{{payment.challengeId}}</a></td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="5">
+                                                        <ul class="pagination pull-right">
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.inactive.pageNumber === 1}">
+                                                                <a ng-click="changePage(1, 'inactive')">«</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.inactive.pageNumber === 1}">
+                                                                <a ng-click="changePage(tableConfig.inactive.pageNumber - 1, 'inactive')">‹</a>
+                                                            </li>
+                                                            <li class="footable-page" ng-class="{'active' : item === tableConfig.inactive.pageNumber}"
+                                                                ng-repeat="item in getPageArray('inactive')">
+                                                                <a ng-click="changePage(item, 'inactive')">{{item}}</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.inactive.pageNumber === tableConfig.inactive.pages}">
+                                                                <a ng-click="changePage(tableConfig.inactive.pageNumber + 1, 'inactive')">›</a>
+                                                            </li>
+                                                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.inactive.pageNumber === tableConfig.inactive.pages}">
+                                                                <a ng-click="changePage(tableConfig.inactive.pages, 'inactive')">»</a>
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
                                     </div>
                                 </uib-tab>
                             </uib-tabset>

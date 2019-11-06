@@ -113,5 +113,5 @@ gulp.task('lint', () => {
     .pipe(eslint.failAfterError());
 });
 
-gulp.task('build', ['lint', 'html', 'images', 'fonts', 'fontawesome', 'misc']);
+gulp.task('build', ['ng-config', 'lint', 'html', 'images', 'fonts', 'fontawesome', 'misc']);
 gulp.task('build:watch', ['watch:build']);

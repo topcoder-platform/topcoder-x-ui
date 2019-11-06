@@ -23,6 +23,17 @@ async function getUserSetting(req) {
   return await UserService.getUserSetting(topcoderUsername);
 }
 
+/**
+ * Gets user setting.
+ * @param {Object} req the request
+ * @param {Object} res the response
+ * @returns {Object} the result
+ */
+async function revokeUserSetting(req) {
+  const topcoderUsername = req.query.topcoderUsername;
+  const provider = req.query.provider;
+  return await UserService.revokeUserSetting(topcoderUsername, provider);
+}
 
 /**
  * Gets user access token.
@@ -36,6 +47,7 @@ async function getUserToken(req) {
 
 module.exports = {
   getUserSetting,
+  revokeUserSetting,
   getUserToken,
 };
 

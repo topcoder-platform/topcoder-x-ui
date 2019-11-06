@@ -3,11 +3,11 @@
     <h2>Dashboard</h2>
   </div>
   <div class="col-lg-2 with-button pull-right">
-    <button class="btn btn-sm btn-info pull-right" ui-sref="app.project">
+    <button class="btn btn-sm btn-info pull-right pull-right-button" ui-sref="app.project">
       <i class="fa fa-plus"></i> Add Project</button>
-  </div>
+    </div>
 </div>
-
+<div class="col-md-10 col-md-offset-1" ng-include src="'components/alert/alert.html'"></div>
 <div class="wrapper wrapper-content animated fadeInRight">
   <div class="row">
     <div class="col-lg-12">
@@ -15,7 +15,7 @@
         <div class="ibox-content">
           <uib-tabset active="active">
             <uib-tab index="0" heading="Ready for review" select="tabChanged('readyForReview')">
-              <br/>
+              <br />
               <div ng-show="tableConfig.readyForReview.initialized">
                 <table ng-if="tableConfig.readyForReview.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
                   <thead>
@@ -44,12 +44,15 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr ng-repeat="item in tableConfig.readyForReview.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
+                    <tr ng-repeat="item in tableConfig.readyForReview.items" ng-class-even="'footable-even'"
+                      ng-class-odd="'footable-odd'">
                       <td class="col-lg-2">{{item.updatedAt | date: 'MM.dd.yyyy hh:mm:ss a'}}</td>
                       <td class="col-lg-2 col-md-2">[${{item.prizes[0]}}] {{item.title}}</td>
                       <td class="col-lg-2">{{item.assignee}}</td>
                       <td class="col-lg-2">{{item.projectId.title}}</td>
-                      <td class="col-lg-2 {{item.assignedAt| hourSince |hourSinceClass}}">{{item.assignedAt|hourSince}}</td>
+                      <td class="col-lg-2 {{item.assignedAt| hourSince |hourSinceClass}}">
+                        <strong>{{item.assignedAt|hourSince}}</strong>
+                      </td>
                       <td class="col-lg-2">
                         <a href="{{item.projectId.repoUrl}}/issues/{{item.number}}" target="_blank">{{item.number}}</a>
                       </td>
@@ -65,7 +68,8 @@
                           <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.readyForReview.pageNumber === 1}">
                             <a ng-click="changePage(tableConfig.readyForReview.pageNumber - 1, 'readyForReview')">‹</a>
                           </li>
-                          <li class="footable-page" ng-class="{'active' : item === tableConfig.readyForReview.pageNumber}" ng-repeat="item in getPageArray('readyForReview')">
+                          <li class="footable-page" ng-class="{'active' : item === tableConfig.readyForReview.pageNumber}"
+                            ng-repeat="item in getPageArray('readyForReview')">
                             <a ng-click="changePage(item, 'readyForReview')">{{item}}</a>
                           </li>
                           <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.readyForReview.pageNumber === tableConfig.readyForReview.pages}">
@@ -85,204 +89,211 @@
               </div>
             </uib-tab>
             <uib-tab index="1" heading="Assigned" select="tabChanged('assigned')">
-                <br/>
-                <div ng-show="tableConfig.assigned.initialized">
-                  <table ng-if="tableConfig.assigned.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
-                    <thead>
-                      <tr>
-                        <th class="footable-sortable" ng-click="sort('updatedAt', 'assigned')" ng-class="{'footable-sorted': tableConfig.assigned.sortBy === 'updatedAt' && tableConfig.assigned.sortDir === 'asc', 'footable-sorted-desc': tableConfig.assigned.sortBy === 'updatedAt' && tableConfig.assigned.sortDir === 'desc'}">
-                          Ticket update date
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="footable-sortable" ng-click="sort('title', 'assigned')" ng-class="{'footable-sorted': tableConfig.assigned.sortBy === 'title' && tableConfig.assigned.sortDir === 'asc', 'footable-sorted-desc': tableConfig.assigned.sortBy === 'title' && tableConfig.assigned.sortDir === 'desc'}">
-                          Ticket title
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="footable-sortable" ng-click="sort('assignee', 'assigned')" ng-class="{'footable-sorted': tableConfig.assigned.sortBy === 'assignee' && tableConfig.assigned.sortDir === 'asc', 'footable-sorted-desc': tableConfig.assigned.sortBy === 'assignee' && tableConfig.assigned.sortDir === 'desc'}">
-                          Ticket assignee
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="footable-sortable" ng-click="sort('projectId.title', 'assigned')" ng-class="{'footable-sorted': tableConfig.assigned.sortBy === 'projectId.title' && tableConfig.assigned.sortDir === 'asc', 'footable-sorted-desc': tableConfig.assigned.sortBy === 'projectId.title' && tableConfig.assigned.sortDir === 'desc'}">
-                          Project name
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="footable-sortable" ng-click="sort('assignedAt', 'assigned')" ng-class="{'footable-sorted': tableConfig.assigned.sortBy === 'assignedAt' && tableConfig.assigned.sortDir === 'asc', 'footable-sorted-desc': tableConfig.assigned.sortBy === 'assignedAt' && tableConfig.assigned.sortDir === 'desc'}">
-                          Hours Assigned
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="col-lg-3" data-sort-ignore="true">Link to the ticket</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr ng-repeat="item in tableConfig.assigned.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
-                        <td class="col-lg-2">{{item.updatedAt | date: 'MM.dd.yyyy hh:mm:ss a'}}</td>
-                        <td class="col-lg-2 col-md-2">[${{item.prizes[0]}}] {{item.title}}</td>
-                        <td class="col-lg-2">{{item.assignee}}</td>
-                        <td class="col-lg-2">{{item.projectId.title}}</td>
-                        <td class="col-lg-2 {{item.assignedAt| hourSince |hourSinceClass}}">{{item.assignedAt|hourSince}}</td>
-                        <td class="col-lg-2">
-                          <a href="{{item.projectId.repoUrl}}/issues/{{item.number}}" target="_blank">{{item.number}}</a>
-                        </td>
-                      </tr>
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <td colspan="6">
-                          <ul class="pagination pull-right">
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.assigned.pageNumber === 1}">
-                              <a ng-click="changePage(1, 'assigned')">«</a>
-                            </li>
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.assigned.pageNumber === 1}">
-                              <a ng-click="changePage(tableConfig.assigned.pageNumber - 1, 'assigned')">‹</a>
-                            </li>
-                            <li class="footable-page" ng-class="{'active' : item === tableConfig.assigned.pageNumber}" ng-repeat="item in getPageArray('assigned')">
-                              <a ng-click="changePage(item, 'assigned')">{{item}}</a>
-                            </li>
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.assigned.pageNumber === tableConfig.assigned.pages}">
-                              <a ng-click="changePage(tableConfig.assigned.pageNumber + 1, 'assigned')">›</a>
-                            </li>
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.assigned.pageNumber === tableConfig.assigned.pages}">
-                              <a ng-click="changePage(tableConfig.assigned.pages, 'assigned')">»</a>
-                            </li>
-                          </ul>
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-                <div ng-if="tableConfig.assigned.items.length==0 && tableConfig.assigned.initialized">
-                  No tickets found
-                </div>
+              <br />
+              <div ng-show="tableConfig.assigned.initialized">
+                <table ng-if="tableConfig.assigned.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
+                  <thead>
+                    <tr>
+                      <th class="footable-sortable" ng-click="sort('updatedAt', 'assigned')" ng-class="{'footable-sorted': tableConfig.assigned.sortBy === 'updatedAt' && tableConfig.assigned.sortDir === 'asc', 'footable-sorted-desc': tableConfig.assigned.sortBy === 'updatedAt' && tableConfig.assigned.sortDir === 'desc'}">
+                        Ticket update date
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="footable-sortable" ng-click="sort('title', 'assigned')" ng-class="{'footable-sorted': tableConfig.assigned.sortBy === 'title' && tableConfig.assigned.sortDir === 'asc', 'footable-sorted-desc': tableConfig.assigned.sortBy === 'title' && tableConfig.assigned.sortDir === 'desc'}">
+                        Ticket title
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="footable-sortable" ng-click="sort('assignee', 'assigned')" ng-class="{'footable-sorted': tableConfig.assigned.sortBy === 'assignee' && tableConfig.assigned.sortDir === 'asc', 'footable-sorted-desc': tableConfig.assigned.sortBy === 'assignee' && tableConfig.assigned.sortDir === 'desc'}">
+                        Ticket assignee
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="footable-sortable" ng-click="sort('projectId.title', 'assigned')" ng-class="{'footable-sorted': tableConfig.assigned.sortBy === 'projectId.title' && tableConfig.assigned.sortDir === 'asc', 'footable-sorted-desc': tableConfig.assigned.sortBy === 'projectId.title' && tableConfig.assigned.sortDir === 'desc'}">
+                        Project name
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="footable-sortable" ng-click="sort('assignedAt', 'assigned')" ng-class="{'footable-sorted': tableConfig.assigned.sortBy === 'assignedAt' && tableConfig.assigned.sortDir === 'asc', 'footable-sorted-desc': tableConfig.assigned.sortBy === 'assignedAt' && tableConfig.assigned.sortDir === 'desc'}">
+                        Hours Assigned
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="col-lg-3" data-sort-ignore="true">Link to the ticket</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="item in tableConfig.assigned.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
+                      <td class="col-lg-2">{{item.updatedAt | date: 'MM.dd.yyyy hh:mm:ss a'}}</td>
+                      <td class="col-lg-2 col-md-2">[${{item.prizes[0]}}] {{item.title}}</td>
+                      <td class="col-lg-2">{{item.assignee}}</td>
+                      <td class="col-lg-2">{{item.projectId.title}}</td>
+                      <td class="col-lg-2 {{item.assignedAt| hourSince |hourSinceClass}}">
+                        <strong> {{item.assignedAt|hourSince}}
+                        </strong>
+                      </td>
+                      <td class="col-lg-2">
+                        <a href="{{item.projectId.repoUrl}}/issues/{{item.number}}" target="_blank">{{item.number}}</a>
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="6">
+                        <ul class="pagination pull-right">
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.assigned.pageNumber === 1}">
+                            <a ng-click="changePage(1, 'assigned')">«</a>
+                          </li>
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.assigned.pageNumber === 1}">
+                            <a ng-click="changePage(tableConfig.assigned.pageNumber - 1, 'assigned')">‹</a>
+                          </li>
+                          <li class="footable-page" ng-class="{'active' : item === tableConfig.assigned.pageNumber}"
+                            ng-repeat="item in getPageArray('assigned')">
+                            <a ng-click="changePage(item, 'assigned')">{{item}}</a>
+                          </li>
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.assigned.pageNumber === tableConfig.assigned.pages}">
+                            <a ng-click="changePage(tableConfig.assigned.pageNumber + 1, 'assigned')">›</a>
+                          </li>
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.assigned.pageNumber === tableConfig.assigned.pages}">
+                            <a ng-click="changePage(tableConfig.assigned.pages, 'assigned')">»</a>
+                          </li>
+                        </ul>
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div ng-if="tableConfig.assigned.items.length==0 && tableConfig.assigned.initialized">
+                No tickets found
+              </div>
             </uib-tab>
             <uib-tab index="2" heading="Open for pickup" select="tabChanged('openForPickup')">
-                <br/>
-                <div ng-show="tableConfig.openForPickup.initialized">
-                  <table ng-if="tableConfig.openForPickup.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
-                    <thead>
-                      <tr>
-                        <th class="footable-sortable" ng-click="sort('updatedAt', 'openForPickup')" ng-class="{'footable-sorted': tableConfig.openForPickup.sortBy === 'updatedAt' && tableConfig.openForPickup.sortDir === 'asc', 'footable-sorted-desc': tableConfig.openForPickup.sortBy === 'updatedAt' && tableConfig.openForPickup.sortDir === 'desc'}">
-                          Ticket update date
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="footable-sortable" ng-click="sort('title', 'openForPickup')" ng-class="{'footable-sorted': tableConfig.openForPickup.sortBy === 'title' && tableConfig.openForPickup.sortDir === 'asc', 'footable-sorted-desc': tableConfig.openForPickup.sortBy === 'title' && tableConfig.openForPickup.sortDir === 'desc'}">
-                          Ticket title
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="footable-sortable" ng-click="sort('assignee', 'openForPickup')" ng-class="{'footable-sorted': tableConfig.openForPickup.sortBy === 'assignee' && tableConfig.openForPickup.sortDir === 'asc', 'footable-sorted-desc': tableConfig.openForPickup.sortBy === 'assignee' && tableConfig.openForPickup.sortDir === 'desc'}">
-                          Ticket assignee
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="footable-sortable" ng-click="sort('projectId.title', 'openForPickup')" ng-class="{'footable-sorted': tableConfig.openForPickup.sortBy === 'projectId.title' && tableConfig.openForPickup.sortDir === 'asc', 'footable-sorted-desc': tableConfig.openForPickup.sortBy === 'projectId.title' && tableConfig.openForPickup.sortDir === 'desc'}">
-                          Project name
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="col-lg-3" data-sort-ignore="true">Link to the ticket</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr ng-repeat="item in tableConfig.openForPickup.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
-                        <td class="col-lg-2">{{item.updatedAt | date: 'MM.dd.yyyy hh:mm:ss a'}}</td>
-                        <td class="col-lg-2 col-md-2">[${{item.prizes[0]}}] {{item.title}}</td>
-                        <td class="col-lg-2">{{item.assignee}}</td>
-                        <td class="col-lg-2">{{item.projectId.title}}</td>
-                        <td class="col-lg-2">
-                          <a href="{{item.projectId.repoUrl}}/issues/{{item.number}}" target="_blank">{{item.number}}</a>
-                        </td>
-                      </tr>
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <td colspan="5">
-                          <ul class="pagination pull-right">
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.openForPickup.pageNumber === 1}">
-                              <a ng-click="changePage(1, 'openForPickup')">«</a>
-                            </li>
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.openForPickup.pageNumber === 1}">
-                              <a ng-click="changePage(tableConfig.openForPickup.pageNumber - 1, 'openForPickup')">‹</a>
-                            </li>
-                            <li class="footable-page" ng-class="{'active' : item === tableConfig.openForPickup.pageNumber}" ng-repeat="item in getPageArray('openForPickup')">
-                              <a ng-click="changePage(item, 'openForPickup')">{{item}}</a>
-                            </li>
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.openForPickup.pageNumber === tableConfig.openForPickup.pages}">
-                              <a ng-click="changePage(tableConfig.openForPickup.pageNumber + 1, 'openForPickup')">›</a>
-                            </li>
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.openForPickup.pageNumber === tableConfig.openForPickup.pages}">
-                              <a ng-click="changePage(tableConfig.openForPickup.pages, 'openForPickup')">»</a>
-                            </li>
-                          </ul>
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-                <div ng-if="tableConfig.openForPickup.items.length==0 && tableConfig.openForPickup.initialized">
-                  No tickets found
-                </div>
+              <br />
+              <div ng-show="tableConfig.openForPickup.initialized">
+                <table ng-if="tableConfig.openForPickup.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
+                  <thead>
+                    <tr>
+                      <th class="footable-sortable" ng-click="sort('updatedAt', 'openForPickup')" ng-class="{'footable-sorted': tableConfig.openForPickup.sortBy === 'updatedAt' && tableConfig.openForPickup.sortDir === 'asc', 'footable-sorted-desc': tableConfig.openForPickup.sortBy === 'updatedAt' && tableConfig.openForPickup.sortDir === 'desc'}">
+                        Ticket update date
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="footable-sortable" ng-click="sort('title', 'openForPickup')" ng-class="{'footable-sorted': tableConfig.openForPickup.sortBy === 'title' && tableConfig.openForPickup.sortDir === 'asc', 'footable-sorted-desc': tableConfig.openForPickup.sortBy === 'title' && tableConfig.openForPickup.sortDir === 'desc'}">
+                        Ticket title
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="footable-sortable" ng-click="sort('assignee', 'openForPickup')" ng-class="{'footable-sorted': tableConfig.openForPickup.sortBy === 'assignee' && tableConfig.openForPickup.sortDir === 'asc', 'footable-sorted-desc': tableConfig.openForPickup.sortBy === 'assignee' && tableConfig.openForPickup.sortDir === 'desc'}">
+                        Ticket assignee
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="footable-sortable" ng-click="sort('projectId.title', 'openForPickup')" ng-class="{'footable-sorted': tableConfig.openForPickup.sortBy === 'projectId.title' && tableConfig.openForPickup.sortDir === 'asc', 'footable-sorted-desc': tableConfig.openForPickup.sortBy === 'projectId.title' && tableConfig.openForPickup.sortDir === 'desc'}">
+                        Project name
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="col-lg-3" data-sort-ignore="true">Link to the ticket</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="item in tableConfig.openForPickup.items" ng-class-even="'footable-even'"
+                      ng-class-odd="'footable-odd'">
+                      <td class="col-lg-2">{{item.updatedAt | date: 'MM.dd.yyyy hh:mm:ss a'}}</td>
+                      <td class="col-lg-2 col-md-2">[${{item.prizes[0]}}] {{item.title}}</td>
+                      <td class="col-lg-2">{{item.assignee}}</td>
+                      <td class="col-lg-2">{{item.projectId.title}}</td>
+                      <td class="col-lg-2">
+                        <a href="{{item.projectId.repoUrl}}/issues/{{item.number}}" target="_blank">{{item.number}}</a>
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="5">
+                        <ul class="pagination pull-right">
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.openForPickup.pageNumber === 1}">
+                            <a ng-click="changePage(1, 'openForPickup')">«</a>
+                          </li>
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.openForPickup.pageNumber === 1}">
+                            <a ng-click="changePage(tableConfig.openForPickup.pageNumber - 1, 'openForPickup')">‹</a>
+                          </li>
+                          <li class="footable-page" ng-class="{'active' : item === tableConfig.openForPickup.pageNumber}"
+                            ng-repeat="item in getPageArray('openForPickup')">
+                            <a ng-click="changePage(item, 'openForPickup')">{{item}}</a>
+                          </li>
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.openForPickup.pageNumber === tableConfig.openForPickup.pages}">
+                            <a ng-click="changePage(tableConfig.openForPickup.pageNumber + 1, 'openForPickup')">›</a>
+                          </li>
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.openForPickup.pageNumber === tableConfig.openForPickup.pages}">
+                            <a ng-click="changePage(tableConfig.openForPickup.pages, 'openForPickup')">»</a>
+                          </li>
+                        </ul>
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div ng-if="tableConfig.openForPickup.items.length==0 && tableConfig.openForPickup.initialized">
+                No tickets found
+              </div>
             </uib-tab>
             <uib-tab index="3" heading="Paid" select="tabChanged('paid')">
-                <br/>
-                <div ng-show="tableConfig.paid.initialized">
-                  <table ng-if="tableConfig.paid.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
-                    <thead>
-                      <tr>
-                        <th class="footable-sortable" ng-click="sort('updatedAt', 'paid')" ng-class="{'footable-sorted': tableConfig.paid.sortBy === 'updatedAt' && tableConfig.paid.sortDir === 'asc', 'footable-sorted-desc': tableConfig.paid.sortBy === 'updatedAt' && tableConfig.paid.sortDir === 'desc'}">
-                          Ticket update date
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="footable-sortable" ng-click="sort('title', 'paid')" ng-class="{'footable-sorted': tableConfig.paid.sortBy === 'title' && tableConfig.paid.sortDir === 'asc', 'footable-sorted-desc': tableConfig.paid.sortBy === 'title' && tableConfig.paid.sortDir === 'desc'}">
-                          Ticket title
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="footable-sortable" ng-click="sort('assignee', 'paid')" ng-class="{'footable-sorted': tableConfig.paid.sortBy === 'assignee' && tableConfig.paid.sortDir === 'asc', 'footable-sorted-desc': tableConfig.paid.sortBy === 'assignee' && tableConfig.paid.sortDir === 'desc'}">
-                          Ticket assignee
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="footable-sortable" ng-click="sort('projectId.title', 'paid')" ng-class="{'footable-sorted': tableConfig.paid.sortBy === 'projectId.title' && tableConfig.paid.sortDir === 'asc', 'footable-sorted-desc': tableConfig.paid.sortBy === 'projectId.title' && tableConfig.paid.sortDir === 'desc'}">
-                          Project name
-                          <span class="footable-sort-indicator"></span>
-                        </th>
-                        <th class="col-lg-3" data-sort-ignore="true">Link to the ticket</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr ng-repeat="item in tableConfig.paid.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
-                        <td class="col-lg-2">{{item.updatedAt | date: 'MM.dd.yyyy hh:mm:ss a'}}</td>
-                        <td class="col-lg-2 col-md-2">[${{item.prizes[0]}}] {{item.title}}</td>
-                        <td class="col-lg-2">{{item.assignee}}</td>
-                        <td class="col-lg-2">{{item.projectId.title}}</td>
-                        <td class="col-lg-2">
-                          <a href="{{item.projectId.repoUrl}}/issues/{{item.number}}" target="_blank">{{item.number}}</a>
-                        </td>
-                      </tr>
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <td colspan="5">
-                          <ul class="pagination pull-right">
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.paid.pageNumber === 1}">
-                              <a ng-click="changePage(1, 'paid')">«</a>
-                            </li>
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.paid.pageNumber === 1}">
-                              <a ng-click="changePage(tableConfig.paid.pageNumber - 1, 'paid')">‹</a>
-                            </li>
-                            <li class="footable-page" ng-class="{'active' : item === tableConfig.paid.pageNumber}" ng-repeat="item in getPageArray('paid')">
-                              <a ng-click="changePage(item, 'paid')">{{item}}</a>
-                            </li>
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.paid.pageNumber === tableConfig.paid.pages}">
-                              <a ng-click="changePage(tableConfig.paid.pageNumber + 1, 'paid')">›</a>
-                            </li>
-                            <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.paid.pageNumber === tableConfig.paid.pages}">
-                              <a ng-click="changePage(tableConfig.paid.pages, 'paid')">»</a>
-                            </li>
-                          </ul>
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-                <div ng-if="tableConfig.paid.items.length==0 && tableConfig.paid.initialized">
-                  No tickets found
-                </div>
+              <br />
+              <div ng-show="tableConfig.paid.initialized">
+                <table ng-if="tableConfig.paid.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
+                  <thead>
+                    <tr>
+                      <th class="footable-sortable" ng-click="sort('updatedAt', 'paid')" ng-class="{'footable-sorted': tableConfig.paid.sortBy === 'updatedAt' && tableConfig.paid.sortDir === 'asc', 'footable-sorted-desc': tableConfig.paid.sortBy === 'updatedAt' && tableConfig.paid.sortDir === 'desc'}">
+                        Ticket update date
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="footable-sortable" ng-click="sort('title', 'paid')" ng-class="{'footable-sorted': tableConfig.paid.sortBy === 'title' && tableConfig.paid.sortDir === 'asc', 'footable-sorted-desc': tableConfig.paid.sortBy === 'title' && tableConfig.paid.sortDir === 'desc'}">
+                        Ticket title
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="footable-sortable" ng-click="sort('assignee', 'paid')" ng-class="{'footable-sorted': tableConfig.paid.sortBy === 'assignee' && tableConfig.paid.sortDir === 'asc', 'footable-sorted-desc': tableConfig.paid.sortBy === 'assignee' && tableConfig.paid.sortDir === 'desc'}">
+                        Ticket assignee
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="footable-sortable" ng-click="sort('projectId.title', 'paid')" ng-class="{'footable-sorted': tableConfig.paid.sortBy === 'projectId.title' && tableConfig.paid.sortDir === 'asc', 'footable-sorted-desc': tableConfig.paid.sortBy === 'projectId.title' && tableConfig.paid.sortDir === 'desc'}">
+                        Project name
+                        <span class="footable-sort-indicator"></span>
+                      </th>
+                      <th class="col-lg-3" data-sort-ignore="true">Link to the ticket</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="item in tableConfig.paid.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
+                      <td class="col-lg-2">{{item.updatedAt | date: 'MM.dd.yyyy hh:mm:ss a'}}</td>
+                      <td class="col-lg-2 col-md-2">[${{item.prizes[0]}}] {{item.title}}</td>
+                      <td class="col-lg-2">{{item.assignee}}</td>
+                      <td class="col-lg-2">{{item.projectId.title}}</td>
+                      <td class="col-lg-2">
+                        <a href="{{item.projectId.repoUrl}}/issues/{{item.number}}" target="_blank">{{item.number}}</a>
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="5">
+                        <ul class="pagination pull-right">
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.paid.pageNumber === 1}">
+                            <a ng-click="changePage(1, 'paid')">«</a>
+                          </li>
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.paid.pageNumber === 1}">
+                            <a ng-click="changePage(tableConfig.paid.pageNumber - 1, 'paid')">‹</a>
+                          </li>
+                          <li class="footable-page" ng-class="{'active' : item === tableConfig.paid.pageNumber}"
+                            ng-repeat="item in getPageArray('paid')">
+                            <a ng-click="changePage(item, 'paid')">{{item}}</a>
+                          </li>
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.paid.pageNumber === tableConfig.paid.pages}">
+                            <a ng-click="changePage(tableConfig.paid.pageNumber + 1, 'paid')">›</a>
+                          </li>
+                          <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.paid.pageNumber === tableConfig.paid.pages}">
+                            <a ng-click="changePage(tableConfig.paid.pages, 'paid')">»</a>
+                          </li>
+                        </ul>
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div ng-if="tableConfig.paid.items.length==0 && tableConfig.paid.initialized">
+                No tickets found
+              </div>
             </uib-tab>
           </uib-tabset>
         </div>
@@ -290,3 +301,4 @@
     </div>
   </div>
 </div>
+<div ng-include src="'components/tutorial/tutorial.html'"></div>

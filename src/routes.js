@@ -43,6 +43,7 @@ module.exports = {
       method: 'addUserToTeam',
       allowNormalUser: true,
       tcLogin: true,
+      allowAnonymous: true,
     },
   },
   '/github/normaluser/callback': {
@@ -50,6 +51,7 @@ module.exports = {
       controller: 'GithubController',
       method: 'addUserToTeamCallback',
       allowNormalUser: true,
+      allowAnonymous: true,
     },
   },
 
@@ -84,6 +86,7 @@ module.exports = {
       method: 'addUserToGroup',
       allowNormalUser: true,
       tcLogin: true,
+      allowAnonymous: true,
     },
   },
   '/gitlab/normaluser/callback': {
@@ -91,6 +94,7 @@ module.exports = {
       controller: 'GitlabController',
       method: 'addUserToGroupCallback',
       allowNormalUser: true,
+      allowAnonymous: true,
     },
   },
 
@@ -149,7 +153,7 @@ module.exports = {
   '/payments/copilot': {
     get: {
       controller: 'CopilotPaymentController',
-      method: 'getAll',
+      method: 'search',
       allowedRoles: [config.COPILOT_ROLE],
     },
     post: {
@@ -182,6 +186,10 @@ module.exports = {
       controller: 'UserController',
       method: 'getUserSetting',
     },
+    delete: {
+      controller: 'UserController',
+      method: 'revokeUserSetting'
+    }
   },
   '/users/accessToken': {
     get: {
@@ -201,6 +209,16 @@ module.exports = {
       controller: 'IssueController',
       method: 'search',
     },
+    post: {
+      controller: 'IssueController',
+      method: 'create',
+    },
+  },
+  '/issues/recreate': {
+    post: {
+      controller: 'IssueController',
+      method: 'recreate'
+    }
   },
   '/appConfig': {
     get: {

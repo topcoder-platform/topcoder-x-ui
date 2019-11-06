@@ -6,7 +6,7 @@
 'use strict';
 
 angular.module('topcoderX')
-  .factory('Helper', ['$rootScope', '$location', function ($rootScope, $location) {
+  .factory('Helper', ['$rootScope', '$location', 'TC_LOGIN_URL', 'TC_USER_PROFILE_URL', 'API_URL', 'ADMIN_TOOL_URL', 'ACCOUNTS_CONNECTOR_URL', 'DIRECT_URL_BASE', function ($rootScope, $location, TC_LOGIN_URL, TC_USER_PROFILE_URL, API_URL, ADMIN_TOOL_URL, ACCOUNTS_CONNECTOR_URL, DIRECT_URL_BASE) {
     var baseUrl = $location.protocol() + '://' + $location.host();
 
     var service = {};
@@ -17,16 +17,15 @@ angular.module('topcoderX')
      * gets the config based on host env
      */
     service.config = function () {
-      var tcDomain = baseUrl.indexOf('topcoder.com') > -1 ? 'topcoder.com' : 'topcoder-dev.com';
       return {
-        TC_LOGIN_URL: 'https://accounts.' + tcDomain + '/member',
-        TC_USER_PROFILE_URL: 'https://api.' + tcDomain + '/v2/user/profile',
-        API_URL: 'https://api.' + tcDomain + '',
-        ADMIN_TOOL_URL: 'https://api.' + tcDomain + '/v2',
-        ACCOUNTS_CONNECTOR_URL: 'https://accounts.' + tcDomain + '/connector.html',
-        DIRECT_URL_BASE: 'https://www.' + tcDomain + '/direct/projectOverview?formData.projectId='
-      }
-    }
+        TC_LOGIN_URL: TC_LOGIN_URL, // eslint-disable-line object-shorthand
+        TC_USER_PROFILE_URL: TC_USER_PROFILE_URL, // eslint-disable-line object-shorthand
+        API_URL: API_URL, // eslint-disable-line object-shorthand
+        ADMIN_TOOL_URL: ADMIN_TOOL_URL, // eslint-disable-line object-shorthand
+        ACCOUNTS_CONNECTOR_URL: ACCOUNTS_CONNECTOR_URL, // eslint-disable-line object-shorthand
+        DIRECT_URL_BASE: DIRECT_URL_BASE, // eslint-disable-line object-shorthand
+      };
+    };
 
     service.isAdminUser = function (currentUser) {
       var userRoles = currentUser.roles.map(function (x) {

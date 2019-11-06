@@ -4,6 +4,6 @@
     <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="closeAlert($index)">
       <span aria-hidden="true">&times;</span>
     </button>
-    {{alert.message}}
+    <div ng-bind-html="alert.message"></div>
   </div>
 <div>
