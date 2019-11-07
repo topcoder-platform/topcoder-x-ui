@@ -10,7 +10,7 @@ gulp.task('ng-config', function () {
     gulp.src('src/front/config.json')
         .pipe(
             gulpNgConfig('app.constants', {
-                environment: process.env.BUILD_ENV || 'dev',
+                environment: process.env.BUILD_ENV || 'prod',
             }))
         .pipe(gulp.dest(paths.src + '/app/'))
 });

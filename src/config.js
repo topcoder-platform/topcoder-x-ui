@@ -59,11 +59,11 @@ module.exports = {
   },
   TOPCODER_VALUES: {
     dev: {
-      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://DEFAULT',
+      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts.topcoder-dev.com/member',
       TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || 'https://api.topcoder-dev.com/v2/user/profile',
     },
     prod: {
-      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://DEFAULT',
+      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts.topcoder.com/member',
       TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || 'https://api.topcoder.com/v2/user/profile',
     },
   },
