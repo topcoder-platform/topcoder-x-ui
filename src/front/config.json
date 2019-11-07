@@ -76,7 +76,7 @@
         "DIRECT_URL_BASE": "https://www.topcoder.com/direct/projectOverview?formData.projectId=",
         "OWNER_LOGIN_GITHUB_URL":"/api/v1/github/owneruser/login",
         "OWNER_LOGIN_GITLAB_URL":"/api/v1/gitlab/owneruser/login",
-        "TOPCODER_URL": "https://topcoder-dev.com",
+        "TOPCODER_URL": "https://topcoder.com",
         "GITHUB_TEAM_URL": "https://github.com/orgs/",
         "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
     }
