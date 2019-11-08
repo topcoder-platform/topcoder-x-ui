@@ -61,6 +61,8 @@ KAFKA_CLIENT_CERT_KEY: <cert string>
 
 KAFKA_URL: silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
 
+KAFKA_GROUP_ID: topcoder-x-processor
+
 TOPIC: topcoder-x
 ```
 
@@ -71,6 +73,7 @@ So it would be updated from this:
 ```
   KAFKA_OPTIONS: {
     connectionString: process.env.KAFKA_URL || 'localhost:9092',
+    groupId: process.env.KAFKA_GROUP_ID || 'topcoder-x-processor',
     ssl: {
       cert: process.env.KAFKA_CLIENT_CERT || fs.readFileSync('./kafka_client.cer'), // eslint-disable-line no-sync
       key: process.env.KAFKA_CLIENT_CERT_KEY || fs.readFileSync('./kafka_client.key'), // eslint-disable-line no-sync
@@ -82,7 +85,8 @@ To this:
 
 ```
   KAFKA_OPTIONS: {
-    connectionString: process.env.KAFKA_URL || 'localhost:9092'
+    connectionString: process.env.KAFKA_URL || 'localhost:9092',
+    groupId: process.env.KAFKA_GROUP_ID || 'topcoder-x-processor'
   },
 ```
 
@@ -188,6 +192,7 @@ ISSUE_BID_EMAIL_RECEIVER:     cwd@topcoder.com
 KAFKA_CLIENT_CERT: <cert>
 KAFKA_CLIENT_CERT_KEY: <key>
 KAFKA_URL:                   silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
+KAFKA_GROUP_ID                topcoder-x-processor
 LOG_LEVEL:                    debug
 MAILGUN_API_KEY:              key-5ebe7a0fae37a9008721ec0bfe5bdd95
 MAILGUN_DOMAIN:               sandbox3fcf4920781449f2a5293f8ef18e4bb6.mailgun.org
