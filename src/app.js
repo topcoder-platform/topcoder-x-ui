@@ -148,6 +148,50 @@ process.on('unhandledRejection', (err) => {
   logger.logFullError(err, 'system');
 });
 
+// dump the configuration to logger
+const ignoreConfigLog = [
+  'cert',
+  'key',
+  'AWS_ACCESS_KEY_ID',
+  'AWS_SECRET_ACCESS_KEY',
+  'AUTH0_CLIENT_ID',
+  'AUTH0_CLIENT_SECRET',
+  'GITHUB_CLIENT_ID',
+  'GITHUB_CLIENT_SECRET',
+  'GITLAB_CLIENT_ID',
+  'GITLAB_CLIENT_SECRET'
+];
+/**
+ * Print configs to logger
+ * @param {Object} params the config params
+ * @param {Number} level the level of param object
+ */
+function dumpConfigs(params, level) {
+  Object.keys(params).forEach((key) => {
+    if (_.includes(ignoreConfigLog, key)) {
+      return;
+    }
+    const item = params[key];
+    let str = '';
+    let n = 0;
+    while (n < level) { // eslint-disable-line no-restricted-syntax
+      n++;
+      str += '  ';
+    }
+    if (item && _.isObject(item)) {
+      str += `${key}=`;
+      logger.debug(str);
+      dumpConfigs(item, level + 1);
+    } else {
+      str += `${key}=${item}`;
+      logger.debug(str);
+    }
+  });
+}
+logger.debug('--- List of Configurations ---');
+dumpConfigs(config, 0);
+logger.debug('--- End of List of Configurations ---');
+
 const port = config.PORT;
 app.listen(port, '0.0.0.0');
 logger.info('Topcoder X server listening on port %d', port);
