@@ -16,11 +16,7 @@ const helper = require('../common/helper');
  * @returns {Object} the configuration details
  */
 async function getAppConfig() {
-  return {
-    helpLink: config.HELP_LINK,
-    copilotRole: config.COPILOT_ROLE,
-    administratorRoles: config.ADMINISTRATOR_ROLES,
-  };
+  return config.frontendConfigs;
 }
 
 module.exports = {

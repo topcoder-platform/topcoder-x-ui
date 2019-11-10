@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('topcoderX') // eslint-disable-line angular/no-services
-  .controller('NavController', ['$scope', '$log', '$state', '$cookies', '$http', '$rootScope', 'TC_USER_PROFILE_URL',
-    function ($scope, $log, $state, $cookies, $http, $rootScope, TC_USER_PROFILE_URL) {
+  .controller('NavController', ['$scope', '$log', '$state', '$cookies', '$http', '$rootScope',
+    function ($scope, $log, $state, $cookies, $http, $rootScope) {
       $scope.$state = $state;
       $scope.menuList = false;
       $scope.user = {};
@@ -10,7 +10,7 @@ angular.module('topcoderX') // eslint-disable-line angular/no-services
 
       const token = $cookies.get('tcjwt');
       const req = {
-        url: TC_USER_PROFILE_URL,
+        url: $rootScope.appConfig.TC_USER_PROFILE_URL,
         method: 'Get',
         headers: {
           Authorization: 'Bearer ' + token,
