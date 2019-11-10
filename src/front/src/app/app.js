@@ -11,7 +11,6 @@ angular.module('topcoderX', [
   'ngResource',
   'ui.router',
   'ui.bootstrap',
-  'app.constants',
   'angular-clipboard',
   'angular-jwt'])
   // In the run phase of your Angular application

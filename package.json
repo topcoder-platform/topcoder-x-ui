@@ -121,7 +121,6 @@
         "gulp-load-plugins": "^2.0.1",
         "gulp-minify-html": "~1.0.6",
         "gulp-ng-annotate": "~1.0.0",
-        "gulp-ng-config": "^1.5.1",
         "gulp-protractor": "^4.1.1",
         "gulp-rename": "~1.2.0",
         "gulp-replace": "~0.5.0",
