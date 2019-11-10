@@ -1,10 +1,9 @@
 'use strict';
 
-angular.module('topcoderX').controller('SettingController', ['currentUser', '$scope', 'OWNER_LOGIN_GITHUB_URL',
-    'OWNER_LOGIN_GITLAB_URL', 'SettingService', '$rootScope', 'Dialog', 'Alert', 'Helper', '$window',
+angular.module('topcoderX').controller('SettingController', ['currentUser', '$scope',
+    'SettingService', '$rootScope', 'Dialog', 'Alert', 'Helper', '$window',
     'Tutorial',
-    function (currentUser, $scope, OWNER_LOGIN_GITHUB_URL,
-        OWNER_LOGIN_GITLAB_URL, SettingService, $rootScope, Dialog, Alert, Helper, $window, Tutorial) {
+    function (currentUser, $scope, SettingService, $rootScope, Dialog, Alert, Helper, $window, Tutorial) {
         $scope.settings = {};
         $scope.isLoaded = false;
 
@@ -21,8 +20,8 @@ angular.module('topcoderX').controller('SettingController', ['currentUser', '$sc
         _getSetting();
 
         $scope.loginUrl = {
-            github: Helper.baseUrl + OWNER_LOGIN_GITHUB_URL,
-            gitlab: Helper.baseUrl + OWNER_LOGIN_GITLAB_URL,
+            github: Helper.baseUrl + $rootScope.appConfig.OWNER_LOGIN_GITHUB_URL,
+            gitlab: Helper.baseUrl + $rootScope.appConfig.OWNER_LOGIN_GITLAB_URL,
         }
 
         $scope.$on('dialog.finished', function (event, args) {

@@ -31,8 +31,9 @@ angular.module('topcoderX')
     jwtInterceptorProvider.tokenGetter = [
       'AuthService', '$http', 'Helper', '$rootScope', 'config',
       function (AuthService, $http, Helper, $rootScope, config) {
+        if (!$rootScope.appConfig) return;
         // token V2 for API V2
-        if (config.url.indexOf(Helper.config().ADMIN_TOOL_URL) > -1) {
+        if (config.url.indexOf($rootScope.appConfig.ADMIN_TOOL_URL) > -1) {
           if (AuthService.getTokenV2()) {
             return AuthService.getTokenV2();
           }
@@ -45,7 +46,7 @@ angular.module('topcoderX')
             if (refreshingToken === null) {
               refreshingToken = $http({
                 method: 'GET',
-                url: Helper.config().API_URL + "/v3/authorizations/1",
+                url: $rootScope.appConfig.API_URL + "/v3/authorizations/1",
                 headers: {
                   'Authorization': "Bearer " + currentToken
                 }

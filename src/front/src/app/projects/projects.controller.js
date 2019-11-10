@@ -7,7 +7,7 @@ angular.module('topcoderX')
       $scope.title = 'Project Management';
 
       //direct base
-      $scope.directUrlBase = Helper.config().DIRECT_URL_BASE;
+      $scope.directUrlBase = $rootScope.appConfig.DIRECT_URL_BASE;
       $scope.isAdminUser = Helper.isAdminUser(currentUser);
       $scope.filter = {
         showAll: $scope.isAdminUser,
