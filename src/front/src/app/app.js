@@ -11,7 +11,6 @@ angular.module('topcoderX', [
   'ngResource',
   'ui.router',
   'ui.bootstrap',
-  'app.constants',
   'angular-clipboard',
   'angular-jwt'])
   // In the run phase of your Angular application
@@ -52,7 +51,9 @@ angular.module('topcoderX', [
               });
             }],
             currentUser: ['AuthService', function (AuthService) {
-              return AuthService.getCurrentUser();
+              return AuthService.getAppConfig().then(function () {
+                return AuthService.getCurrentUser();
+              });
             }],
 
           }
@@ -63,11 +64,10 @@ angular.module('topcoderX', [
           templateUrl: 'components/common/content.html',
           resolve: {
             currentUser: ['AuthService', function (AuthService) {
-              return AuthService.getCurrentUser();
-            }],
-            AppConfig: ['AuthService', function (AuthService) {
-              return AuthService.getAppConfig();
-            }],
+              return AuthService.getAppConfig().then(function () {
+                return AuthService.getCurrentUser();
+              });
+            }]
           },
         })
         .state('app.main', {

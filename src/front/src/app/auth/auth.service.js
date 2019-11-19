@@ -2,12 +2,11 @@
 
 angular.module('topcoderX')
   .factory('AuthService', [
-    '$q', '$log', 'jwtHelper', '$cookies', '$window', '$state', '$rootScope', '$http',
-    'COOKIES_SECURE', 'JWT_V3_NAME', 'JWT_V2_NAME', 'Helper',
-    function ($q, $log, jwtHelper, $cookies, $window, $state, $rootScope, $http,
-      COOKIES_SECURE, JWT_V3_NAME, JWT_V2_NAME, Helper) {
+    '$q', '$log', 'jwtHelper', '$cookies', '$window', '$state', '$rootScope', '$http', 'Helper',
+    function ($q, $log, jwtHelper, $cookies, $window, $state, $rootScope, $http, Helper) {
       // these constants are for AuthService internal usage only
       // they don't depend on the environment thus don't have to be placed in global config
+
       var GET_FRESH_TOKEN_REQUEST = 'GET_FRESH_TOKEN_REQUEST';
       var GET_FRESH_TOKEN_SUCCESS = 'GET_FRESH_TOKEN_SUCCESS';
       var GET_FRESH_TOKEN_FAILURE = 'GET_FRESH_TOKEN_FAILURE';
@@ -153,14 +152,14 @@ angular.module('topcoderX')
           AuthService.logginOut = null;
           // remove only token V3, which we set from the script manually
           // token V2 will be removed automatically during logout server request
-          $cookies.remove(JWT_V3_NAME, { path: '/' });
+          $cookies.remove($rootScope.appConfig.JWT_V3_NAME, { path: '/' });
         });
 
         return AuthService.logginOut;
       }
 
       AuthService.login = function () {
-        $window.location.href = Helper.config().TC_LOGIN_URL + '?retUrl=' + encodeURIComponent($window.location.href);
+        $window.location.href = $rootScope.appConfig.TC_LOGIN_URL + '?retUrl=' + encodeURIComponent($window.location.href);
       }
 
       /**
@@ -170,7 +169,7 @@ angular.module('topcoderX')
       AuthService.init = function () {
         // add hidden iframe which is used to get API v3 token
         configureConnector({
-          connectorUrl: Helper.config().ACCOUNTS_CONNECTOR_URL,
+          connectorUrl: $rootScope.appConfig ? $rootScope.appConfig.ACCOUNTS_CONNECTOR_URL : null,
           frameId: 'tc-accounts-iframe',
         });
       }
@@ -219,15 +218,15 @@ angular.module('topcoderX')
        * @return {String} token v3
        */
       AuthService.getTokenV3 = function () {
-        return $cookies.get(JWT_V3_NAME);
+        return $cookies.get($rootScope.appConfig.JWT_V3_NAME);
       }
 
       /**
        * Save token V3 to cookies
        */
       AuthService.setTokenV3 = function (token) {
-        return $cookies.put(JWT_V3_NAME, token, {
-          secure: COOKIES_SECURE,
+        return $cookies.put($rootScope.appConfig.JWT_V3_NAME, token, {
+          secure: $rootScope.appConfig.COOKIES_SECURE,
         });
       }
 
@@ -246,7 +245,7 @@ angular.module('topcoderX')
        * @return {String} token v2
        */
       AuthService.getTokenV2 = function () {
-        return $cookies.get(JWT_V2_NAME);
+        return $cookies.get($rootScope.appConfig.JWT_V2_NAME);
       }
 
       /**
@@ -282,17 +281,20 @@ angular.module('topcoderX')
        * gets the application configurations
        */
       AuthService.getAppConfig = function () {
-        var tctV3 = AuthService.getTokenV3();
-
-        if (!tctV3) {
-          return null;
+        if ($rootScope.appConfig) {
+          return $q.resolve($rootScope.appConfig);
         }
-        return $http.get(Helper.baseUrl + '/api/v1/appConfig').then(function (res) {
-          $rootScope.appConfig = res.data;
-          return $q.resolve(res.data);
-        }).catch(function (err) {
-          return $q.reject(err);
-        });
+        return $http.get(Helper.baseUrl + '/api/v1/appConfig')
+          .then(function (res) {
+            $rootScope.appConfig = res.data;
+            if (connectorIFrame && !connectorIFrame.src) {
+              connectorIFrame.src = $rootScope.appConfig.ACCOUNTS_CONNECTOR_URL;
+              url = $rootScope.appConfig.ACCOUNTS_CONNECTOR_URL;
+            }
+            return $q.resolve(res.data);
+          }).catch(function (err) {
+            return $q.reject(err);
+          });
       };
 
       return AuthService;

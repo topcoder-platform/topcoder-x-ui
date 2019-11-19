@@ -224,6 +224,8 @@ module.exports = {
     get: {
       controller: 'AppConfigController',
       method: 'getAppConfig',
+      allowNormalUser: true,
+      allowAnonymous: true
     },
   },
 };
