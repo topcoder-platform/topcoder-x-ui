@@ -142,6 +142,11 @@ angular.module('topcoderX', [
           templateUrl: 'app/members/member.html',
           controller: 'MemberController',
           controllerAs: 'vm',
+          resolve: {
+            authService: ['AuthService', function (AuthService) {
+              return AuthService.getAppConfig();
+            }]
+          },
         })
         .state('app.copilotPayments', {
           url: '/copilot-payments',
