@@ -157,12 +157,21 @@ async function addUserToGroupCallback(req, res) {
     throw new errors.ValidationError('Missing code.');
   }
   const group = await helper.ensureExists(OwnerUserGroup, {identifier}, 'OwnerUserGroup');
+
+  if (!group) {
+    throw new errors.NotFoundError('The group is not found or not accessible.');
+  }
+
   // get owner user
   const ownerUser = await helper.ensureExists(User,
     {username: group.ownerUsername, type: constants.USER_TYPES.GITLAB, role: constants.USER_ROLES.OWNER}, 'User');
 
+  if (!ownerUser) {
+    throw new errors.NotFoundError('The owner user is not found or not accessible.');
+  }
+
   // refresh the owner user access token if needed
-  if (ownerUser.accessTokenExpiration.getTime() <=
+  if (ownerUser.accessTokenExpiration && ownerUser.accessTokenExpiration.getTime() <=
     new Date().getTime() + constants.GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION * MS_PER_SECOND) {
     const refreshTokenResult = await request
       .post('https://gitlab.com/oauth/token')
