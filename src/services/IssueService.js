@@ -238,22 +238,6 @@ async function recreate(issue, currentUser) {
     },
   };
 
-  const dbIssue = await dbHelper.scanOne(models.Issue, {
-    number: issueNumber,
-    projectId: issue.projectId
-  });
-
-  if (!issue.recreate) {
-    if (dbIssue) dbIssue.delete();
-    return {
-      success: true
-    };
-  }
-
-  if (!dbIssue) {
-    createEvent.event = 'issue.created';
-  }
-
   const labels = [];
 
   if (provider === 'github') {
@@ -313,6 +297,23 @@ async function recreate(issue, currentUser) {
     } catch (err) {
       throw helper.convertGitLabError(err, 'Failed to get issue.');
     }
+  }
+
+  const dbIssue = await dbHelper.scanOne(models.Issue, {
+    number: issueNumber,
+    provider,
+    repositoryId: createEvent.data.repository.id
+  });
+
+  if (!issue.recreate) {
+    if (dbIssue) dbIssue.delete();
+    return {
+      success: true
+    };
+  }
+
+  if (!dbIssue) {
+    createEvent.event = 'issue.created';
   }
 
   if (labels.length > 0) {

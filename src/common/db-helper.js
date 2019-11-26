@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const logger = require('./logger');
 
 /*
@@ -43,6 +44,36 @@ async function scan(model, scanParams) {
       }
 
       return resolve(result.count === 0 ? [] : result);
+    });
+  });
+}
+
+/**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
+ * @param {Object} params The parameters object
+ * @returns {Promise<void>}
+ */
+async function queryOne(model, params) {
+  logger.debug('Enter queryOne.');
+
+  return await new Promise((resolve, reject) => {
+    const queryParams = {};
+
+    _.forOwn(params, (value, key) => {
+      queryParams[key] = {eq: value};
+    });
+
+    logger.debug(`${JSON.stringify(queryParams)}`);
+    model.queryOne(queryParams).exec((err, result) => {
+      if (err) {
+        logger.debug(`queryOne. Error. ${err}`);
+        return reject(err);
+      }
+      logger.debug('queryOne. Result.');
+      logger.debug(result);
+
+      return resolve(result);
     });
   });
 }
@@ -136,4 +167,5 @@ module.exports = {
   create,
   update,
   remove,
+  queryOne
 };
