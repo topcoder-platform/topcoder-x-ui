@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const logger = require('./logger');
 
 /*
@@ -51,21 +50,24 @@ async function scan(model, scanParams) {
 /**
  * Get single data by query parameters
  * @param {Object} model The dynamoose model to query
- * @param {Object} params The parameters object
+ * @param {String} repositoryId The repository id to query
+ * @param {Number} number The number id to query
+ * @param {String} provider The provider id to query
  * @returns {Promise<void>}
  */
-async function queryOne(model, params) {
+async function queryOneIssue(model, repositoryId, number, provider) {
   logger.debug('Enter queryOne.');
 
   return await new Promise((resolve, reject) => {
-    const queryParams = {};
 
-    _.forOwn(params, (value, key) => {
-      queryParams[key] = {eq: value};
-    });
-
-    logger.debug(`${JSON.stringify(queryParams)}`);
-    model.queryOne(queryParams).exec((err, result) => {
+    logger.debug(`repositoryId : ${repositoryId}`);
+    logger.debug(`number : ${number}`);
+    logger.debug(`provider : ${provider}`);
+    model.query('repositoryId').eq(repositoryId)
+    .filter('number').eq(number)
+    .filter('provider').eq(provider)
+    .all()
+    .exec((err, result) => {
       if (err) {
         logger.debug(`queryOne. Error. ${err}`);
         return reject(err);
@@ -73,7 +75,7 @@ async function queryOne(model, params) {
       logger.debug('queryOne. Result.');
       logger.debug(result);
 
-      return resolve(result);
+      return resolve(result.count === 0 ? null : result[0]);
     });
   });
 }
@@ -167,5 +169,5 @@ module.exports = {
   create,
   update,
   remove,
-  queryOne
+  queryOneIssue
 };
