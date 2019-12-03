@@ -43,7 +43,7 @@ const GITLAB_MAX_PER_PAGE = Number.MAX_SAFE_INTEGER;
 const GITLAB_DEFAULT_GROUP_ACCESS_LEVEL = 30;
 
 // The Gitlab access token default expiration in seconds
-const GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION = 3600;
+const GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION = 3600 * 24 * 14;
 
 // The Gitlab refresh token time in seconds before expiration
 const GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION = 300;
