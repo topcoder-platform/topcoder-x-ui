@@ -6,9 +6,9 @@
 'use strict';
 
 angular.module('topcoderX').controller('IssueController', ['currentUser', '$scope', '$timeout', 'ProjectService', 'IssueService',
-  '$rootScope', '$state', 'Alert',
+  '$rootScope', '$state', 'Alert', '$log',
   function (currentUser, $scope, $timeout, ProjectService, IssueService, $rootScope, $state,
-    Alert) {
+    Alert, $log) {
     // Maintain the navigation state.
     $timeout(function () {
       angular.element('#projectsManagement').addClass('active');
@@ -16,6 +16,8 @@ angular.module('topcoderX').controller('IssueController', ['currentUser', '$scop
 
     // get topcoderx projects
     $scope.getProjects = function () {
+      $log.log('getProjects dipanggil cui... dari upsert');
+
       ProjectService.getProjects('active', false).then(function (response) {
         $scope.projects = response.data;
         if ($scope.projects.length === 0) {

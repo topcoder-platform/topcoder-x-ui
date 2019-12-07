@@ -17,7 +17,7 @@ const logger = require('./logger');
  */
 async function getById(model, id) {
   return await new Promise((resolve, reject) => {
-    model.query('id').eq(id).exec((err, result) => {
+    model.query('id').eq(id).consistent().all().exec((err, result) => {
       if (err) {
         logger.error(`DynamoDB getById error ${err}`);
         reject(err);
@@ -88,7 +88,7 @@ async function queryOneIssue(model, repositoryId, number, provider) {
  */
 async function scanOne(model, scanParams) {
   return await new Promise((resolve, reject) => {
-    model.scan(scanParams).exec((err, result) => {
+    model.scan(scanParams).consistent().all().exec((err, result) => {
       if (err) {
         logger.error(`DynamoDB scanOne error ${err}`);
         reject(err);

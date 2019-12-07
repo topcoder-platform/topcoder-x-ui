@@ -30,7 +30,7 @@
                                 <uib-tab index="0" heading="Current Projects" select="getProjects('active')">
                                     <br />
                                     <div ng-if="isLoaded">
-                                        <div ng-show="projects.length===0">
+                                        <div ng-show="allProjects.length===0">
                                             <div class="text-center m-t-lg">
                                                 <h4>You don't have active projects right now. Please
                                                     <button class="btn btn-sm btn-info" ng-click="goProject()">
@@ -41,7 +41,17 @@
                                                 </h4>
                                             </div>
                                         </div>
-                                        <div ng-hide="projects.length===0">
+                                        <div ng-hide="allProjects.length===0">
+                                            <div class="col-lg-4" style="padding-left: 0px">
+                                                <div class="input-group custom-search-form">
+                                                    <input ng-model="searchText" type="text" class="form-control" placeholder="Find projects" ng-change="onSearchChange(this)">
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default" type="button" ng-click="onSearchIconClicked('github')">
+                                                            <span class="glyphicon glyphicon-search"></span>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
                                             <table class="footable table table-stripped toggle-arrow-tiny"
                                                 data-page-navigation=".pagination" data-page-size="10">
                                                 <thead>
@@ -68,12 +78,12 @@
                                                         <td class="col-lg-2" ng-show="isAdminUser">{{project.owner}}</td>
                                                         <td class="col-lg-2">
                                                             <button class="btn btn-sm btn-success" ng-click="goProject(project)">
-                                                                <strong>Edit</strong>
+                                                                <strong>Manage</strong>
                                                             </button>
                                                         </td>
                                                     </tr>
                                                 </tbody>
-                                                <tfoot>
+                                                <tfoot ng-hide="searchText">
                                                     <tr>
                                                         <td colspan="{{isAdminUser? 5: 4}}">
                                                             <ul class="pagination pull-right"></ul>
@@ -87,10 +97,20 @@
                                 <uib-tab index="1" heading="Archived Projects" select="getProjects('archived')">
                                     <br />
                                     <div ng-if="isLoaded">
-                                        <div ng-show="projects.length===0" class="text-center m-t-lg">
+                                        <div ng-show="allProjects.length===0" class="text-center m-t-lg">
                                             <p>No projects have been archived.</p>
                                         </div>
-                                        <div ng-hide="projects.length===0">
+                                        <div ng-hide="allProjects.length===0">
+                                            <div class="col-lg-4" style="padding-left: 0px">
+                                                <div class="input-group custom-search-form">
+                                                    <input ng-model="searchText" type="text" class="form-control" placeholder="Find projects" ng-change="onSearchChange(this)">
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default" type="button" ng-click="onSearchIconClicked()">
+                                                            <span class="glyphicon glyphicon-search"></span>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
                                             <table class="footable table table-stripped toggle-arrow-tiny"
                                                 data-page-size="10">
                                                 <thead>
@@ -112,12 +132,12 @@
                                                         <td class="col-lg-2" ng-show="isAdminUser">{{archivedProject.owner}}</td>
                                                         <td class="col-lg-2">
                                                             <button class="btn btn-sm btn-success" ng-click="goProject(archivedProject)">
-                                                                <strong>Edit</strong>
+                                                                <strong>Manage</strong>
                                                             </button>
                                                         </td>
                                                     </tr>
                                                 </tbody>
-                                                <tfoot>
+                                                <tfoot ng-hide="searchText">
                                                     <tr>
                                                         <td colspan="{{isAdminUser? 5: 4}}">
                                                             <ul class="pagination pull-right"></ul>

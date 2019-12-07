@@ -159,7 +159,7 @@ Once you have registered your account, go into `Project Management` and add a ne
 
 Use Topcoder Direct ID `7377` since this has a valid billing account in the dev environment.
 
-Once it's been added, click `Edit` for the project in the list on `Project Management` and click `Add Webhooks`.  Once the webhook has been added, you should be able to see it in the Gitlab project under `Settings` --> `Integrations` --> `Webhooks`
+Once it's been added, click `Manage` for the project in the list on `Project Management` and click `Add Webhooks`.  Once the webhook has been added, you should be able to see it in the Gitlab project under `Settings` --> `Integrations` --> `Webhooks`
 
 To test the webhook, create a new issue in the project with a title like `[$1] This is a test issue`
 
