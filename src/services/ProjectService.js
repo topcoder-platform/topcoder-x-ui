@@ -127,9 +127,14 @@ async function create(project, currentUser) {
 
   const createdProject = await dbHelper.create(models.Project, project);
 
-  await createLabel({projectId: project.id}, currentUser);
-  await createHook({projectId: project.id}, currentUser);
-  await addWikiRules({projectId: project.id}, currentUser);
+  try {
+    await createLabel({projectId: project.id}, currentUser);
+    await createHook({projectId: project.id}, currentUser);
+    await addWikiRules({projectId: project.id}, currentUser);
+  }
+  catch (err) {
+    throw new Error('Project created. Adding the webhook, issue labels, and wiki rules failed.');
+  }
 
   return createdProject;
 }

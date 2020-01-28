@@ -35,7 +35,7 @@
         "angular-storage": "~0.0.11",
         "angular-touch": "~1.7.4",
         "angular-ui-bootstrap": "~2.5.0",
-        "angular-ui-router": "~0.2.13",
+        "angular-ui-router": "~1.0.23",
         "auth0-angular": "~4.0.4",
         "auth0-js": "^9.11.3",
         "auth0-lock": "^11.17.2",

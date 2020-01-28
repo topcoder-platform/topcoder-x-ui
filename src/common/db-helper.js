@@ -17,7 +17,7 @@ const logger = require('./logger');
  */
 async function getById(model, id) {
   return await new Promise((resolve, reject) => {
-    model.query('id').eq(id).exec((err, result) => {
+    model.query('id').eq(id).consistent().all().exec((err, result) => {
       if (err) {
         logger.error(`DynamoDB getById error ${err}`);
         reject(err);
@@ -48,6 +48,39 @@ async function scan(model, scanParams) {
 }
 
 /**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
+ * @param {String} repositoryId The repository id to query
+ * @param {Number} number The number id to query
+ * @param {String} provider The provider id to query
+ * @returns {Promise<void>}
+ */
+async function queryOneIssue(model, repositoryId, number, provider) {
+  logger.debug('Enter queryOne.');
+
+  return await new Promise((resolve, reject) => {
+
+    logger.debug(`repositoryId : ${repositoryId}`);
+    logger.debug(`number : ${number}`);
+    logger.debug(`provider : ${provider}`);
+    model.query('repositoryId').eq(repositoryId)
+    .filter('number').eq(number)
+    .filter('provider').eq(provider)
+    .all()
+    .exec((err, result) => {
+      if (err) {
+        logger.debug(`queryOne. Error. ${err}`);
+        return reject(err);
+      }
+      logger.debug('queryOne. Result.');
+      logger.debug(result);
+
+      return resolve(result.count === 0 ? null : result[0]);
+    });
+  });
+}
+
+/**
  * Get single data by scan parameters
  * @param {Object} model The dynamoose model to scan
  * @param {Object} scanParams The scan parameters object
@@ -55,7 +88,7 @@ async function scan(model, scanParams) {
  */
 async function scanOne(model, scanParams) {
   return await new Promise((resolve, reject) => {
-    model.scan(scanParams).exec((err, result) => {
+    model.scan(scanParams).consistent().all().exec((err, result) => {
       if (err) {
         logger.error(`DynamoDB scanOne error ${err}`);
         reject(err);
@@ -136,4 +169,5 @@ module.exports = {
   create,
   update,
   remove,
+  queryOneIssue
 };

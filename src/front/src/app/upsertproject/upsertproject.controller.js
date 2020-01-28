@@ -26,7 +26,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       archived: false,
     };
     if ($rootScope.project) {
-      $scope.title = 'Edit a Project';
+      $scope.title = 'Manage a Project';
       $scope.project = $rootScope.project;
       $scope.project.id = $rootScope.project.id;
       $scope.project.copilot = $rootScope.project.copilot;
@@ -92,9 +92,14 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       } else {
         ProjectService.create($scope.project).then(function () {
           Alert.info('Project has been added successfully, and Topcoder X issue labels, webhook, and wiki rules have been added to the repository', $scope);
-          $state.go('app.projects');
+          setTimeout(function() {
+            $state.go('app.projects');
+          }, 3000);
         }).catch(function (error) {
           Alert.error(error.data.message, $scope);
+          setTimeout(function() {
+            $state.go('app.projects');
+          }, 3000);
         });
       }
     };

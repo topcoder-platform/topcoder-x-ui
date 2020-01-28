@@ -9,6 +9,9 @@ angular.module('topcoderX')
   .factory('ProjectService', ['Helper', '$http', function (Helper, $http) {
     // object we will return
     var ProjectService = {};
+    var projectsDataPromise = {};
+    var projectsGetLock = {};
+
     /**
      * Create a project
      * @param project  the project to be created
@@ -23,9 +26,17 @@ angular.module('topcoderX')
      * Get all projects
      */
     ProjectService.getProjects = function (status, showAll) {
-      return $http.get(Helper.baseUrl + '/api/v1/projects?status=' + status + '&showAll=' + showAll).then(function (response) {
+      var url = Helper.baseUrl + '/api/v1/projects?status=' + status + '&showAll=' + showAll;
+      if (projectsGetLock[url]) {
+        return projectsDataPromise[url];
+      }
+
+      projectsGetLock[url] = true;
+      projectsDataPromise[url] = $http.get(url).then(function (response) {
+        projectsGetLock[url] = false;
         return response;
       });
+      return projectsDataPromise[url];
     };
 
     /**

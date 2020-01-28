@@ -9,14 +9,25 @@ angular.module('topcoderX')
     .factory('IssueService', ['$http', 'Helper', function ($http, Helper) {
         var baseUrl = Helper.baseUrl;
         var service = {};
+        var issuesDataPromise = {};
+        var issuesGetLock = {};
 
         /**
          * search for issues
          */
         service.search = function (label, sortBy, sortDir, pageNo, pageSize) {
-            return $http.get(baseUrl + '/api/v1/issues?label=' + label + '&sortBy=' + sortBy + '&sortDir=' + sortDir + '&page=' + pageNo + '&perPage=' + pageSize).then(function (response) {
+            var url = baseUrl + '/api/v1/issues?label=' + label + '&sortBy=' + sortBy + '&sortDir=' + sortDir + '&page=' + pageNo + '&perPage=' + pageSize;
+
+            if (issuesGetLock[url]) {
+                return issuesDataPromise[url];
+            }
+
+            issuesGetLock[url] = true;
+            issuesDataPromise[url] = $http.get(url).then(function (response) {
+                issuesGetLock[url] = false;
                 return response;
             });
+            return issuesDataPromise[url];
         };
 
         /**
