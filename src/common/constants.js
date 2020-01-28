@@ -1,3 +1,4 @@
+/* eslint-disable */
 /*
  * Copyright (c) 2017 TopCoder, Inc. All rights reserved.
  */
