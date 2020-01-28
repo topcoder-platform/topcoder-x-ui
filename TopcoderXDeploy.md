@@ -104,8 +104,8 @@ For local deployment, configuring M2M token generation can use this provided acc
 ```
 export AUTH0_URL=https://topcoder-dev.auth0.com/oauth/token
 export AUTH0_AUDIENCE=https://m2m.topcoder-dev.com/
-export AUTH0_CLIENT_ID=LU2Nt7YPHQ3lxrFNKitJ82syB4wIMR7G
-export AUTH0_CLIENT_SECRET=O8S2YOb-0lI4NS3smR4d4uf0VM9BN0y1Ra4ABRktGUPOXc34mUO25uJrCpU-TBAT
+export AUTH0_CLIENT_ID=
+export AUTH0_CLIENT_SECRET=
 ```
 
 
