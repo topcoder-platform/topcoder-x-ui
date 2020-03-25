@@ -15,10 +15,10 @@ module.exports = {
   // MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/topcoderx',
   SESSION_SECRET: process.env.SESSION_SECRET || 'kjsdfkj34857',
   // Github and gitlab client id and secret
-  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || 'ae39bea2a2a23f1dd032',
-  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || 'f31dd2da12015f60372a5312a40a06b517a88702',
-  GITLAB_CLIENT_ID: process.env.GITLAB_CLIENT_ID || 'af4c1ea3d12783e55470a6604c169b2cdc03734c7e3969f7f4336325f6e0e6b4',
-  GITLAB_CLIENT_SECRET: process.env.GITLAB_CLIENT_SECRET || '8906a8e924df81ddadd12b37ee98767cfba3084ca3c9d52a5753412da8d9879e',
+  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || ' ',
+  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || ' ',
+  GITLAB_CLIENT_ID: process.env.GITLAB_CLIENT_ID || ' ',
+  GITLAB_CLIENT_SECRET: process.env.GITLAB_CLIENT_SECRET || ' ',
 
   // used as base to construct various URLs
   WEBSITE: process.env.WEBSITE || 'http://topcoderx.topcoder-dev.com',
