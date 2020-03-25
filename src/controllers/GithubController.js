@@ -196,7 +196,7 @@ async function addUserToTeamCallback(req, res) {
   // check if user is already in the team or not yet
   if (githubUser.state === 'active') {
     // redirect user to the success page, to let user know that he is already in the team
-    const url = `${teamDetails.organization.login}_${teamDetails.name}`;
+    const url = `${teamDetails.organization.login}_${teamDetails.name.replace(/ /g, '-')}`;
     res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/github/${url}`);
   } else {
     // redirect user to organization invitation page
