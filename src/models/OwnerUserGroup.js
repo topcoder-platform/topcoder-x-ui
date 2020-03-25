@@ -54,6 +54,16 @@ const schema = new Schema({
       name: 'IdentifierIndex',
     },
   },
+  accessLevel: {
+    type: String,
+    required: true,
+    index: {
+      global: true,
+      rangeKey: 'id',
+      project: true,
+      name: 'AccessLevelIndex',
+    },
+  },
 });
 
 

@@ -24,8 +24,8 @@ angular.module('topcoderX')
          * get gitlab shareable link
          *
          */
-        service.getGitlabShareableLink = function (groupId) {
-            return $http.get(baseUrl + '/api/v1/gitlab/groups/' + groupId + '/registrationurl').then(function (response) {
+        service.getGitlabShareableLink = function (groupId, accessLevel) {
+            return $http.get(baseUrl + '/api/v1/gitlab/groups/' + groupId + '/registrationurl/' + accessLevel).then(function (response) {
                 return response;
             });
         };
@@ -44,8 +44,28 @@ angular.module('topcoderX')
          * get github shareable link
          *
          */
-        service.getGithubShareableLink = function (teamId) {
-            return $http.get(baseUrl + '/api/v1/github/teams/' + teamId + '/registrationurl').then(function (response) {
+        service.getGithubShareableLink = function (teamId, accessLevel) {
+            return $http.get(baseUrl + '/api/v1/github/teams/' + teamId + '/registrationurl/' + accessLevel).then(function (response) {
+                return response;
+            });
+        };
+
+        /**
+         * remove all users from a github team
+         *
+         */
+        service.removeAllGithubUsers = function (teamId) {
+            return $http.delete(baseUrl + '/api/v1/github/teams/' + teamId + '/users').then(function (response) {
+                return response;
+            });
+        };
+
+        /**
+         * remove all users from a gitlab group
+         *
+         */
+        service.removeAllGitlabUsers = function (groupId) {
+            return $http.delete(baseUrl + '/api/v1/gitlab/groups/' + groupId + '/users').then(function (response) {
                 return response;
             });
         };

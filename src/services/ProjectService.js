@@ -13,7 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const Joi = require('joi');
-const gitHubApi = require('octonode');
+const GitHub = require('github-api');
 const Gitlab = require('gitlab/dist/es5').default;
 const _ = require('lodash');
 const guid = require('guid');
@@ -238,11 +238,11 @@ async function createLabel(body, currentUser) {
   const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
   if (provider === 'github') {
     try {
-      const client = gitHubApi.client(userRole.accessToken);
-      const ghrepo = client.repo(`${repoOwner}/${repoName}`);
+      const github = new GitHub({token: userRole.accessToken});
+      const issueWrapper = github.getIssues(repoOwner, repoName);
       await Promise.all(config.LABELS.map(async (label) => {
         await new Promise((resolve, reject) => {
-          ghrepo.label({
+          issueWrapper.createLabel({
             name: label.name,
             color: label.color,
           }, (error) => {
@@ -311,15 +311,15 @@ async function createHook(body, currentUser) {
   const updateExisting = dbProject.registeredWebhookId !== undefined;
   if (provider === 'github') {
     try {
-      const client = gitHubApi.client(userRole.accessToken);
-      const ghrepo = client.repo(`${repoOwner}/${repoName}`);
+      const github = new GitHub({token: userRole.accessToken});
+      const repoWrapper = github.getRepo(repoOwner, repoName);
       await new Promise((resolve, reject) => {
-        ghrepo.hooks(async (err, hooks) => {
-          if(!err && dbProject.registeredWebhookId && 
+        repoWrapper.listHooks(async (err, hooks) => {
+          if (!err && dbProject.registeredWebhookId &&
             _.find(hooks, {id: parseInt(dbProject.registeredWebhookId, 10)})) {
-              await ghrepo.deleteHookAsync(dbProject.registeredWebhookId);
+            await repoWrapper.deleteHook(dbProject.registeredWebhookId);
           }
-          ghrepo.hook({
+          repoWrapper.createHook({
             name: 'web',
             active: true,
             events: [
@@ -336,7 +336,7 @@ async function createHook(body, currentUser) {
               content_type: 'json',
               secret: dbProject.secretWebhookKey,
             },
-          }, (error, hook) => {          
+          }, (error, hook) => {
             if (error) {
               return reject(error);
             }
@@ -355,11 +355,11 @@ async function createHook(body, currentUser) {
       }).get('true')
         .isUndefined()
         .value()) {
-          let errMsg = 'Failed to create webhook';
-          if (err.statusCode === 404) { // eslint-disable-line no-magic-numbers
-            err.message = `The repository is not found or doesn't have access to create webhook`;
-          }
-          throw helper.convertGitHubError(err, errMsg);
+        const errMsg = 'Failed to create webhook';
+        if (err.statusCode === 404) { // eslint-disable-line no-magic-numbers
+          err.message = 'The repository is not found or doesn\'t have access to create webhook';
+        }
+        throw helper.convertGitHubError(err, errMsg);
       }
     }
   } else {
@@ -368,12 +368,12 @@ async function createHook(body, currentUser) {
         url: config.GITLAB_API_BASE_URL,
         oauthToken: userRole.accessToken,
       });
-      let hooks = await client.ProjectHooks.all(`${repoOwner}/${repoName}`);
-      if(hooks && dbProject.registeredWebhookId &&
+      const hooks = await client.ProjectHooks.all(`${repoOwner}/${repoName}`);
+      if (hooks && dbProject.registeredWebhookId &&
         _.find(hooks, {id: parseInt(dbProject.registeredWebhookId, 10)})) {
-          await client.ProjectHooks.remove(`${repoOwner}/${repoName}`, dbProject.registeredWebhookId);
+        await client.ProjectHooks.remove(`${repoOwner}/${repoName}`, dbProject.registeredWebhookId);
       }
-      let hook = await client.ProjectHooks.add(`${repoOwner}/${repoName}`,
+      const hook = await client.ProjectHooks.add(`${repoOwner}/${repoName}`,
         `${config.HOOK_BASE_URL}/webhooks/gitlab`, {
           push_events: true,
           issues_events: true,
@@ -392,16 +392,16 @@ async function createHook(body, currentUser) {
         await update(dbProject, currentUser);
       }
     } catch (err) {
-      let errMsg = 'Failed to create webhook';
+      const errMsg = 'Failed to create webhook';
       if (err.statusCode === 404) { // eslint-disable-line no-magic-numbers
-        err.message = `The repository is not found or doesn't have access to create webhook`;
+        err.message = 'The repository is not found or doesn\'t have access to create webhook';
       }
       throw helper.convertGitLabError(err, errMsg);
     }
   }
   return {
     success: true,
-    updated: updateExisting
+    updated: updateExisting,
   };
 }
 
@@ -426,22 +426,13 @@ async function addWikiRules(body, currentUser) {
   const content = fs.readFileSync(path.resolve(__dirname, '../assets/WorkingWithTickets.md'), 'utf8'); // eslint-disable-line
   if (provider === 'github') {
     try {
-      const client = gitHubApi.client(userRole.accessToken);
-      const ghrepo = client.repo(`${repoOwner}/${repoName}`);
-
-      const issues = await new Promise((resolve, reject) => {
-        ghrepo.issues((error, data) => {
-          if (error) {
-            return reject(error);
-          }
-          return resolve(data);
-        });
-      });
-
-      const wikiIssue = _.find(issues, { title: 'Github ticket rules' });
+      const github = new GitHub({token: userRole.accessToken});
+      const issueWrapper = github.getIssues(repoOwner, repoName);
+      const {data: issues} = await issueWrapper.listIssues();
+      const wikiIssue = _.find(issues, {title: 'Github ticket rules'});
       if (!wikiIssue || wikiIssue.body !== content) {
         await new Promise((resolve, reject) => {
-          ghrepo.issue({
+          issueWrapper.createIssue({
             title: 'Github ticket rules',
             body: content,
           }, (error) => {
@@ -452,7 +443,6 @@ async function addWikiRules(body, currentUser) {
           });
         });
       }
-
     } catch (err) {
       throw helper.convertGitHubError(err, 'Failed to add wiki rules.');
     }
@@ -493,10 +483,10 @@ async function transferOwnerShip(body, currentUser) {
   const provider = await helper.getProviderType(dbProject.repoUrl);
   const setting = await userService.getUserSetting(body.owner);
   if (!setting.gitlab && !setting.github) {
-    throw new errors.ValidationError(`User ${body.owner} doesn't currently have Topcoder-X access. 
+    throw new errors.ValidationError(`User ${body.owner} doesn't currently have Topcoder-X access.
     Please have them sign in and set up their Gitlab and Github accounts with Topcoder-X before transferring ownership.`);
   } else if (!setting[provider]) {
-    throw new errors.ValidationError(`User ${body.owner} doesn't currently have Topcoder-X access setup for ${provider}. 
+    throw new errors.ValidationError(`User ${body.owner} doesn't currently have Topcoder-X access setup for ${provider}.
     Please have them sign in and set up their ${provider} accounts with Topcoder-X before transferring ownership.`);
   }
 

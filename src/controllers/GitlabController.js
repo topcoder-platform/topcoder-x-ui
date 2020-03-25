@@ -21,6 +21,7 @@ const UserService = require('../services/UserService');
 const User = require('../models').User;
 const OwnerUserGroup = require('../models').OwnerUserGroup;
 const UserMapping = require('../models').UserMapping;
+const UserGroupMapping = require('../models').UserGroupMapping;
 
 const request = superagentPromise(superagent, Promise);
 
@@ -114,7 +115,7 @@ async function getGroupRegistrationUrl(req) {
   if (!user || !user.accessToken) {
     throw new errors.UnauthorizedError('You have not setup for Gitlab.');
   }
-  return await GitlabService.getGroupRegistrationUrl(user.username, req.params.id);
+  return await GitlabService.getGroupRegistrationUrl(user.username, req.params.id, req.params.accessLevel);
 }
 
 /**
@@ -170,27 +171,7 @@ async function addUserToGroupCallback(req, res) {
     throw new errors.NotFoundError('The owner user is not found or not accessible.');
   }
 
-  // refresh the owner user access token if needed
-  if (ownerUser.accessTokenExpiration && ownerUser.accessTokenExpiration.getTime() <=
-    new Date().getTime() + constants.GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION * MS_PER_SECOND) {
-    const refreshTokenResult = await request
-      .post('https://gitlab.com/oauth/token')
-      .query({
-        client_id: config.GITLAB_CLIENT_ID,
-        client_secret: config.GITLAB_CLIENT_SECRET,
-        refresh_token: ownerUser.refreshToken,
-        grant_type: 'refresh_token',
-        redirect_uri: `${config.WEBSITE}/api/${config.API_VERSION}/gitlab/owneruser/callback`,
-      })
-      .end();
-    // save user token data
-    const expiresIn = refreshTokenResult.body.expires_in || constants.GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION;
-    await dbHelper.update(User, ownerUser.id, {
-      accessToken: refreshTokenResult.body.access_token,
-      accessTokenExpiration: new Date(new Date().getTime() + expiresIn * MS_PER_SECOND),
-      refreshToken: refreshTokenResult.body.refresh_token,
-    });
-  }
+  await GitlabService.refreshGitlabUserAccessToken(ownerUser);
 
   // exchange code to get normal user token
   const result = await request
@@ -212,7 +193,7 @@ async function addUserToGroupCallback(req, res) {
   });
 
   // add user to group
-  const gitlabUser = await GitlabService.addGroupMember(group.groupId, ownerUser.accessToken, token);
+  const gitlabUser = await GitlabService.addGroupMember(group.groupId, ownerUser.accessToken, token, group.accessLevel);
   // associate gitlab username with TC username
   const mapping = await dbHelper.scanOne(UserMapping, {
     topcoderUsername: {eq: req.session.tcUsername},
@@ -230,8 +211,57 @@ async function addUserToGroupCallback(req, res) {
       gitlabUserId: gitlabUser.id,
     });
   }
+  // We get gitlabUser.id and group.groupId and
+  // associate github username and teamId
+  const gitlabUserToGroupMapping = await dbHelper.scanOne(UserGroupMapping, {
+    groupId: {eq: group.groupId},
+    gitlabUserId: {eq: gitlabUser.id},
+  });
+
+  if (!gitlabUserToGroupMapping) {
+    await dbHelper.create(UserGroupMapping, {
+      id: helper.generateIdentifier(),
+      groupId: group.groupId,
+      gitlabUserId: gitlabUser.id,
+    });
+  }
   // redirect to success page
   res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/gitlab/${currentGroup.full_path}`);
+}
+
+
+/**
+ * Delete users from a group.
+ * @param {Object} req the request
+ * @param {Object} res the response
+ */
+async function deleteUsersFromTeam(req, res) {
+  const groupId = req.params.id;
+  let groupInDB;
+  try {
+    groupInDB = await helper.ensureExists(OwnerUserGroup, {groupId}, 'OwnerUserGroup');
+  } catch (err) {
+    if (!(err instanceof errors.NotFoundError)) {
+      throw err;
+    }
+  }
+  // If groupInDB not exists, then just return
+  if (groupInDB) {
+    try {
+      const ownerUser = await helper.ensureExists(User,
+        {username: groupInDB.ownerUsername, type: constants.USER_TYPES.GITLAB, role: constants.USER_ROLES.OWNER}, 'User');
+      await GitlabService.refreshGitlabUserAccessToken(ownerUser);
+      const userGroupMappings = await dbHelper.scan(UserGroupMapping, {groupId});
+      // eslint-disable-next-line no-restricted-syntax
+      for (const userGroupMapItem of userGroupMappings) {
+        await GitlabService.deleteUserFromGitlabGroup(ownerUser.accessToken, groupId, userGroupMapItem.gitlabUserId);
+        await dbHelper.remove(UserGroupMapping, {id: userGroupMapItem.id});
+      }
+    } catch (err) {
+      throw err;
+    }
+  }
+  res.send({});
 }
 
 module.exports = {
@@ -241,6 +271,7 @@ module.exports = {
   getGroupRegistrationUrl,
   addUserToGroup,
   addUserToGroupCallback,
+  deleteUsersFromTeam,
 };
 
 helper.buildController(module.exports);

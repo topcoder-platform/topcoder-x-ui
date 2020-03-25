@@ -12,7 +12,7 @@
 const Joi = require('joi');
 const _ = require('lodash');
 const moment = require('moment');
-const gitHubApi = require('octonode');
+const GitHub = require('github-api');
 const Gitlab = require('gitlab/dist/es5').default;
 const config = require('../config');
 const errors = require('../common/errors');
@@ -134,24 +134,19 @@ async function create(issue, currentUser) {
   const title = `[$${issue.prize}] ${issue.title}`;
   if (provider === 'github') {
     try {
-      const client = gitHubApi.client(userRole.accessToken);
-      const ghrepo = client.repo(`${repoOwner}/${repoName}`);
-      const response = await new Promise((resolve, reject) => {
-        ghrepo.issue({
-          title,
-          body: issue.comment,
-          labels: [config.OPEN_FOR_PICKUP_ISSUE_LABEL]
-        }, (error, resp) => {
-          if (error) {
-            return reject(error);
-          }
-          return resolve(resp);
-        });
-      });
+      const github = new GitHub({token: userRole.accessToken});
+      const githubIssueWrapper = github.getIssues(repoOwner, repoName);
+      const newIssue = {
+        title,
+        body: issue.comment,
+        labels: [config.OPEN_FOR_PICKUP_ISSUE_LABEL],
+      };
+      const createdIssueResp = await githubIssueWrapper.createIssue(newIssue);
+      const createdIssueData = createdIssueResp.data;
       return {
         success: true,
-        url: response.html_url,
-        number: response.number
+        url: createdIssueData.html_url,
+        number: createdIssueData.number,
       };
     } catch (err) {
       // if error is already exists discard
@@ -172,7 +167,7 @@ async function create(issue, currentUser) {
       const response = await client.Issues.create(`${repoOwner}/${repoName}`, {
         title,
         description: issue.comment,
-        labels: config.OPEN_FOR_PICKUP_ISSUE_LABEL
+        labels: config.OPEN_FOR_PICKUP_ISSUE_LABEL,
       });
       return {
         success: true,
@@ -201,7 +196,7 @@ create.schema = {
     prize: Joi.number().required(),
     title: Joi.string().required(),
     comment: Joi.string().required(),
-    repoUrl: Joi.string().required()
+    repoUrl: Joi.string().required(),
   },
   currentUser: currentUserSchema,
 };
@@ -229,47 +224,29 @@ async function recreate(issue, currentUser) {
     provider,
     data: {
       issue: {
-        number: issueNumber
+        number: issueNumber,
       },
       repository: {
         name: repoName,
-        full_name: `${repoOwner}/${repoName}`
-      }
+        full_name: `${repoOwner}/${repoName}`,
+      },
     },
   };
-
   const labels = [];
-
   if (provider === 'github') {
     try {
-      const client = gitHubApi.client(userRole.accessToken);
-      var ghrepo = client.repo(`${repoOwner}/${repoName}`);
-      const remoteRepo = await new Promise((resolve, reject) => {
-        ghrepo.info((error, resp) => {
-          if (error) {
-            return reject(error);
-          }
-          return resolve(resp);
-        });
-      });
-
-      var ghissue = client.issue(`${repoOwner}/${repoName}`, issueNumber);
-      const remoteIssue = await new Promise((resolve, reject) => {
-        ghissue.info((error, resp) => {
-          if (error) {
-            return reject(error);
-          }
-          return resolve(resp);
-        });
-      });
-
-      createEvent.data.repository.id = remoteRepo.id;
+      const github = new GitHub({token: userRole.accessToken});
+      const repoWrapper = github.getRepo(repoOwner, repoName);
+      const {data: repoInfo} = await repoWrapper.getDetails();
+      const issueWrapper = github.getIssues(repoOwner, repoName);
+      const {data: remoteIssue} = await issueWrapper.getIssue(issueNumber);
+      createEvent.data.repository.id = repoInfo.id;
       createEvent.data.issue.title = remoteIssue.title;
       createEvent.data.issue.body = remoteIssue.body;
-      createEvent.data.issue.owner = { id: remoteIssue.user.id };
-      createEvent.data.issue.assignees = _.map(remoteIssue.assignees, function(o) { return _.pick(o, 'id'); });
+      createEvent.data.issue.owner = {id: remoteIssue.user.id};
+      createEvent.data.issue.assignees = _.map(remoteIssue.assignees, (o) => _.pick(o, 'id'));
       if (remoteIssue.labels && remoteIssue.labels.length > 0) {
-        remoteIssue.labels.forEach(label => {
+        remoteIssue.labels.forEach((label) => {
           labels.push(label.name);
         });
       }
@@ -287,10 +264,10 @@ async function recreate(issue, currentUser) {
       createEvent.data.repository.id = remoteIssue.project_id;
       createEvent.data.issue.title = remoteIssue.title;
       createEvent.data.issue.body = remoteIssue.description;
-      createEvent.data.issue.owner = { id: remoteIssue.author.id };
+      createEvent.data.issue.owner = {id: remoteIssue.author.id};
       createEvent.data.issue.assignees = _.map(remoteIssue.assignees, function(o) { return _.pick(o, 'id'); });
       if (remoteIssue.labels && remoteIssue.labels.length > 0) {
-        remoteIssue.labels.forEach(label => {
+        remoteIssue.labels.forEach((label) => {
           labels.push(label);
         });
       }
@@ -299,15 +276,17 @@ async function recreate(issue, currentUser) {
     }
   }
 
-  const dbIssue = await dbHelper.queryOneIssue(models.Issue, 
+  const dbIssue = await dbHelper.queryOneIssue(models.Issue,
     createEvent.data.repository.id,
     issueNumber,
     provider);
 
   if (!issue.recreate) {
-    if (dbIssue) dbIssue.delete();
+    if (dbIssue) {
+      dbIssue.delete();
+    }
     return {
-      success: true
+      success: true,
     };
   }
 
@@ -330,15 +309,15 @@ recreate.schema = {
     projectId: Joi.string().required(),
     number: Joi.number().required(),
     url: Joi.string().required(),
-    recreate: Joi.boolean().required()
+    recreate: Joi.boolean().required(),
   },
-  currentUser: currentUserSchema
+  currentUser: currentUserSchema,
 };
 
 module.exports = {
   search,
   create,
-  recreate
+  recreate,
 };
 
 helper.buildService(module.exports);

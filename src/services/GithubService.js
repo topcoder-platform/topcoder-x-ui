@@ -87,16 +87,16 @@ ensureOwnerUser.schema = Joi.object().keys({
  * @param {Number} perPage the page size (default to be constants.DEFAULT_PER_PAGE). Must be within range [1, constants.MAX_PER_PAGE]
  * @returns {Promise} the promise result
  */
-async function listOwnerUserTeams(token, page = 1, perPage = constants.DEFAULT_PER_PAGE) {  
+async function listOwnerUserTeams(token, page = 1, perPage = constants.DEFAULT_PER_PAGE) {
   try {
     const github = new GitHub({token});
     const user = github.getUser();
-    
+
     const response = await user._request('GET', '/user/teams', {
       page,
       per_page: perPage,
     });
-    
+
     const result = {
       page,
       perPage,
@@ -133,14 +133,18 @@ listOwnerUserTeams.schema = Joi.object().keys({
  * @param {String} token the access token of owner user
  * @param {String} ownerUsername the owner user name
  * @param {String} teamId the team id
+ * @param {String} accessLevel the team access level
  * @returns {Promise} the promise result
  */
-async function getTeamRegistrationUrl(token, ownerUsername, teamId) {
+async function getTeamRegistrationUrl(token, ownerUsername, teamId, accessLevel) {
   // check whether owner user can add team member to the team
   let membershipData;
+  let githubOrgId;
   try {
     const github = new GitHub({token});
     const team = github.getTeam(teamId);
+    const teamInfo = await team.getTeam();
+    githubOrgId = await teamInfo.data.organization.id;
     const response = await team.getMembership(ownerUsername);
     membershipData = response.data;
   } catch (err) {
@@ -159,8 +163,10 @@ async function getTeamRegistrationUrl(token, ownerUsername, teamId) {
     ownerUsername,
     type: constants.USER_TYPES.GITHUB,
     teamId,
+    githubOrgId,
     ownerToken: token,
     identifier,
+    accessLevel,
   });
 
   // construct URL
@@ -172,6 +178,7 @@ getTeamRegistrationUrl.schema = Joi.object().keys({
   token: Joi.string().required(),
   ownerUsername: Joi.string().required(),
   teamId: Joi.string().required(),
+  accessLevel: Joi.string().required(),
 });
 
 /**
@@ -179,9 +186,10 @@ getTeamRegistrationUrl.schema = Joi.object().keys({
  * @param {String} teamId the team id
  * @param {String} ownerUserToken the owner user token
  * @param {String} normalUserToken the normal user token
+ * @param {String} accessLevel the team's access level
  * @returns {Promise} the promise result
  */
-async function addTeamMember(teamId, ownerUserToken, normalUserToken) {
+async function addTeamMember(teamId, ownerUserToken, normalUserToken, accessLevel) {
   let username;
   let id;
   let state;
@@ -199,8 +207,8 @@ async function addTeamMember(teamId, ownerUserToken, normalUserToken) {
       token: ownerUserToken,
     });
     const team = github.getTeam(teamId);
-    const membershipResponse = await team.addMembership(username);
-    state = _.get(membershipResponse, 'data.state')
+    const membershipResponse = await team.addMembership(username, {role: accessLevel});
+    state = _.get(membershipResponse, 'data.state');
   } catch (err) {
     // if error is already exists discard
     if (_.chain(err).get('body.errors').countBy({
@@ -219,6 +227,7 @@ addTeamMember.schema = Joi.object().keys({
   teamId: Joi.string().required(),
   ownerUserToken: Joi.string().required(),
   normalUserToken: Joi.string().required(),
+  accessLevel: Joi.string().required(),
 });
 
 /**
@@ -252,7 +261,7 @@ getUserIdByUsername.schema = Joi.object().keys({
  * @returns {Object} team object, see https://developer.github.com/v3/teams/#get-team
  */
 async function getTeamDetails(token, teamId) {
-  const teamIdAsNumber = !_.isNumber(teamId) ? parseInt(teamId, 10) : teamId
+  const teamIdAsNumber = !_.isNumber(teamId) ? parseInt(teamId, 10) : teamId;
   let team;
 
   try {
@@ -273,6 +282,37 @@ getTeamDetails.schema = Joi.object().keys({
 });
 
 
+/**
+ * Get team detailed data
+ *
+ * @param {String} token user owner token
+ * @param {String|Number} teamId team id
+ * @param {String|Number} orgId team id
+ * @param {String|Number} githubUserName team id
+ *
+ * @returns {Object} status object, see https://developer.github.com/v3/teams/members/#remove-team-membership
+ */
+async function deleteUserFromGithubTeam(token, teamId, orgId, githubUserName) {
+  const teamIdAsNumber = !_.isNumber(teamId) ? parseInt(teamId, 10) : teamId;
+  let deleteResult;
+  try {
+    const github = new GitHub({token});
+    const team = await github.getTeam(teamIdAsNumber);
+    const deleteGithubUserEndpoint = `/organizations/${orgId}/team/${teamIdAsNumber}/memberships/${githubUserName}`;
+    deleteResult = await team._request('DELETE', deleteGithubUserEndpoint);
+  } catch (err) {
+    throw helper.convertGitHubError(err, `Failed to delete user '${githubUserName}' from org with orgId '${orgId}' and team id '${teamId}'.`);
+  }
+  return deleteResult;
+}
+
+deleteUserFromGithubTeam.schema = Joi.object().keys({
+  token: Joi.string().required(),
+  teamId: Joi.alternatives().try(Joi.string(), Joi.number()).required(),
+  orgId: Joi.string().required(),
+  githubUserName: Joi.string().required(),
+});
+
 module.exports = {
   ensureOwnerUser,
   listOwnerUserTeams,
@@ -280,6 +320,7 @@ module.exports = {
   addTeamMember,
   getUserIdByUsername,
   getTeamDetails,
+  deleteUserFromGithubTeam,
 };
 
 helper.buildService(module.exports);

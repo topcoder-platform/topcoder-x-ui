@@ -21,7 +21,10 @@ const errors = require('../common/errors');
 const User = require('../models').User;
 const UserMapping = require('../models').UserMapping;
 const OwnerUserGroup = require('../models').OwnerUserGroup;
+
 const request = superagentPromise(superagent, Promise);
+// milliseconds per second
+const MS_PER_SECOND = 1000;
 
 /**
  * Ensure the owner user is in database.
@@ -141,9 +144,10 @@ listOwnerUserGroups.schema = Joi.object().keys({
  * Get owner user group registration URL.
  * @param {String} ownerUsername the owner user name
  * @param {String} groupId the group id
+ * @param {String} accessLevel the group access level
  * @returns {Promise} the promise result
  */
-async function getGroupRegistrationUrl(ownerUsername, groupId) {
+async function getGroupRegistrationUrl(ownerUsername, groupId, accessLevel) {
   // generate identifier
   const identifier = helper.generateIdentifier();
 
@@ -154,6 +158,7 @@ async function getGroupRegistrationUrl(ownerUsername, groupId) {
     type: constants.USER_TYPES.GITLAB,
     groupId,
     identifier,
+    accessLevel,
   });
 
   // construct URL
@@ -164,6 +169,7 @@ async function getGroupRegistrationUrl(ownerUsername, groupId) {
 getGroupRegistrationUrl.schema = Joi.object().keys({
   ownerUsername: Joi.string().required(),
   groupId: Joi.string().required(),
+  accessLevel: Joi.string().required(),
 });
 
 /**
@@ -171,9 +177,10 @@ getGroupRegistrationUrl.schema = Joi.object().keys({
  * @param {String} groupId the group id
  * @param {String} ownerUserToken the owner user token
  * @param {String} normalUserToken the normal user token
+ * @param {String} accessLevel the access level
  * @returns {Promise} the promise result
  */
-async function addGroupMember(groupId, ownerUserToken, normalUserToken) {
+async function addGroupMember(groupId, ownerUserToken, normalUserToken, accessLevel) {
   let username;
   let userId;
   try {
@@ -192,7 +199,7 @@ async function addGroupMember(groupId, ownerUserToken, normalUserToken) {
     await request
       .post(`${config.GITLAB_API_BASE_URL}/api/v4/groups/${groupId}/members`)
       .set('Authorization', `Bearer ${ownerUserToken}`)
-      .send(`user_id=${userId}&access_level=${constants.GITLAB_DEFAULT_GROUP_ACCESS_LEVEL}`)
+      .send(`user_id=${userId}&access_level=${accessLevel}`)
       .end();
     // return gitlab username
     return {
@@ -214,6 +221,7 @@ addGroupMember.schema = Joi.object().keys({
   groupId: Joi.string().required(),
   ownerUserToken: Joi.string().required(),
   normalUserToken: Joi.string().required(),
+  accessLevel: Joi.string().required(),
 });
 
 /**
@@ -241,12 +249,82 @@ getUserIdByUsername.schema = Joi.object().keys({
   username: Joi.string().required(),
 });
 
+/**
+ * Refresh the owner user access token if needed
+ * @param {Object} gitlabOwner the gitlab owner
+ */
+async function refreshGitlabUserAccessToken(gitlabOwner) {
+  if (gitlabOwner.accessTokenExpiration && gitlabOwner.accessTokenExpiration.getTime() <=
+    new Date().getTime() + constants.GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION * MS_PER_SECOND) {
+    const refreshTokenResult = await request
+      .post('https://gitlab.com/oauth/token')
+      .query({
+        client_id: config.GITLAB_CLIENT_ID,
+        client_secret: config.GITLAB_CLIENT_SECRET,
+        refresh_token: gitlabOwner.refreshToken,
+        grant_type: 'refresh_token',
+        redirect_uri: `${config.WEBSITE}/api/${config.API_VERSION}/gitlab/owneruser/callback`,
+      })
+      .end();
+      // save user token data
+    const expiresIn = refreshTokenResult.body.expires_in || constants.GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION;
+    await dbHelper.update(User, gitlabOwner.id, {
+      accessToken: refreshTokenResult.body.access_token,
+      accessTokenExpiration: new Date(new Date().getTime() + expiresIn * MS_PER_SECOND),
+      refreshToken: refreshTokenResult.body.refresh_token,
+    });
+  }
+}
+
+refreshGitlabUserAccessToken.schema = Joi.object().keys({
+  gitlabOwner: Joi.object().keys({
+    id: Joi.string().required(),
+    accessTokenExpiration: Joi.date().required(),
+    refreshToken: Joi.string().required(),
+    role: Joi.string(),
+    userProviderId: Joi.number(),
+    type: Joi.string(),
+    accessToken: Joi.string(),
+    username: Joi.string(),
+  }),
+});
+
+/**
+ * delete user fromgroup
+ * @param {String} ownerUserToken the gitlab owner token
+ * @param {String} groupId the gitlab group Id
+ * @param {String} userId the normal user id
+ */
+async function deleteUserFromGitlabGroup(ownerUserToken, groupId, userId) {
+  try {
+    await request
+      .del(`${config.GITLAB_API_BASE_URL}/api/v4/groups/${groupId}/members/${userId}`)
+      .set('Authorization', `Bearer ${ownerUserToken}`)
+      .send()
+      .end();
+  } catch (err) {
+    // If a user is not found from gitlab, then ignore the error
+    // eslint-disable-next-line no-magic-numbers
+    if (err.status !== 404) {
+      throw helper.convertGitLabError(err, `Failed to delete user from group, userId is ${userId}, groupId is ${groupId}.`);
+    }
+  }
+}
+
+deleteUserFromGitlabGroup.schema = Joi.object().keys({
+  ownerUserToken: Joi.string().required(),
+  groupId: Joi.string().required(),
+  userId: Joi.string().required(),
+});
+
 module.exports = {
   ensureOwnerUser,
   listOwnerUserGroups,
   getGroupRegistrationUrl,
   addGroupMember,
   getUserIdByUsername,
+  refreshGitlabUserAccessToken,
+  deleteUserFromGitlabGroup,
 };
 
 helper.buildService(module.exports);

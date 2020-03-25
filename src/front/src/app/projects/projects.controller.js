@@ -65,7 +65,6 @@ angular.module('topcoderX')
           }
         });
       };
-      $scope.getProjects('active');
 
       $scope.repoType = function (repo) {
         return (repo.toLocaleLowerCase().indexOf("gitlab") >= 0 ? "Gitlab" : "Github");

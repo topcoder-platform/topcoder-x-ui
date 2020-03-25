@@ -1,0 +1,30 @@
+<div class="inmodal">
+    <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="close()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="reg-dialog-label">Configure Access Level and Valid Period</h4>
+    </div>
+    <div class="modal-body" style="background-color: #fff;">
+        <div class="row">
+            <label class="form-label">Access Level:</label>
+            <select class="form-control" ng-if="provider === 'gitlab'" ng-model="accessLevel" ng-change="updateAccessLevel(accessLevel)" required>
+                <option value ="30">Developer</option>
+                <option value ="20">Reporter</option>
+            </select>
+            <select class="form-control" ng-if="provider === 'github'" ng-model="accessLevel" ng-change="updateAccessLevel(accessLevel)" required>
+                <option value ="member">Member</option>
+                <option value ="maintainer">Maintainer</option>
+            </select>
+            <br />
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-info" ng-click="setChanges()">
+            OK
+        </button>
+        <button type="button" class="btn btn-white" ng-click="close()">
+            Cancel
+        </button>
+    </div>
+</div>

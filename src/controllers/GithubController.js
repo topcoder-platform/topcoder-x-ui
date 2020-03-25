@@ -19,6 +19,7 @@ const config = require('../config');
 const GithubService = require('../services/GithubService');
 const UserService = require('../services/UserService');
 const OwnerUserTeam = require('../models').OwnerUserTeam;
+const UserTeamMapping = require('../models').UserTeamMapping;
 const UserMapping = require('../models').UserMapping;
 const constants = require('../common/constants');
 
@@ -102,7 +103,8 @@ async function getTeamRegistrationUrl(req) {
   if (!user || !user.accessToken) {
     throw new errors.UnauthorizedError('You have not setup for Github.');
   }
-  return await GithubService.getTeamRegistrationUrl(user.accessToken, user.username, req.params.id);
+  return await GithubService.getTeamRegistrationUrl(user.accessToken, user.username, req.params.id,
+    req.params.accessLevel);
 }
 
 /**
@@ -152,7 +154,7 @@ async function addUserToTeamCallback(req, res) {
   const token = result.body.access_token;
   // add user to team
   console.log(`adding ${token} to ${team.teamId} with ${team.ownerToken}`); /* eslint-disable-line no-console */
-  const githubUser = await GithubService.addTeamMember(team.teamId, team.ownerToken, token);
+  const githubUser = await GithubService.addTeamMember(team.teamId, team.ownerToken, token, team.accessLevel);
   // associate github username with TC username
   const mapping = await dbHelper.scanOne(UserMapping, {
     topcoderUsername: {eq: req.session.tcUsername},
@@ -175,6 +177,22 @@ async function addUserToTeamCallback(req, res) {
     });
   }
 
+  // associate github username and teamId
+  const githubUserToTeamMapping = await dbHelper.scanOne(UserTeamMapping, {
+    teamId: {eq: team.teamId},
+    githubUserName: {eq: githubUser.username},
+    githubOrgId: {eq: team.githubOrgId},
+  });
+
+  if (!githubUserToTeamMapping) {
+    await dbHelper.create(UserTeamMapping, {
+      id: helper.generateIdentifier(),
+      teamId: team.teamId,
+      githubUserName: githubUser.username,
+      githubOrgId: team.githubOrgId,
+    });
+  }
+
   // check if user is already in the team or not yet
   if (githubUser.state === 'active') {
     // redirect user to the success page, to let user know that he is already in the team
@@ -190,6 +208,40 @@ async function addUserToTeamCallback(req, res) {
   }
 }
 
+/**
+ * Delete users from a team.
+ * @param {Object} req the request
+ * @param {Object} res the response
+ */
+async function deleteUsersFromTeam(req, res) {
+  let teamInDB;
+  const teamId = req.params.id;
+  try {
+    teamInDB = await helper.ensureExists(OwnerUserTeam, {teamId}, 'OwnerUserTeam');
+  } catch (err) {
+    if (!(err instanceof errors.NotFoundError)) {
+      throw err;
+    }
+  }
+  // If teamInDB not exists, then just return
+  if (teamInDB) {
+    try {
+      const githubOrgId = teamInDB.githubOrgId;
+      const token = teamInDB.ownerToken;
+      const userTeamMappings = await dbHelper.scan(UserTeamMapping, {
+        teamId: req.params.id,
+      });
+      // eslint-disable-next-line no-restricted-syntax
+      for (const userTeamMapItem of userTeamMappings) {
+        await GithubService.deleteUserFromGithubTeam(token, teamId, githubOrgId, userTeamMapItem.githubUserName);
+        await dbHelper.remove(UserTeamMapping, {id: userTeamMapItem.id});
+      }
+    } catch (err) {
+      throw err;
+    }
+  }
+  res.send({});
+}
 
 module.exports = {
   ownerUserLogin,
@@ -198,6 +250,7 @@ module.exports = {
   getTeamRegistrationUrl,
   addUserToTeam,
   addUserToTeamCallback,
+  deleteUsersFromTeam,
 };
 
 helper.buildController(module.exports);

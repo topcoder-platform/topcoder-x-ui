@@ -44,6 +44,16 @@ const schema = new Schema({
       name: 'TeamIdIndex',
     },
   },
+  githubOrgId: {
+    type: String,
+    required: true,
+    index: {
+      global: true,
+      rangeKey: 'id',
+      project: true,
+      name: 'RepositoryIdIndex',
+    },
+  },
   ownerToken: {type: String, required: true},
   identifier: {
     type: String,
@@ -53,6 +63,16 @@ const schema = new Schema({
       rangeKey: 'id',
       project: true,
       name: 'IdentifierIndex',
+    },
+  },
+  accessLevel: {
+    type: String,
+    required: true,
+    index: {
+      global: true,
+      rangeKey: 'id',
+      project: true,
+      name: 'AccessLevelIndex',
     },
   },
 });
