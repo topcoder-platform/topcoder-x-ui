@@ -24,7 +24,12 @@ angular.module('topcoderX')
          * get gitlab shareable link
          *
          */
-        service.getGitlabShareableLink = function (groupId, accessLevel) {
+        service.getGitlabShareableLink = function (groupId, accessLevel, expiredAt) {
+            if (expiredAt) {
+                return $http.get(baseUrl + '/api/v1/gitlab/groups/' + groupId + '/registrationurl/' + accessLevel + '/' + expiredAt).then(function (response) {
+                    return response;
+                });
+            }
             return $http.get(baseUrl + '/api/v1/gitlab/groups/' + groupId + '/registrationurl/' + accessLevel).then(function (response) {
                 return response;
             });

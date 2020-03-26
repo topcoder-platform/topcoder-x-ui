@@ -29,4 +29,5 @@ require('metismenu');
 require('pace-js');
 require('footable');
 require('jquery-ui-dist/jquery-ui');
+require('angularjs-datepicker');
 window.shortid = require('shortid')

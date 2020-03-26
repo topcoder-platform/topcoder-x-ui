@@ -115,7 +115,11 @@ async function getGroupRegistrationUrl(req) {
   if (!user || !user.accessToken) {
     throw new errors.UnauthorizedError('You have not setup for Gitlab.');
   }
-  return await GitlabService.getGroupRegistrationUrl(user.username, req.params.id, req.params.accessLevel);
+  return await GitlabService.getGroupRegistrationUrl(
+    user.username,
+    req.params.id,
+    req.params.accessLevel,
+    req.params.expiredAt);
 }
 
 /**
@@ -193,7 +197,12 @@ async function addUserToGroupCallback(req, res) {
   });
 
   // add user to group
-  const gitlabUser = await GitlabService.addGroupMember(group.groupId, ownerUser.accessToken, token, group.accessLevel);
+  const gitlabUser = await GitlabService.addGroupMember(
+    group.groupId,
+    ownerUser.accessToken,
+    token,
+    group.accessLevel,
+    group.expiredAt);
   // associate gitlab username with TC username
   const mapping = await dbHelper.scanOne(UserMapping, {
     topcoderUsername: {eq: req.session.tcUsername},

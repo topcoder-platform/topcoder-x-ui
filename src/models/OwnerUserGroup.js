@@ -64,6 +64,10 @@ const schema = new Schema({
       name: 'AccessLevelIndex',
     },
   },
+  expiredAt: {
+    type: String,
+    required: false
+  }
 });
 
 

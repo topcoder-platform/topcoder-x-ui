@@ -86,6 +86,12 @@ module.exports = {
       method: 'getGroupRegistrationUrl',
     },
   },
+  '/gitlab/groups/:id/registrationurl/:accessLevel/:expiredAt': {
+    get: {
+      controller: 'GitlabController',
+      method: 'getGroupRegistrationUrl',
+    },
+  },
   '/gitlab/groups/:id/users': {
     delete: {
       controller: 'GitlabController',
