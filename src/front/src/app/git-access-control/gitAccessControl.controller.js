@@ -88,8 +88,13 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
                 function (data) {
                     if (data) {
                         const accessLevel = data.accessLevel;
+                        const expiredAt = data.expiredAt;
                         var config = $scope.tableConfig[provider];
-                        config.accessLinkMethod.apply(vm, [team.id, accessLevel]).then(function (response) {
+                        var params = [team.id, accessLevel];
+                        if (expiredAt) {
+                            params.push(expiredAt);
+                        }
+                        config.accessLinkMethod.apply(vm, params).then(function (response) {
                             team.accessLink = response.data.url;
                             team.showLink = true;
                             team.gettingLink = false;

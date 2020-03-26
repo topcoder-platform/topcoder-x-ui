@@ -145,9 +145,10 @@ listOwnerUserGroups.schema = Joi.object().keys({
  * @param {String} ownerUsername the owner user name
  * @param {String} groupId the group id
  * @param {String} accessLevel the group access level
+ * @param {String} expiredAt the expired at params to define how long user joined teams. can be null
  * @returns {Promise} the promise result
  */
-async function getGroupRegistrationUrl(ownerUsername, groupId, accessLevel) {
+async function getGroupRegistrationUrl(ownerUsername, groupId, accessLevel, expiredAt) {
   // generate identifier
   const identifier = helper.generateIdentifier();
 
@@ -159,6 +160,7 @@ async function getGroupRegistrationUrl(ownerUsername, groupId, accessLevel) {
     groupId,
     identifier,
     accessLevel,
+    expiredAt
   });
 
   // construct URL
@@ -170,6 +172,7 @@ getGroupRegistrationUrl.schema = Joi.object().keys({
   ownerUsername: Joi.string().required(),
   groupId: Joi.string().required(),
   accessLevel: Joi.string().required(),
+  expiredAt: Joi.string()
 });
 
 /**
@@ -178,9 +181,10 @@ getGroupRegistrationUrl.schema = Joi.object().keys({
  * @param {String} ownerUserToken the owner user token
  * @param {String} normalUserToken the normal user token
  * @param {String} accessLevel the access level
+ * @param {String} expiredAt the expired at params to define how long user joined teams. can be null
  * @returns {Promise} the promise result
  */
-async function addGroupMember(groupId, ownerUserToken, normalUserToken, accessLevel) {
+async function addGroupMember(groupId, ownerUserToken, normalUserToken, accessLevel, expiredAt) {
   let username;
   let userId;
   try {
@@ -195,11 +199,15 @@ async function addGroupMember(groupId, ownerUserToken, normalUserToken, accessLe
       throw new errors.UnauthorizedError('Can not get user id from the normal user access token.');
     }
 
+    let body = `user_id=${userId}&access_level=${accessLevel}`;
+    if (expiredAt) {
+      body = body + `&expires_at=${expiredAt} `;
+    }
     // add user to group
     await request
       .post(`${config.GITLAB_API_BASE_URL}/api/v4/groups/${groupId}/members`)
       .set('Authorization', `Bearer ${ownerUserToken}`)
-      .send(`user_id=${userId}&access_level=${accessLevel}`)
+      .send(body)
       .end();
     // return gitlab username
     return {
@@ -222,6 +230,7 @@ addGroupMember.schema = Joi.object().keys({
   ownerUserToken: Joi.string().required(),
   normalUserToken: Joi.string().required(),
   accessLevel: Joi.string().required(),
+  expiredAt: Joi.string()
 });
 
 /**
