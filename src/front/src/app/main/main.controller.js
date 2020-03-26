@@ -184,5 +184,13 @@ angular.module('topcoderX')
           Tutorial.show(dialog, $scope);
         }
       }
-
+      //go to a new project page
+      $scope.goProject = function (project) {
+        if (project) {
+          $rootScope.project = project;
+        } else {
+          $rootScope.project = null;
+        }
+        $state.go('app.project');
+      };
     }]);
