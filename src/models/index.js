@@ -23,7 +23,7 @@ if (config.DYNAMODB.IS_LOCAL === 'true') {
 
 dynamoose.setDefaults({
   create: true,
-  update: false,
+  update: true,
 });
 
 const models = {};
