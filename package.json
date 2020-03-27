@@ -58,7 +58,7 @@
         "font-awesome": "~4.3.0",
         "footable": "~2.0.3",
         "get-parameter-names": "^0.3.0",
-        "github-api": "^3.0.0",
+        "github-api": "^3.3.0",
         "gitlab": "^3.3.6",
         "guid": "0.0.12",
         "icheck": "1.0.2",
