@@ -20,7 +20,8 @@
         "clean": "gulp clean",
         "test:fe": "gulp protractor",
         "lint": "gulp lint",
-        "heroku-postbuild": "gulp build"
+        "heroku-postbuild": "gulp build",
+        "create-tables": "CREATE_DB=true node scripts/create-update-tables.js"
     },
     "dependencies": {
         "angular": "~1.7.9",
