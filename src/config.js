@@ -15,14 +15,22 @@ module.exports = {
   // MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/topcoderx',
   SESSION_SECRET: process.env.SESSION_SECRET || 'kjsdfkj34857',
   // Github and gitlab client id and secret
-  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || ' ',
-  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || ' ',
-  GITLAB_CLIENT_ID: process.env.GITLAB_CLIENT_ID || ' ',
-  GITLAB_CLIENT_SECRET: process.env.GITLAB_CLIENT_SECRET || ' ',
-
+  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+  GITLAB_CLIENT_ID: process.env.GITLAB_CLIENT_ID,
+  GITLAB_CLIENT_SECRET: process.env.GITLAB_CLIENT_SECRET,
+  AZURE_APP_ID: process.env.AZURE_APP_ID,
+  AZURE_CLIENT_SECRET: process.env.AZURE_CLIENT_SECRET,
+  AZURE_USER_APP_ID: process.env.AZURE_APP_ID,
+  AZURE_USER_CLIENT_SECRET: process.env.AZURE_USER_CLIENT_SECRET,
+  
   // used as base to construct various URLs
   WEBSITE: process.env.WEBSITE || 'http://topcoderx.topcoder-dev.com',
+  WEBSITE_SECURE: process.env.WEBSITE_SECURE || 'https://topcoderx.topcoder-dev.com',
   GITLAB_API_BASE_URL: process.env.GITLAB_API_BASE_URL || 'https://gitlab.com',
+  AZURE_API_BASE_URL: process.env.AZURE_API_BASE_URL || 'https://app.vssps.visualstudio.com',
+  AZURE_DEVOPS_API_BASE_URL: process.env.AZURE_DEVOPS_API_BASE_URL || 'https://dev.azure.com',
+
   // kafka configuration
   TOPIC: process.env.TOPIC || 'tc-x-events',
   KAFKA_OPTIONS: {
@@ -82,6 +90,7 @@ const frontendConfigs = {
       "DIRECT_URL_BASE": "https://www.topcoder-dev/direct/projectOverview?formData.projectId=",
       "OWNER_LOGIN_GITHUB_URL":"/api/v1/github/owneruser/login",
       "OWNER_LOGIN_GITLAB_URL":"/api/v1/gitlab/owneruser/login",
+      "OWNER_LOGIN_AZURE_URL":"/api/v1/azure/owneruser/login",
       "TOPCODER_URL": "https://topcoder-dev.com",
       "GITHUB_TEAM_URL": "https://github.com/orgs/",
       "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
@@ -99,6 +108,7 @@ const frontendConfigs = {
       "DIRECT_URL_BASE": "https://www.topcoder-dev.com/direct/projectOverview?formData.projectId=",
       "OWNER_LOGIN_GITHUB_URL":"/api/v1/github/owneruser/login",
       "OWNER_LOGIN_GITLAB_URL":"/api/v1/gitlab/owneruser/login",
+      "OWNER_LOGIN_AZURE_URL":"/api/v1/azure/owneruser/login",
       "TOPCODER_URL": "https://topcoder-dev.com",
       "GITHUB_TEAM_URL": "https://github.com/orgs/",
       "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
@@ -115,6 +125,7 @@ const frontendConfigs = {
       "DIRECT_URL_BASE": "https://www.topcoder-dev.com/direct/projectOverview?formData.projectId=",
       "OWNER_LOGIN_GITHUB_URL":"/api/v1/github/owneruser/login",
       "OWNER_LOGIN_GITLAB_URL":"/api/v1/gitlab/owneruser/login",
+      "OWNER_LOGIN_AZURE_URL":"/api/v1/azure/owneruser/login",
       "TOPCODER_URL": "https://topcoder-dev.com",
       "GITHUB_TEAM_URL": "https://github.com/orgs/",
       "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
@@ -131,6 +142,7 @@ const frontendConfigs = {
       "DIRECT_URL_BASE": "https://www.topcoder-dev.com/direct/projectOverview?formData.projectId=",
       "OWNER_LOGIN_GITHUB_URL":"/api/v1/github/owneruser/login",
       "OWNER_LOGIN_GITLAB_URL":"/api/v1/gitlab/owneruser/login",
+      "OWNER_LOGIN_AZURE_URL":"/api/v1/azure/owneruser/login",
       "TOPCODER_URL": "https://topcoder-dev.com",
       "GITHUB_TEAM_URL": "https://github.com/orgs/",
       "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
@@ -147,6 +159,7 @@ const frontendConfigs = {
       "DIRECT_URL_BASE": "https://www.topcoder.com/direct/projectOverview?formData.projectId=",
       "OWNER_LOGIN_GITHUB_URL":"/api/v1/github/owneruser/login",
       "OWNER_LOGIN_GITLAB_URL":"/api/v1/gitlab/owneruser/login",
+      "OWNER_LOGIN_AZURE_URL":"/api/v1/azure/owneruser/login",
       "TOPCODER_URL": "https://topcoder-dev.com",
       "GITHUB_TEAM_URL": "https://github.com/orgs/",
       "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
@@ -169,6 +182,7 @@ module.exports.frontendConfigs = {
   DIRECT_URL_BASE: process.env.DIRECT_URL_BASE || frontendConfigs[activeEnv].DIRECT_URL_BASE,
   OWNER_LOGIN_GITHUB_URL: process.env.OWNER_LOGIN_GITHUB_URL || frontendConfigs[activeEnv].OWNER_LOGIN_GITHUB_URL,
   OWNER_LOGIN_GITLAB_URL: process.env.OWNER_LOGIN_GITLAB_URL || frontendConfigs[activeEnv].OWNER_LOGIN_GITLAB_URL,
+  OWNER_LOGIN_AZURE_URL: process.env.OWNER_LOGIN_AZURE_URL || frontendConfigs[activeEnv].OWNER_LOGIN_AZURE_URL,
   TOPCODER_URL: process.env.TOPCODER_URL || frontendConfigs[activeEnv].TOPCODER_URL,
   GITHUB_TEAM_URL: process.env.GITHUB_TEAM_URL || frontendConfigs[activeEnv].GITHUB_TEAM_URL,
   GITLAB_GROUP_URL: process.env.GITLAB_GROUP_URL || frontendConfigs[activeEnv].GITLAB_GROUP_URL

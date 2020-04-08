@@ -31,6 +31,7 @@ const schema = new Schema({
     },
   },
   repoUrl: {type: String, required: true},
+  repoId: {type: String, required: false},
   rocketChatWebhook: {type: String, required: false},
   rocketChatChannelName: {type: String, required: false},
   archived: {type: String, required: true},

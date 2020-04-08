@@ -46,7 +46,7 @@ const schema = new Schema({
   },
   githubOrgId: {
     type: String,
-    required: true,
+    required: false,
     index: {
       global: true,
       rangeKey: 'id',
@@ -67,7 +67,7 @@ const schema = new Schema({
   },
   accessLevel: {
     type: String,
-    required: true,
+    required: false,
     index: {
       global: true,
       rangeKey: 'id',
@@ -75,6 +75,7 @@ const schema = new Schema({
       name: 'AccessLevelIndex',
     },
   },
+  organizationName: { type: String, required: false }
 });
 
 module.exports = schema;

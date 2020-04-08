@@ -25,6 +25,7 @@ const NotFoundError = require('./errors').NotFoundError;
 const ValidationError = require('./errors').ValidationError;
 const dbHelper = require('./db-helper');
 
+
 bluebird.promisifyAll(bcrypt);
 bluebird.promisifyAll(parseDomain);
 
@@ -201,7 +202,8 @@ async function ensureExists(Model, criteria, modelName) {
  */
 async function getProviderType(repoUrl) {
   const parsedDomain = await parseDomain(repoUrl);
-  if (!parsedDomain || !parsedDomain.domain || (parsedDomain.domain !== 'github' && parsedDomain.domain !== 'gitlab')) {
+  if (!parsedDomain || !parsedDomain.domain || 
+    (parsedDomain.domain !== 'github' && parsedDomain.domain !== 'gitlab' && parsedDomain.domain !== 'azure')) {
     throw new ValidationError('Invalid git repo url');
   }
   return parsedDomain.domain;
@@ -220,16 +222,26 @@ async function getProjectCopilotOrOwner(models, project, provider, isCopilot) {
     topcoderUsername: isCopilot ? project.copilot : project.owner,
   });
 
-  if (!userMapping || (provider === 'github' && !userMapping.githubUserId) || (provider === 'gitlab' && !userMapping.gitlabUserId)) {
+  if (!userMapping || 
+    (provider === 'github' && !userMapping.githubUserId) 
+    || (provider === 'gitlab' && !userMapping.gitlabUserId)
+    || (provider === 'azure' && !userMapping.azureUserId)) {
     throw new Error(`Couldn't find ${isCopilot ? 'copilot' : 'owner'} username for '${provider}' for this repository.`);
   }
 
-  return await dbHelper.scanOne(models.User, {
-    username: provider === 'github' ? userMapping.githubUsername : userMapping.gitlabUsername,
+  let user = await dbHelper.scanOne(models.User, {
+    username: provider === 'github' ? userMapping.githubUsername : // eslint-disable-line no-nested-ternary
+      provider === 'gitlab' ? userMapping.gitlabUsername : userMapping.azureEmail,
     type: provider,
   });
-}
+  
+  if (provider === 'azure') {
+    const azureService = require('../services/AzureService'); // eslint-disable-line global-require
+    user = azureService.refreshAzureUserAccessToken(user);
+  }
 
+  return user;
+}
 
 /**
  * Generate an unique identifier
@@ -240,6 +252,18 @@ function generateIdentifier() {
   return `${uuid()}-${new Date().getTime()}`;
 }
 
+/**
+ * Generate simple hash of string
+ *
+ * @param {String} s the str
+ * @returns {String} the hash
+ */
+function hashCode(s) {
+  return s.split("").reduce(function(a, b){
+    a = ((a << 5) - a) + b.charCodeAt(0); // eslint-disable-line no-bitwise, no-magic-numbers
+    return a & a; // eslint-disable-line no-bitwise
+  }, 0);
+}
 
 module.exports = {
   buildService,
@@ -250,4 +274,5 @@ module.exports = {
   generateIdentifier,
   getProviderType,
   getProjectCopilotOrOwner,
+  hashCode
 };

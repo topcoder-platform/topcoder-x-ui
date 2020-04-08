@@ -65,6 +65,31 @@
                             </div>
                         </td>
                     </tr>
+                    <tr height="60px">
+                        <td><h4>Azure DevOps</h4></td>
+                        <td>
+                            <div ng-if='isLoaded'>
+                                <div ng-if='settings.azure'>
+                                    <i ng-if='!settings.expired.azure' class="btn fa fa-check green-check-icon"></i>
+                                    <i ng-if='settings.expired.azure' class="btn fa fa-warning orange-warning-icon" ng-click="renew('azure')" title="Renew the token"></i>&#09;
+                                </div>
+                                <div ng-if='!settings.azure'>
+                                    <a class="btn btn-sm btn-info" ng-href="{{loginUrl.azure}}">
+                                        Setup
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div ng-if='isLoaded'>
+                                <div ng-if='settings.azure'>
+                                    <a class="btn btn-sm btn-danger" ng-click="revoke('azure')">
+                                        Revoke
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>
