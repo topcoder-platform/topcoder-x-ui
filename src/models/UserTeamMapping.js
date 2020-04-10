@@ -23,7 +23,7 @@ const schema = new Schema({
   },
   githubOrgId: {
     type: String,
-    required: true,
+    required: false,
     index: {
       global: true,
       project: true,
@@ -33,7 +33,7 @@ const schema = new Schema({
   },
   githubUserName: {
     type: String,
-    required: true,
+    required: false,
     index: {
       global: true,
       project: true,
@@ -41,6 +41,8 @@ const schema = new Schema({
       name: 'GithubUserNameIndex',
     },
   },
+  azureProjectId: { type: String, required: false },
+  azureUserId: { type: String, required: false }
 });
 
 module.exports = schema;
