@@ -131,13 +131,20 @@ async function create(project, currentUser) {
   const provider = await helper.getProviderType(project.repoUrl);
 
   if (provider === 'azure') {
-    project.repoUrl = decodeURIComponent(project.repoUrl);
+    const repoUrlObj = new URL(project.repoUrl);
+    const pathCount = 3;
+    const paths = repoUrlObj.pathname.split('/');
+    if (paths.length > pathCount) {
+      project.repoUrl = decodeURIComponent(`${repoUrlObj.origin}/${paths[1]}/${paths[2]}`); // eslint-disable-line no-magic-numbers
+    }
+    else {
+      project.repoUrl = decodeURIComponent(`${repoUrlObj.origin}${repoUrlObj.pathname}`);
+    }
     const userRole = await helper.getProjectCopilotOrOwner(models, project, provider, false);
     const results = project.repoUrl.split('/');
     const index = 1;
     const repoName = results[results.length - index];
-    const excludePart = 3;
-    const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
+    const repoOwner = _(results).slice(pathCount, results.length - 1).join('/');
   
     let result = await request
       .get(`${config.AZURE_DEVOPS_API_BASE_URL}/${repoOwner}/_apis/projects/${repoName}?api-version=5.1`)
