@@ -32,6 +32,7 @@
                                             <thead>
                                                 <tr>
                                                     <th class="col-lg-2" data-sort-ignore="true">Team Name</th>
+                                                    <th class="col-lg-2" data-sort-ignore="true">Organization</th>
                                                     <th class="col-lg-2" data-sort-ignore="true">Get Link</th>
                                                     <th class="col-lg-2" data-sort-ignore="true">Remove All Users</th>
                                                 </tr>
@@ -39,6 +40,7 @@
                                             <tbody>
                                                 <tr ng-repeat="item in tableConfig.github.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
                                                     <td class="col-lg-2">{{item.name}}</td>
+                                                    <td class="col-lg-2">{{item.organization.login}}</td>
                                                     <td class="col-lg-2">
                                                         <button class="btn btn-sm btn-success" ng-hide="item.gettingLink" ng-click="getSharableLink(item, 'github')">
                                                             <strong>Get Link</strong>
