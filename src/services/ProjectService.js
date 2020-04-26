@@ -203,6 +203,7 @@ async function update(project, currentUser) {
     dbProject[item[0]] = item[1];
     return item;
   });
+  dbProject.updatedAt = new Date();
 
   return await dbHelper.update(models.Project, dbProject.id, dbProject);
 }
@@ -225,7 +226,14 @@ async function getAll(query, currentUser) {
   }
   // if show all is checked user must be admin
   if (query.showAll && await securityService.isAdminUser(currentUser.roles)) {
-    return await dbHelper.scan(models.Project, condition);
+    let projects = await dbHelper.scan(models.Project, condition);
+    projects = _.map(projects, (project) => {
+      if (!project.updatedAt) {
+        project.updatedAt = 0;
+      }
+      return project;
+    });
+    return _.orderBy(projects, ['updatedAt', 'title'], ['desc', 'asc']);
   }
 
   const filter = {
@@ -240,7 +248,14 @@ async function getAll(query, currentUser) {
     },
   };
 
-  return await dbHelper.scan(models.Project, filter);
+  let projects = await dbHelper.scan(models.Project, filter);
+  projects = _.map(projects, (project) => {
+    if (!project.updatedAt) {
+      project.updatedAt = 0;
+    }
+    return project;
+  });
+  return _.orderBy(projects, ['updatedAt', 'title'], ['desc', 'asc']);
 }
 
 getAll.schema = Joi.object().keys({
