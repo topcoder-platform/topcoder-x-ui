@@ -67,7 +67,18 @@ angular.module('topcoderX')
       };
 
       $scope.repoType = function (repo) {
-        return (repo.toLocaleLowerCase().indexOf("gitlab") >= 0 ? "Gitlab" : "Github");
+        if (repo.toLocaleLowerCase().indexOf("github") >= 0) {
+          return "Github";
+        }
+        else if (repo.toLocaleLowerCase().indexOf("gitlab") >= 0) {
+          return "Gitlab";
+        }
+        else if (repo.toLocaleLowerCase().indexOf("azure") >= 0) {
+          return "Azure";
+        }
+        else {
+          return "Other";
+        }
       };
 
       $scope.init = function () {

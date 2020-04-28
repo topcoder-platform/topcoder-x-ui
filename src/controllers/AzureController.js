@@ -3,7 +3,7 @@
  */
 
 /**
- * This controller exposes Gitlab REST endpoints.
+ * This controller exposes Azure REST endpoints.
  *
  * @author TCSCODER
  * @version 1.0
@@ -17,12 +17,11 @@ const errors = require('../common/errors');
 const constants = require('../common/constants');
 const config = require('../config');
 const AzureService = require('../services/AzureService');
-const GitlabService = require('../services/GitlabService');
 const UserService = require('../services/UserService');
 const User = require('../models').User;
 const OwnerUserTeam = require('../models').OwnerUserTeam;
-// const UserMapping = require('../models').UserMapping;
-const UserGroupMapping = require('../models').UserGroupMapping;
+const UserMapping = require('../models').UserMapping;
+const UserTeamMapping = require('../models').UserTeamMapping;
 
 const request = superagentPromise(superagent, Promise);
 
@@ -40,7 +39,7 @@ async function ownerUserLogin(req, res) {
   if (!req.session.state) {
     req.session.state = helper.generateIdentifier();
   }
-  // redirect to GitLab OAuth
+  // redirect to Azure OAuth
   const callbackUri = `${config.WEBSITE_SECURE}${constants.AZURE_OWNER_CALLBACK_URL}`;
   res.redirect(`https://app.vssps.visualstudio.com/oauth2/authorize?client_id=${
     config.AZURE_APP_ID
@@ -50,7 +49,7 @@ async function ownerUserLogin(req, res) {
 }
 
 /**
- * Owner user login callback, redirected by GitLab.
+ * Owner user login callback, redirected by Azure.
  * @param {Object} req the request
  * @param {Object} res the response
  */
@@ -104,7 +103,7 @@ async function ownerUserLoginCallback(req, res) {
 async function listOwnerUserTeams(req) {
   const user = await UserService.getAccessTokenByHandle(req.currentUser.handle, constants.USER_TYPES.AZURE);
   if (!user || !user.accessToken) {
-    throw new errors.UnauthorizedError('You have not setup for Gitlab.');
+    throw new errors.UnauthorizedError('You have not setup for Azure.');
   }
   return await AzureService.listOwnerUserTeams(user, req.query.page, req.query.perPage);
 }
@@ -136,7 +135,7 @@ async function addUserToTeam(req, res) {
   // store identifier to session, to be compared in callback
   req.session.identifier = identifier;
 
-  // redirect to GitLab OAuth
+  // redirect to Azure OAuth
   const callbackUri = `${config.WEBSITE_SECURE}/api/${config.API_VERSION}/azure/normaluser/callback`;
   res.redirect(`https://app.vssps.visualstudio.com/oauth2/authorize?client_id=${
     config.AZURE_USER_APP_ID
@@ -146,7 +145,7 @@ async function addUserToTeam(req, res) {
 }
 
 /**
- * Normal user callback, to be added to group. Redirected by GitLab.
+ * Normal user callback, to be added to group. Redirected by Azure.
  * @param {Object} req the request
  * @param {Object} res the response
  */
@@ -197,29 +196,15 @@ async function addUserToTeamCallback(req, res) {
     .end()
     .then((resp) => resp.body);
 
-  // PATCH https://vsaex.dev.azure.com/{organization}/_apis/userentitlements/{userId}?api-version=5.1-preview.2
   try {
-  await request
-    .patch(`https://vsaex.dev.azure.com/telagaid/_apis/userentitlements/${userProfile.id}?api-version=5.1-preview.2`)
+    await request
+    .patch(`https://vsaex.dev.azure.com/${team.organizationName}/_apis/UserEntitlements?doNotSendInviteForNewUsers=true&api-version=5.1-preview.3`)
     .send([{
-        from: "",
+        from: '',
         op: 0,
-        path: "",
+        path: `/${userProfile.id}/projectEntitlements/${team.githubOrgId}/teamRefs`,
         value: {
-          projectEntitlements: {
-            projectRef: {
-              id: team.githubOrgId
-            },
-            teamRefs: [{
-              id:team.teamId
-            }]
-          },
-          user: {
-            subjectKind: 'user',
-            displayName: userProfile.emailAddress,
-            principalName: userProfile.emailAddress,
-            id: userProfile.id
-          }
+          id:team.teamId
         }
       }])
     .set('Content-Type', 'application/json-patch+json')
@@ -229,37 +214,70 @@ async function addUserToTeamCallback(req, res) {
   catch(err) {
     console.log(err); // eslint-disable-line no-console
   }
+
+  // associate azure username with TC username
+  const mapping = await dbHelper.scanOne(UserMapping, {
+    topcoderUsername: {eq: req.session.tcUsername},
+  });
+  if (mapping) {
+    await dbHelper.update(UserMapping, mapping.id, {
+      azureEmail: userProfile.emailAddress,
+      azureUserId: userProfile.id
+    });
+  } else {
+    await dbHelper.create(UserMapping, {
+      id: helper.generateIdentifier(),
+      topcoderUsername: req.session.tcUsername,
+      azureEmail: userProfile.emailAddress,
+      azureUserId: userProfile.id
+    });
+  }
+
+  const azureUserToTeamMapping = await dbHelper.scanOne(UserTeamMapping, {
+    teamId: {eq: team.teamId},
+    azureUserId: {eq: userProfile.id},
+  });
+
+  if (!azureUserToTeamMapping) {
+    await dbHelper.create(UserTeamMapping, {
+      id: helper.generateIdentifier(),
+      teamId: team.teamId,
+      azureUserId: userProfile.id,
+      azureProjectId: team.githubOrgId
+    });
+  }
+  
   // redirect to success page
-  res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/azure/path`);
+  res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/azure/${team.organizationName}_${team.githubOrgId}`);
 }
 
 
 /**
- * Delete users from a group.
+ * Delete users from a team.
  * @param {Object} req the request
  * @param {Object} res the response
  */
 async function deleteUsersFromTeam(req, res) {
-  const groupId = req.params.id;
-  let groupInDB;
+  const teamId = req.params.id;
+  let teamInDB;
   try {
-    groupInDB = await helper.ensureExists(OwnerUserTeam, {groupId}, 'OwnerUserTeam');
+    teamInDB = await helper.ensureExists(OwnerUserTeam, {teamId}, 'OwnerUserTeam');
   } catch (err) {
     if (!(err instanceof errors.NotFoundError)) {
       throw err;
     }
   }
-  // If groupInDB not exists, then just return
-  if (groupInDB) {
+  // If teamInDB not exists, then just return
+  if (teamInDB) {
     try {
       const ownerUser = await helper.ensureExists(User,
-        {username: groupInDB.ownerUsername, type: constants.USER_TYPES.GITLAB, role: constants.USER_ROLES.OWNER}, 'User');
-      await GitlabService.refreshGitlabUserAccessToken(ownerUser);
-      const userGroupMappings = await dbHelper.scan(UserGroupMapping, {groupId});
+        {username: teamInDB.ownerUsername, type: constants.USER_TYPES.AZURE, role: constants.USER_ROLES.OWNER}, 'User');
+      await AzureService.refreshAzureUserAccessToken(ownerUser);
+      const userTeamMappings = await dbHelper.scan(UserTeamMapping, {teamId});
       // eslint-disable-next-line no-restricted-syntax
-      for (const userGroupMapItem of userGroupMappings) {
-        await GitlabService.deleteUserFromGitlabGroup(ownerUser.accessToken, groupId, userGroupMapItem.gitlabUserId);
-        await dbHelper.remove(UserGroupMapping, {id: userGroupMapItem.id});
+      for (const userTeamMapItem of userTeamMappings) {
+        await AzureService.deleteUserFromAzureTeam(ownerUser.accessToken, teamInDB, userTeamMapItem.azureUserId);
+        await dbHelper.remove(UserTeamMapping, {id: userTeamMapItem.id});
       }
     } catch (err) {
       throw err;

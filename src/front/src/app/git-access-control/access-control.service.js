@@ -95,5 +95,15 @@ angular.module('topcoderX')
             });
         };
 
+        /**
+         * remove all users from a azure team
+         *
+         */
+        service.removeAllAzureUsers = function (teamId) {
+            return $http.delete(baseUrl + '/api/v1/azure/teams/' + teamId + '/users').then(function (response) {
+                return response;
+            });
+        };
+
         return service;
     }]);

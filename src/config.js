@@ -93,7 +93,8 @@ const frontendConfigs = {
       "OWNER_LOGIN_AZURE_URL":"/api/v1/azure/owneruser/login",
       "TOPCODER_URL": "https://topcoder-dev.com",
       "GITHUB_TEAM_URL": "https://github.com/orgs/",
-      "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
+      "GITLAB_GROUP_URL": "https://gitlab.com/groups/",
+      "AZURE_TEAM_URL": "https://dev.azure.com/"
 
   },
   "heroku":{
@@ -111,7 +112,8 @@ const frontendConfigs = {
       "OWNER_LOGIN_AZURE_URL":"/api/v1/azure/owneruser/login",
       "TOPCODER_URL": "https://topcoder-dev.com",
       "GITHUB_TEAM_URL": "https://github.com/orgs/",
-      "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
+      "GITLAB_GROUP_URL": "https://gitlab.com/groups/",
+      "AZURE_TEAM_URL": "https://dev.azure.com/"
   },
   "dev":{
       "JWT_V3_NAME":"v3jwt",
@@ -128,7 +130,8 @@ const frontendConfigs = {
       "OWNER_LOGIN_AZURE_URL":"/api/v1/azure/owneruser/login",
       "TOPCODER_URL": "https://topcoder-dev.com",
       "GITHUB_TEAM_URL": "https://github.com/orgs/",
-      "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
+      "GITLAB_GROUP_URL": "https://gitlab.com/groups/",
+      "AZURE_TEAM_URL": "https://dev.azure.com/"
   },
   "qa":{
       "JWT_V3_NAME":"v3jwt",
@@ -145,7 +148,8 @@ const frontendConfigs = {
       "OWNER_LOGIN_AZURE_URL":"/api/v1/azure/owneruser/login",
       "TOPCODER_URL": "https://topcoder-dev.com",
       "GITHUB_TEAM_URL": "https://github.com/orgs/",
-      "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
+      "GITLAB_GROUP_URL": "https://gitlab.com/groups/",
+      "AZURE_TEAM_URL": "https://dev.azure.com/"
   },
   "prod":{
       "JWT_V3_NAME":"v3jwt",
@@ -162,7 +166,8 @@ const frontendConfigs = {
       "OWNER_LOGIN_AZURE_URL":"/api/v1/azure/owneruser/login",
       "TOPCODER_URL": "https://topcoder-dev.com",
       "GITHUB_TEAM_URL": "https://github.com/orgs/",
-      "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
+      "GITLAB_GROUP_URL": "https://gitlab.com/groups/",
+      "AZURE_TEAM_URL": "https://dev.azure.com/"
   }
 };
 
@@ -185,5 +190,6 @@ module.exports.frontendConfigs = {
   OWNER_LOGIN_AZURE_URL: process.env.OWNER_LOGIN_AZURE_URL || frontendConfigs[activeEnv].OWNER_LOGIN_AZURE_URL,
   TOPCODER_URL: process.env.TOPCODER_URL || frontendConfigs[activeEnv].TOPCODER_URL,
   GITHUB_TEAM_URL: process.env.GITHUB_TEAM_URL || frontendConfigs[activeEnv].GITHUB_TEAM_URL,
-  GITLAB_GROUP_URL: process.env.GITLAB_GROUP_URL || frontendConfigs[activeEnv].GITLAB_GROUP_URL
+  GITLAB_GROUP_URL: process.env.GITLAB_GROUP_URL || frontendConfigs[activeEnv].GITLAB_GROUP_URL,
+  AZURE_TEAM_URL: process.env.AZURE_TEAM_URL || frontendConfigs[activeEnv].AZURE_TEAM_URL
 };

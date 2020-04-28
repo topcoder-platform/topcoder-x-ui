@@ -3,7 +3,7 @@
  */
 
 /**
- * This service will provide GitLab operations.
+ * This service will provide Azure operations.
  *
  * @author TCSCODER
  * @version 1.0
@@ -12,7 +12,6 @@
 const Joi = require('joi');
 const superagent = require('superagent');
 const superagentPromise = require('superagent-promise');
-const _ = require('lodash');
 const config = require('../config');
 const constants = require('../common/constants');
 const helper = require('../common/helper');
@@ -42,7 +41,7 @@ async function ensureOwnerUser(token, topcoderUsername) {
       .end()
       .then((res) => res.body);
   } catch (err) {
-    throw helper.convertGitLabError(err, 'Failed to ensure valid owner user.');
+    throw helper.convertAzureError(err, 'Failed to ensure valid owner user.');
   }
   if (!userProfile) {
     throw new errors.UnauthorizedError('Can not get user from the access token.');
@@ -139,7 +138,7 @@ async function listOwnerUserTeams(user, page = 1, perPage = constants.GITLAB_DEF
       })
     };
   } catch (err) {
-    throw helper.convertGitLabError(err, 'Failed to list user groups');
+    throw helper.convertAzureError(err, 'Failed to list user groups');
   }
 }
 
@@ -190,89 +189,6 @@ getTeamRegistrationUrl.schema = Joi.object().keys({
 });
 
 /**
- * Add group member.
- * @param {String} groupId the group id
- * @param {String} ownerUserToken the owner user token
- * @param {String} normalUserToken the normal user token
- * @param {String} accessLevel the access level
- * @param {String} expiredAt the expired at params to define how long user joined teams. can be null
- * @returns {Promise} the promise result
- */
-async function addGroupMember(groupId, ownerUserToken, normalUserToken, accessLevel, expiredAt) {
-  let username;
-  let userId;
-  try {
-    // get normal user id
-    const res = await request
-      .get(`${config.GITLAB_API_BASE_URL}/api/v4/user`)
-      .set('Authorization', `Bearer ${normalUserToken}`)
-      .end();
-    userId = res.body.id;
-    username = res.body.username;
-    if (!userId) {
-      throw new errors.UnauthorizedError('Can not get user id from the normal user access token.');
-    }
-
-    let body = `user_id=${userId}&access_level=${accessLevel}`;
-    if (expiredAt) {
-      body = body + `&expires_at=${expiredAt} `;
-    }
-    // add user to group
-    await request
-      .post(`${config.GITLAB_API_BASE_URL}/api/v4/groups/${groupId}/members`)
-      .set('Authorization', `Bearer ${ownerUserToken}`)
-      .send(body)
-      .end();
-    // return gitlab username
-    return {
-      username: res.body.username,
-      id: res.body.id,
-    };
-  } catch (err) {
-    if (_.get(JSON.parse(err.response.text), 'message') !== 'Member already exists') {
-      if (err instanceof errors.ApiError) {
-        throw err;
-      }
-      throw helper.convertGitLabError(err, 'Failed to add group member');
-    }
-    return {username, id: userId};
-  }
-}
-
-addGroupMember.schema = Joi.object().keys({
-  groupId: Joi.string().required(),
-  ownerUserToken: Joi.string().required(),
-  normalUserToken: Joi.string().required(),
-  accessLevel: Joi.string().required(),
-  expiredAt: Joi.string()
-});
-
-/**
- * Gets the user id by username
- * @param {string} username the username
- * @returns {number} the user id
- */
-async function getUserIdByUsername(username) {
-  try {
-    // get current user
-    const users = await request
-      .get(`${config.GITLAB_API_BASE_URL}/api/v4/users?username=${username}`)
-      .end()
-      .then((res) => res.body);
-    if (!users || !users.length) {
-      throw new errors.NotFoundError(`The user with username ${username} is not found on gitlab`);
-    }
-    return users[0].id;
-  } catch (err) {
-    throw helper.convertGitLabError(err, 'Failed to get detail about user from gitlab.');
-  }
-}
-
-getUserIdByUsername.schema = Joi.object().keys({
-  username: Joi.string().required(),
-});
-
-/**
  * Refresh the owner user access token if needed
  * @param {Object} azureOwner the azure owner
  * @returns {Object} the user object
@@ -318,29 +234,37 @@ refreshAzureUserAccessToken.schema = Joi.object().keys({
 
 /**
  * delete user fromgroup
- * @param {String} ownerUserToken the gitlab owner token
- * @param {String} groupId the gitlab group Id
+ * @param {String} ownerUserToken the azure owner token
+ * @param {Object} team the azure team
  * @param {String} userId the normal user id
  */
-async function deleteUserFromGitlabGroup(ownerUserToken, groupId, userId) {
+async function deleteUserFromAzureTeam(ownerUserToken, team, userId) {
   try {
     await request
-      .del(`${config.GITLAB_API_BASE_URL}/api/v4/groups/${groupId}/members/${userId}`)
-      .set('Authorization', `Bearer ${ownerUserToken}`)
-      .send()
-      .end();
+    .patch(`https://vsaex.dev.azure.com/${team.organizationName}/_apis/UserEntitlements?doNotSendInviteForNewUsers=true&api-version=5.1-preview.3`)
+    .send([{
+        from: '',
+        op: 'remove',
+        path: `/${userId}/projectEntitlements/${team.githubOrgId}`,
+        value: {
+          id:team.teamId
+        }
+    }])
+    .set('Content-Type', 'application/json-patch+json')
+    .set('Authorization', `Bearer ${ownerUserToken}`)
+    .end();
   } catch (err) {
-    // If a user is not found from gitlab, then ignore the error
+    // If a user is not found from azure, then ignore the error
     // eslint-disable-next-line no-magic-numbers
     if (err.status !== 404) {
-      throw helper.convertGitLabError(err, `Failed to delete user from group, userId is ${userId}, groupId is ${groupId}.`);
+      throw helper.convertAzureError(err, `Failed to delete user from group, userId is ${userId}, teamId is ${team.teamId}.`);
     }
   }
 }
 
-deleteUserFromGitlabGroup.schema = Joi.object().keys({
+deleteUserFromAzureTeam.schema = Joi.object().keys({
   ownerUserToken: Joi.string().required(),
-  groupId: Joi.string().required(),
+  team: Joi.object().required(),
   userId: Joi.string().required(),
 });
 
@@ -348,10 +272,8 @@ module.exports = {
   ensureOwnerUser,
   listOwnerUserTeams,
   getTeamRegistrationUrl,
-  addGroupMember,
-  getUserIdByUsername,
   refreshAzureUserAccessToken,
-  deleteUserFromGitlabGroup,
+  deleteUserFromAzureTeam
 };
 
 helper.buildService(module.exports);
