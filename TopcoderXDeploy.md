@@ -168,13 +168,13 @@ You should see the message passed successfully from the webhook to the receiver 
 If the flow works properly, you will see a comment like this added to the Gitlab issue:
 
 ```
-Contest https://www.topcoder-dev.com/challenges/30052039 has been created for this ticket.
+Challenge 17ab4b5b-fad6-405a-8abb-9f23e9fa3730 has been created for this ticket
 ```
 
 You can test assignment by assigning the ticket to yourself.  You should then see another message after a few seconds like this:
 
 ```
-Contest https://www.topcoder-dev.com/challenges/30052039 has been updated - it has been assigned to tonyj.
+Challenge 17ab4b5b-fad6-405a-8abb-9f23e9fa3730 has been assigned to mess.
 ```
 
 ## Sample development configs
