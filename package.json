@@ -24,7 +24,7 @@
         "create-tables": "CREATE_DB=true node scripts/create-update-tables.js"
     },
     "dependencies": {
-        "angular": "~1.7.9",
+        "angular": "~1.8.0",
         "angular-animate": "~1.7.4",
         "angular-clipboard": "~1.2.1",
         "angular-cookies": "~1.7.4",
