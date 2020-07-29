@@ -87,6 +87,10 @@
                 Rocket Chat Channel Name is required.</span>
               <br />
             </div>
+            <label class="form-label" style="margin-bottom: 0px;">Create Copilot Payments?</label>
+            <input class="checkbox-control" style="margin-top: 0;" type="checkbox" ng-model="project.createCopilotPayments" ng-checked="project.createCopilotPayments === 'true'"
+              ng-model="project.createCopilotPayments" ng-true-value="'true'" ng-false-value="'false'" />
+            <br />
             <label class="form-label">Archived:</label>
             <input class="checkbox-control" type="checkbox" ng-model="project.archived" ng-checked="project.archived === 'true'"
               ng-model="project.archived" ng-true-value="'true'" ng-false-value="'false'" />

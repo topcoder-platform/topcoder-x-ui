@@ -50,6 +50,7 @@ const projectSchema = {
     registeredWebhookId: Joi.string().allow(null),
     createdAt: Joi.date(),
     updatedAt: Joi.date(),
+    createCopilotPayments: Joi.boolean()
   },
   currentUser: currentUserSchema,
 };
@@ -63,6 +64,7 @@ const createProjectSchema = {
     rocketChatWebhook: Joi.string().allow(null),
     rocketChatChannelName: Joi.string().allow(null),
     archived: Joi.boolean().required(),
+    createCopilotPayments: Joi.boolean()
   },
   currentUser: currentUserSchema
 };
