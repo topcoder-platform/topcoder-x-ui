@@ -24,6 +24,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       rocketChatWebhook: null,
       rocketChatChannelName: null,
       archived: false,
+      createCopilotPayments: false
     };
     if ($rootScope.project) {
       $scope.title = 'Manage a Project';
