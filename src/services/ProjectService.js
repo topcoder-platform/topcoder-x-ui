@@ -17,8 +17,6 @@ const GitHub = require('github-api');
 const Gitlab = require('gitlab/dist/es5').default;
 const _ = require('lodash');
 const guid = require('guid');
-const superagent = require('superagent');
-const superagentPromise = require('superagent-promise');
 const kafka = require('../utils/kafka');
 const helper = require('../common/helper');
 const dbHelper = require('../common/db-helper');
@@ -28,8 +26,6 @@ const errors = require('../common/errors');
 
 const userService = require('./UserService');
 const securityService = require('./SecurityService');
-
-const request = superagentPromise(superagent, Promise);
 
 const currentUserSchema = Joi.object().keys({
   handle: Joi.string().required(),
@@ -129,33 +125,6 @@ async function create(project, currentUser) {
   project.secretWebhookKey = guid.raw();
   project.copilot = project.copilot ? project.copilot.toLowerCase() : null;
   project.id = helper.generateIdentifier();
-
-  const provider = await helper.getProviderType(project.repoUrl);
-
-  if (provider === 'azure') {
-    const repoUrlObj = new URL(project.repoUrl);
-    const pathCount = 3;
-    const paths = repoUrlObj.pathname.split('/');
-    if (paths.length > pathCount) {
-      project.repoUrl = decodeURIComponent(`${repoUrlObj.origin}/${paths[1]}/${paths[2]}`); // eslint-disable-line no-magic-numbers
-    }
-    else {
-      project.repoUrl = decodeURIComponent(`${repoUrlObj.origin}${repoUrlObj.pathname}`);
-    }
-    const userRole = await helper.getProjectCopilotOrOwner(models, project, provider, false);
-    const results = project.repoUrl.split('/');
-    const index = 1;
-    const repoName = results[results.length - index];
-    const repoOwner = _(results).slice(pathCount, results.length - 1).join('/');
-  
-    let result = await request
-      .get(`${config.AZURE_DEVOPS_API_BASE_URL}/${repoOwner}/_apis/projects/${repoName}?api-version=5.1`)
-      .set('Authorization', `Bearer ${userRole.accessToken}`)
-      .end()
-      .then((res) => res.body);
-
-    project.repoId = result.id;
-  }
 
   const createdProject = await dbHelper.create(models.Project, project);
 
@@ -327,35 +296,6 @@ async function createLabel(body, currentUser) {
         throw helper.convertGitLabError(err, 'Failed to create labels.');
       }
     }
-  } else if (provider === 'azure') {
-    try {
-      // POST https://dev.azure.com/{organization}/{project}/_apis/wit/workitems/${type}?api-version=6.0-preview.3
-      const result = await request
-        .post(`${config.AZURE_DEVOPS_API_BASE_URL}/${repoOwner}/${repoName}/_apis/wit/workitems/$issue?api-version=6.0-preview.3`)
-        .send([{
-          op: 'add',
-          path: '/fields/System.Title',
-          from: null,
-          value: 'Issue For Creating Labels'
-        }, {
-          op: 'add',
-          path: '/fields/System.Tags',
-          value: _.join(config.LABELS.map((label) => label.name), '; ')
-        }])
-        .set('Authorization', `Bearer ${userRole.accessToken}`)
-        .set('Content-Type', 'application/json-patch+json')
-        .end()
-        .then((res) => res.body);
-        // DELETE https://dev.azure.com/{organization}/{project}/_apis/wit/workitems/{id}?api-version=6.0-preview.3
-        await request
-          .del(`${config.AZURE_DEVOPS_API_BASE_URL}/${repoOwner}/${repoName}/_apis/wit/workitems/${result.id}?api-version=6.0-preview.3`)
-          .set('Authorization', `Bearer ${userRole.accessToken}`)
-          .end();
-    } catch (err) {
-      if (_.get(err, 'error.message') !== 'Label already exists') {
-        throw helper.convertGitLabError(err, 'Failed to create labels.');
-      }
-    }
   }
   return {
     success: true,
@@ -474,49 +414,6 @@ async function createHook(body, currentUser) {
       }
       throw helper.convertGitLabError(err, errMsg);
     }
-  } else if (provider === 'azure') {
-    try {
-      // https://dev.azure.com/telagaid/_apis/projects/Test%20Second?api-version=5.1      
-      let project = await request
-        .get(`${config.AZURE_DEVOPS_API_BASE_URL}/${repoOwner}/_apis/projects/${repoName}?api-version=5.1`)
-        .set('Authorization', `Bearer ${userRole.accessToken}`)
-        .end()
-        .then((res) => res.body);
-
-      // https://dev.azure.com/telagaid/_apis/hooks/subscriptions?api-version=5.1 
-      const eventTypes = [
-        'workitem.created', 
-        'workitem.updated', 
-        'workitem.deleted',
-        'workitem.restored',
-        'workitem.commented'
-      ];
-      for (const eventType of eventTypes) { // eslint-disable-line no-restricted-syntax
-        await request
-          .post(`${config.AZURE_DEVOPS_API_BASE_URL}/${repoOwner}/_apis/hooks/subscriptions?api-version=5.1`)
-          .send({
-            publisherId: 'tfs',
-            eventType: eventType,
-            resourceVersion: '5.1-preview.3',
-            consumerId: 'webHooks',
-            consumerActionId: 'httpRequest',
-            publisherInputs: {
-              projectId: project.id
-            },
-            consumerInputs: {
-              basicAuthUsername: 'tcx',
-              url: `${config.HOOK_BASE_URL}/webhooks/azure`,
-              basicAuthPassword: dbProject.secretWebhookKey
-            }
-          })
-          .set('Authorization', `Bearer ${userRole.accessToken}`)
-          .set('Content-Type', 'application/json')
-          .end()
-          .then((res) => res.body);
-      }
-    } catch (err) {
-      throw helper.convertGitLabError(err, 'Failed to ensure valid owner user.');
-    }
   } else {
     return {
       success: false
@@ -581,38 +478,6 @@ async function addWikiRules(body, currentUser) {
           title: 'Gitlab ticket rules',
         }
       );
-    } catch (err) {
-      throw helper.convertGitLabError(err, 'Failed to add wiki rules.');
-    }
-  } else if (provider === 'azure') {
-    try {
-      // PUT https://dev.azure.com/{organization}/{project}/_apis/wiki/wikis/{wikiIdentifier}/pages?path={path}&api-version=5.1
-      const project = await request
-        .get(`${config.AZURE_DEVOPS_API_BASE_URL}/${repoOwner}/_apis/projects/${repoName}?api-version=5.1`)
-        .set('Authorization', `Bearer ${userRole.accessToken}`)
-        .end()
-        .then((res) => res.body);
-
-      // POST https://dev.azure.com/fabrikam/_apis/wiki/wikis?api-version=5.1
-      await request
-      .post(`${config.AZURE_DEVOPS_API_BASE_URL}/${repoOwner}/${repoName}/_apis/wiki/wikis?api-version=5.1`)
-      .send({
-        type: 'projectWiki',
-        name: `${repoName.replace(/ /g, '-')}.wiki`,
-        projectId: project.id
-      })
-      .set('Authorization', `Bearer ${userRole.accessToken}`)
-      .set('Content-Type', 'application/json')
-      .end();
-
-      await request
-      .put(`${config.AZURE_DEVOPS_API_BASE_URL}/${repoOwner}/${repoName}/_apis/wiki/wikis/${repoName.replace(/ /g, '-')}.wiki/pages?path=Azure%20ticket%20rules&api-version=5.1`)
-      .send({
-        content
-      })
-      .set('Authorization', `Bearer ${userRole.accessToken}`)
-      .set('Content-Type', 'application/json')
-      .end();
     } catch (err) {
       throw helper.convertGitLabError(err, 'Failed to add wiki rules.');
     }

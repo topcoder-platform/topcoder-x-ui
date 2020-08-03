@@ -13,9 +13,6 @@ angular.module('topcoderX')
         $scope.link = $rootScope.appConfig.GITHUB_TEAM_URL + org + '/teams/' + team;
       } else if (provider === 'github') {
         $scope.link = $rootScope.appConfig.GITLAB_GROUP_URL + url;
-      } else if (provider === 'azure') {
-        const params = url.split('_');
-        $scope.link = $rootScope.appConfig.AZURE_TEAM_URL + params[0] + '/' + params[1];
       }
     };
     _getUrl($scope.provider, $stateParams.url);

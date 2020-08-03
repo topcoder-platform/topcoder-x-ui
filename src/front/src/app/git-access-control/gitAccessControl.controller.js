@@ -33,19 +33,6 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
                 accessLinkMethod: GitAccessControlService.getGitlabShareableLink,
                 removeAllUsersMethod: GitAccessControlService.removeAllGitlabUsers,
                 query: '',
-            },
-            azure: {
-                pageNumber: 1,
-                pageSize: 10,
-                isLoading: false,
-                items: [],
-                allItems: [],
-                totalPages: 1,
-                searchMethod: GitAccessControlService.getAzureOwnerTeams,
-                initialized: false,
-                accessLinkMethod: GitAccessControlService.getAzureShareableLink,
-                removeAllUsersMethod: GitAccessControlService.removeAllAzureUsers,
-                query: '',
             }
         }
 
@@ -87,19 +74,6 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
          */
         $scope.getSharableLink = function (team, provider) {
             team.gettingLink = true;
-            if (provider === 'azure') {
-                var azconfig = $scope.tableConfig[provider];
-                var azparams = [team.id, team.orgName, team.projectId];
-                azconfig.accessLinkMethod.apply(vm, azparams).then(function (response) {
-                    team.accessLink = response.data.url;
-                    team.showLink = true;
-                    team.gettingLink = false;
-                }).catch(function (err) {
-                    team.gettingLink = false;
-                    _handleError(err);
-                });
-                return;
-            }
             const modalInstance = $uibModal.open({
                 size: 'md',
                 templateUrl: 'app/git-access-control/git-access-dialog.html',

@@ -30,8 +30,7 @@ const USER_ROLES = {
 // The user types
 const USER_TYPES = {
   GITHUB: 'github',
-  GITLAB: 'gitlab',
-  AZURE: 'azure'
+  GITLAB: 'gitlab'
 };
 
 // The default page size for Gitlab API
@@ -50,15 +49,8 @@ const GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION = 3600 * 24 * 14;
 // The Gitlab refresh token time in seconds before expiration
 const GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION = 300;
 
-// The Azure access token default expiration in seconds
-const AZURE_ACCESS_TOKEN_DEFAULT_EXPIRATION = 3600 * 24 * 14;
-
-// The Azure refresh token time in seconds before expiration
-const AZURE_REFRESH_TOKEN_BEFORE_EXPIRATION = 300;
-
 const GITHUB_OWNER_CALLBACK_URL = '/api/v1/github/owneruser/callback';
 const GITLAB_OWNER_CALLBACK_URL = '/api/v1/gitlab/owneruser/callback';
-const AZURE_OWNER_CALLBACK_URL = '/api/v1/azure/owneruser/callback';
 
 const OWNER_USER_LOGIN_SUCCESS_URL = '/#!/app/settings';
 const USER_ADDED_TO_TEAM_SUCCESS_URL = '/#!/members';
@@ -78,11 +70,8 @@ module.exports = {
   GITLAB_DEFAULT_GROUP_ACCESS_LEVEL,
   GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION,
   GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION,
-  AZURE_ACCESS_TOKEN_DEFAULT_EXPIRATION,
-  AZURE_REFRESH_TOKEN_BEFORE_EXPIRATION,
   GITHUB_OWNER_CALLBACK_URL,
   GITLAB_OWNER_CALLBACK_URL,
-  AZURE_OWNER_CALLBACK_URL,
   OWNER_USER_LOGIN_SUCCESS_URL,
   USER_ADDED_TO_TEAM_SUCCESS_URL,
   TC_LOGIN_CALLBACK_URL,

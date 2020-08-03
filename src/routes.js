@@ -115,55 +115,6 @@ module.exports = {
       allowAnonymous: true,
     },
   },
-
-  '/azure/owneruser/login': {
-    get: {
-      controller: 'AzureController',
-      method: 'ownerUserLogin',
-    },
-  },
-  '/azure/owneruser/callback': {
-    get: {
-      controller: 'AzureController',
-      method: 'ownerUserLoginCallback',
-    },
-  },
-  '/azure/owneruser/teams': {
-    get: {
-      controller: 'AzureController',
-      method: 'listOwnerUserTeams',
-    },
-  },
-  '/azure/teams/:id/registrationurl/:orgname/:projectId': {
-    get: {
-      controller: 'AzureController',
-      method: 'getTeamRegistrationUrl',
-    },
-  },
-  '/azure/teams/:id/users': {
-    delete: {
-      controller: 'AzureController',
-      method: 'deleteUsersFromTeam',
-    },
-  },
-  '/azure/teams/registration/:identifier': {
-    get: {
-      controller: 'AzureController',
-      method: 'addUserToTeam',
-      allowNormalUser: true,
-      tcLogin: true,
-      allowAnonymous: true,
-    },
-  },
-  '/azure/normaluser/callback': {
-    get: {
-      controller: 'AzureController',
-      method: 'addUserToTeamCallback',
-      allowNormalUser: true,
-      allowAnonymous: true,
-    },
-  },
-
   '/tclogin': {
     get: {
       controller: 'TCUserController',

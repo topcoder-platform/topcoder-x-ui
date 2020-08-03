@@ -36,26 +36,6 @@ angular.module('topcoderX')
         };
 
         /**
-         * get azure owner teams
-         *
-         */
-        service.getAzureOwnerTeams = function (pageNo, pageSize) {
-            return $http.get(baseUrl + '/api/v1/azure/owneruser/teams?page=' + pageNo + '&perPage=' + pageSize).then(function (response) {
-                return response;
-            });
-        };
-
-        /**
-         * get azure shareable link
-         *
-         */
-        service.getAzureShareableLink = function (teamId, orgname, projectId) {
-            return $http.get(baseUrl + '/api/v1/azure/teams/' + teamId + '/registrationurl/' + orgname + '/' + projectId).then(function (response) {
-                return response;
-            });
-        };
-
-        /**
          * get github owner teams
          *
          */
@@ -91,16 +71,6 @@ angular.module('topcoderX')
          */
         service.removeAllGitlabUsers = function (groupId) {
             return $http.delete(baseUrl + '/api/v1/gitlab/groups/' + groupId + '/users').then(function (response) {
-                return response;
-            });
-        };
-
-        /**
-         * remove all users from a azure team
-         *
-         */
-        service.removeAllAzureUsers = function (teamId) {
-            return $http.delete(baseUrl + '/api/v1/azure/teams/' + teamId + '/users').then(function (response) {
                 return response;
             });
         };
