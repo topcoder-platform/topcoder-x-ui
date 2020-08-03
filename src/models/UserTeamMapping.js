@@ -40,9 +40,7 @@ const schema = new Schema({
       rangKey: 'id',
       name: 'GithubUserNameIndex',
     },
-  },
-  azureProjectId: { type: String, required: false },
-  azureUserId: { type: String, required: false }
+  }
 });
 
 module.exports = schema;

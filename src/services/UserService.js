@@ -29,7 +29,6 @@ async function getUserSetting(handle) {
   const setting = {
     github: false,
     gitlab: false,
-    azure: false,
     expired: {}
   };
 
@@ -55,16 +54,6 @@ async function getUserSetting(handle) {
     });
     if (!_.isNil(gitlab)) {
       users.push(gitlab);
-    }
-  }
-
-  if (mapping.azureEmail) {
-    const azure = await dbHelper.scanOne(User, {
-      username: mapping.azureEmail,
-      type: constants.USER_TYPES.AZURE,
-    });
-    if (!_.isNil(azure)) {
-      users.push(azure);
     }
   }
 
@@ -115,14 +104,6 @@ async function revokeUserSetting(handle, provider) {
     return true;
   }
 
-  if (provider === 'azure' && mapping.azureEmail) {
-    dbHelper.remove(User, {
-      username: mapping.azureEmail,
-      type: constants.USER_TYPES.AZURE,
-    });
-    return true;
-  }
-
   return false;
 }
 
@@ -166,7 +147,7 @@ async function getAccessTokenByHandle(handle, provider) {
   let gitUserName;
   if (mapping) {
     gitUserName = provider === constants.USER_TYPES.GITHUB ? 'githubUsername' :   //eslint-disable-line no-nested-ternary
-      provider === constants.USER_TYPES.GITLAB ? 'gitlabUsername' : 'azureEmail';
+      'gitlabUsername';
     return await dbHelper.scanOne(User, {
       username: mapping[gitUserName],
       type: provider,

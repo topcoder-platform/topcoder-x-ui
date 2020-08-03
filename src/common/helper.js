@@ -160,26 +160,6 @@ function convertGitLabError(err, message) {
 }
 
 /**
- * Convert azure api error.
- * @param {Error} err the azure api error
- * @param {String} message the error message
- * @returns {Error} converted error
- */
-function convertAzureError(err, message) {
-  let resMsg = `${message}. ${err.message}.\n`;
-  const detail = _.get(err, 'response.body.message');
-  if (detail) {
-    resMsg += ` Detail: ${detail}`;
-  }
-  const apiError = new errors.ApiError(
-    err.status || _.get(err, 'response.status', constants.SERVICE_ERROR_STATUS),
-    _.get(err, 'response.body.message', constants.SERVICE_ERROR),
-    resMsg
-  );
-  return apiError;
-}
-
-/**
  * Ensure entity exists for given criteria. Return error if no result.
  * @param {Object} Model the mongoose model to query
  * @param {Object|String|Number} criteria the criteria (if object) or id (if string/number)
@@ -216,7 +196,7 @@ async function ensureExists(Model, criteria, modelName) {
 async function getProviderType(repoUrl) {
   const parsedDomain = await parseDomain(repoUrl);
   if (!parsedDomain || !parsedDomain.domain || 
-    (parsedDomain.domain !== 'github' && parsedDomain.domain !== 'gitlab' && parsedDomain.domain !== 'azure')) {
+    (parsedDomain.domain !== 'github' && parsedDomain.domain !== 'gitlab')) {
     throw new ValidationError('Invalid git repo url');
   }
   return parsedDomain.domain;
@@ -237,21 +217,15 @@ async function getProjectCopilotOrOwner(models, project, provider, isCopilot) {
 
   if (!userMapping || 
     (provider === 'github' && !userMapping.githubUserId) 
-    || (provider === 'gitlab' && !userMapping.gitlabUserId)
-    || (provider === 'azure' && !userMapping.azureUserId)) {
+    || (provider === 'gitlab' && !userMapping.gitlabUserId)) {
     throw new Error(`Couldn't find ${isCopilot ? 'copilot' : 'owner'} username for '${provider}' for this repository.`);
   }
 
   let user = await dbHelper.scanOne(models.User, {
     username: provider === 'github' ? userMapping.githubUsername : // eslint-disable-line no-nested-ternary
-      provider === 'gitlab' ? userMapping.gitlabUsername : userMapping.azureEmail,
+      userMapping.gitlabUsername,
     type: provider,
   });
-  
-  if (provider === 'azure') {
-    const azureService = require('../services/AzureService'); // eslint-disable-line global-require
-    user = azureService.refreshAzureUserAccessToken(user);
-  }
 
   return user;
 }
@@ -283,7 +257,6 @@ module.exports = {
   buildController,
   convertGitHubError,
   convertGitLabError,
-  convertAzureError,
   ensureExists,
   generateIdentifier,
   getProviderType,

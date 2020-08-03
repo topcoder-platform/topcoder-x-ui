@@ -73,9 +73,6 @@ angular.module('topcoderX')
         else if (repo.toLocaleLowerCase().indexOf("gitlab") >= 0) {
           return "Gitlab";
         }
-        else if (repo.toLocaleLowerCase().indexOf("azure") >= 0) {
-          return "Azure";
-        }
         else {
           return "Other";
         }

@@ -21,8 +21,7 @@ angular.module('topcoderX').controller('SettingController', ['currentUser', '$sc
 
         $scope.loginUrl = {
             github: Helper.baseUrl + $rootScope.appConfig.OWNER_LOGIN_GITHUB_URL,
-            gitlab: Helper.baseUrl + $rootScope.appConfig.OWNER_LOGIN_GITLAB_URL,
-            azure: Helper.baseUrl + $rootScope.appConfig.OWNER_LOGIN_AZURE_URL
+            gitlab: Helper.baseUrl + $rootScope.appConfig.OWNER_LOGIN_GITLAB_URL
         }
 
         $scope.$on('dialog.finished', function (event, args) {
