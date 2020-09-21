@@ -75,8 +75,8 @@
                                                     <td class="col-lg-2">${{payment.amount}}</td>
                                                     <td class="col-lg-2">{{payment.description}}</td>
                                                     <td class="col-lg-2">
-                                                        <a href="{{topcoderUrl}}/direct/contest/detail?projectId={{payment.challengeId}}"
-                                                            target="_blank">{{payment.challengeId}}</a>
+                                                        <a href="{{topcoderUrl}}/direct/contest/detail?projectId={{payment.challengeUUID}}"
+                                                            target="_blank">{{payment.challengeUUID}}</a>
                                                     </td>
                                                     <td class="col-lg-2">
                                                         <button class="btn btn-sm btn-success" ng-click="goPayment(payment)">
@@ -148,8 +148,8 @@
                                                     <td class="col-lg-2">{{payment.project.title}}</td>
                                                     <td class="col-lg-2">${{payment.amount}}</td>
                                                     <td class="col-lg-2">{{payment.description}}</td>
-                                                    <td class="col-lg-2"><a href="{{topcoderUrl}}/direct/contest/detail?projectId={{payment.challengeId}}"
-                                                            target="_blank">{{payment.challengeId}}</a></td>
+                                                    <td class="col-lg-2"><a href="{{topcoderUrl}}/direct/contest/detail?projectId={{payment.challengeUUID}}"
+                                                            target="_blank">{{payment.challengeUUID}}</a></td>
                                                 </tr>
                                             </tbody>
                                             <tfoot>

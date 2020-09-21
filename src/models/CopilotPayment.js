@@ -40,6 +40,15 @@ const schema = new Schema({
       name: 'ChallengeIdIndex',
     },
   },
+  challengeUUID: {
+    type: String,
+    required: false,
+    index: {
+      global: true,
+      project: true,
+      name: 'ChallengeUUIdIndex'
+    }
+  },
   closed: {
     type: String,
     required: true,
