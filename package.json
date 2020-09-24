@@ -11,7 +11,7 @@
         "npm": "5"
     },
     "scripts": {
-        "start": "node src/app.js",
+        "start": "node -r esm src/app.js",
         "serve": "./node_modules/.bin/concurrently \"npm run start:be\" \"npm run start:fe\"",
         "start:be": "nodemon src/app.js ",
         "start:fe": "gulp build:watch",

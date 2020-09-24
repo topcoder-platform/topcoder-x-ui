@@ -8,6 +8,7 @@ COPY . /topcoder-x-ui
 WORKDIR /topcoder-x-ui
 
 # Install the dependencies from package.json
+RUN npm install esm
 RUN npm install
 RUN npm run build
 #RUN npm test
