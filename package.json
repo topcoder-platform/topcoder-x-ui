@@ -81,7 +81,8 @@
         "superagent-promise": "^1.1.0",
         "typescript": "~2.3.3",
         "uuid": "^3.3.2",
-        "winston": "^2.3.1"
+        "winston": "^2.3.1",
+        "@topcoder-platform/tc-auth-lib": "git+https://github.com/topcoder-platform/tc-auth-lib.git#1.0.0"
     },
     "devDependencies": {
         "angular-mocks": "~1.4.4",
@@ -143,8 +144,7 @@
         "uglify-save-license": "~0.4.1",
         "vinyl-buffer": "1.0.0",
         "vinyl-source-stream": "1.1.0",
-        "wiredep": "~4.0.0",
-        "tc-auth-lib": "git+https://github.com/topcoder-platform/tc-auth-lib.git#dev"
+        "wiredep": "~4.0.0"
     },
     "nodemonConfig": {
         "ignore": [
