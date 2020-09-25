@@ -23,6 +23,7 @@ const logger = require('./common/logger');
 const errors = require('./common/errors');
 const constants = require('./common/constants');
 const {getAppHealth} = require('./controllers/AppHealthController');
+global.atob  = require('atob');
 
 const app = express();
 app.use(cors());
