@@ -109,7 +109,10 @@ const frontendConfigs = {
       "JWT_V2_NAME":"tcjwt",
       "COOKIES_SECURE":false,
       "TC_LOGIN_URL": "https://accounts.topcoder-dev.com/member",
+
+      // TODO: we can clean this conf, as no need https://github.com/topcoder-platform/topcoder-x-ui/issues/342
       "TC_USER_PROFILE_URL": "https://api.topcoder-dev.com/v2/user/profile",
+
       "API_URL": "https://api.topcoder-dev.com",
       "ADMIN_TOOL_URL": "https://api.topcoder-dev.com/v2",
       "ACCOUNTS_CONNECTOR_URL": "https://accounts.topcoder-dev.com/connector.html",
