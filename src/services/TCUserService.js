@@ -9,16 +9,10 @@
  * @version 1.0
  */
 const Joi = require('joi');
-const superagent = require('superagent');
-const superagentPromise = require('superagent-promise');
-const config = require('../config');
+const decodeToken = require('@topcoder-platform/tc-auth-lib').decodeToken;
 const errors = require('../common/errors');
 const helper = require('../common/helper');
 const UserMapping = require('../models').UserMapping;
-const decodeToken = require('@topcoder-platform/tc-auth-lib').decodeToken;
-
-const request = superagentPromise(superagent, Promise);
-
 
 /**
  * gets the handle of tc user.
