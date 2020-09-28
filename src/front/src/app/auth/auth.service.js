@@ -155,7 +155,7 @@ angular.module('topcoderX')
         //$cookies.remove($rootScope.appConfig.JWT_V3_NAME, { path: '/' });
         //});
         $window.location.href = $rootScope.appConfig.TC_LOGIN_URL + '?logout=true&retUrl=' + encodeURIComponent($window.location.href);
-        //return AuthService.logginOut;
+        return AuthService.logginOut;
       }
 
       AuthService.login = function () {
