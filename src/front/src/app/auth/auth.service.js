@@ -11,9 +11,9 @@ angular.module('topcoderX')
       var GET_FRESH_TOKEN_SUCCESS = 'GET_FRESH_TOKEN_SUCCESS';
       var GET_FRESH_TOKEN_FAILURE = 'GET_FRESH_TOKEN_FAILURE';
 
-      var LOGOUT_REQUEST = 'LOGOUT_REQUEST';
-      var LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
-      var LOGOUT_FAILURE = 'LOGOUT_FAILURE';
+      //var LOGOUT_REQUEST = 'LOGOUT_REQUEST';
+      //var LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
+      //var LOGOUT_FAILURE = 'LOGOUT_FAILURE';
 
       // local variables
       var connectorIFrame, url, loading;
@@ -148,14 +148,14 @@ angular.module('topcoderX')
       AuthService.logout = function () {
         // send request to the server that we want to log out
         // save loggingOut promise to be accessed any time
-        AuthService.logginOut = proxyCall(LOGOUT_REQUEST, LOGOUT_SUCCESS, LOGOUT_FAILURE).then(function () {
-          AuthService.logginOut = null;
-          // remove only token V3, which we set from the script manually
-          // token V2 will be removed automatically during logout server request
-          $cookies.remove($rootScope.appConfig.JWT_V3_NAME, { path: '/' });
-        });
-
-        return AuthService.logginOut;
+        //AuthService.logginOut = proxyCall(LOGOUT_REQUEST, LOGOUT_SUCCESS, LOGOUT_FAILURE).then(function () {
+        //AuthService.logginOut = null;
+        // remove only token V3, which we set from the script manually
+        // token V2 will be removed automatically during logout server request
+        //$cookies.remove($rootScope.appConfig.JWT_V3_NAME, { path: '/' });
+        //});
+        $window.location.href = $rootScope.appConfig.TC_LOGIN_URL + '?logout=true&retUrl=' + encodeURIComponent($window.location.href);
+        //return AuthService.logginOut;
       }
 
       AuthService.login = function () {
