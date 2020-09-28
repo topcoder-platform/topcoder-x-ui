@@ -14,7 +14,7 @@ angular.module('topcoderX') // eslint-disable-line angular/no-services
       $scope.user['copilot'] = false;
       Object.keys(decodedToken).findIndex(function (key) {
         if (key.includes('roles')) {
-          if (decodedToken['roles'].indexOf('copilot') > -1) {
+          if (key.indexOf('copilot') > -1) {
             $scope.user['copilot'] = true;
             $log.info('User is a copilot');
           } else {
