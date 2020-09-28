@@ -271,6 +271,29 @@ angular.module('topcoderX')
         }
 
         var currentUser = jwtHelper.decodeToken(tctV3);
+
+        Object.keys(currentUser).findIndex(function (key) {
+          if (key.includes('roles')) {
+            currentUser.roles = currentUser[key];
+            return true;
+          }
+          return false;
+        });
+        Object.keys(currentUser).findIndex(function (key) {
+          if (key.includes('handle')) {
+            currentUser.handle = currentUser[key];
+            return true;
+          }
+          return false;
+        });
+        Object.keys(currentUser).findIndex(function (key) {
+          if (key.includes('userId')) {
+            currentUser.userId = parseInt(currentUser[key], 10);
+            return true;
+          }
+          return false;
+        });
+
         currentUser.id = currentUser.userId;
         currentUser.token = tctV3;
 
