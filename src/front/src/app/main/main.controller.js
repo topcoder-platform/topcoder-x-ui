@@ -56,7 +56,6 @@ angular.module('topcoderX')
 
       $scope.logout = function () {
         AuthService.logout();
-        $state.go('auth');
       };
 
       // auth

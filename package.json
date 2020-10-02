@@ -7,13 +7,13 @@
     "private": true,
     "main": "src/app.js",
     "engines": {
-        "node": "8",
-        "npm": "5"
+        "node": "14",
+        "npm": "6"
     },
     "scripts": {
         "start": "node -r esm src/app.js",
         "serve": "./node_modules/.bin/concurrently \"npm run start:be\" \"npm run start:fe\"",
-        "start:be": "nodemon src/app.js ",
+        "start:be": "nodemon -r esm src/app.js",
         "start:fe": "gulp build:watch",
         "build": "gulp build",
         "test": "node ./node_modules/mocha/bin/mocha --recursive --timeout 999999 --colors tests/*.test.js --bail",
@@ -53,7 +53,7 @@
         "cors": "^2.8.4",
         "debug": "~2.6.3",
         "dynamoose": "^1.1.0",
-	"esm": "^3.2.25",
+        "esm": "^3.2.25",
         "express": "^4.15.4",
         "express-jwt": "^5.3.0",
         "express-session": "^1.15.5",
