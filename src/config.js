@@ -61,7 +61,7 @@ module.exports = {
   },
   TOPCODER_VALUES: {
     dev: {
-      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts-auth.topcoder-dev.com',
+      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts-auth0.topcoder-dev.com',
       TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || 'https://api.topcoder-dev.com/v2/user/profile',
     },
     prod: {
