@@ -4,19 +4,9 @@ angular.module('topcoderX')
   .factory('AuthService', [
     '$q', '$log', 'jwtHelper', '$cookies', '$window', '$state', '$rootScope', '$http', 'Helper',
     function ($q, $log, jwtHelper, $cookies, $window, $state, $rootScope, $http, Helper) {
-      // these constants are for AuthService internal usage only
-      // they don't depend on the environment thus don't have to be placed in global config
-
-      var GET_FRESH_TOKEN_REQUEST = 'GET_FRESH_TOKEN_REQUEST';
-      var GET_FRESH_TOKEN_SUCCESS = 'GET_FRESH_TOKEN_SUCCESS';
-      var GET_FRESH_TOKEN_FAILURE = 'GET_FRESH_TOKEN_FAILURE';
-
-      var LOGOUT_REQUEST = 'LOGOUT_REQUEST';
-      var LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
-      var LOGOUT_FAILURE = 'LOGOUT_FAILURE';
 
       // local variables
-      var connectorIFrame, url, loading;
+      var connectorIFrame, loading; 
 
       /**
        * Create invisible iframe and append it to the body
@@ -49,35 +39,17 @@ angular.module('topcoderX')
       /**
        * Proxies calls to the iframe from main window
        *
-       * @param  {String} REQUEST request id
-       * @param  {String} SUCCESS success respond id
-       * @param  {String} FAILURE failure respond id
-       * @param  {Object} params  params of the request
        * @return {Promise}        promise of the request
        */
-      function proxyCall(REQUEST, SUCCESS, FAILURE, params) {
+      function proxyCall() {
         if (!connectorIFrame) {
           throw new Error('connector has not yet been configured.')
         }
 
-        params = arguments.length > 3 && angular.isDefined(arguments[3]) ? arguments[3] : {};
-
         function request() {
           return $q(function (resolve, reject) {
-            function receiveMessage(e) {
-              var safeFormat = e.data.type === SUCCESS || e.data.type === FAILURE
-              if (safeFormat) {
-                window.removeEventListener('message', receiveMessage)
-                if (e.data.type === SUCCESS) resolve(e.data)
-                if (e.data.type === FAILURE) reject(e.error)
-              }
-            }
-
-            window.addEventListener('message', receiveMessage)
-
-            var payload = $.extend({}, { type: REQUEST }, params)
-
-            connectorIFrame.contentWindow.postMessage(payload, url)
+            var token = AuthService.getToken('v3jwt')
+            token ? resolve({ token: token }) : reject("v3jwt cookie not found") // eslint-disable-line no-unused-expressions
           })
         }
 
@@ -95,7 +67,6 @@ angular.module('topcoderX')
           $log.warn('iframe connector can only be configured once, this request has been ignored.')
         } else {
           connectorIFrame = createFrame(options.frameId, options.connectorUrl)
-          url = options.connectorUrl
 
           loading = $q(function (resolve) {
             connectorIFrame.onload = function () {
@@ -105,12 +76,45 @@ angular.module('topcoderX')
         }
       }
 
+      function fromPairs(arr) {
+        return arr.reduce(function(accumulator, value) {
+          accumulator[value[0]] = value[1];
+          return accumulator;
+        }, {})
+      }
+
+      /**
+       * parse cookie to find a key data.
+       *
+       * @param  {String} cookie    cookie data
+       * @return {Object}  parsed cookie
+       */
+      function parseCookie(cookie) {
+        return fromPairs(
+          cookie
+            .split(';')
+            .map(
+              function (pair) { return pair.split('=').map(function(part) { return part.trim() }) }
+            )
+        )
+      }
+
       var AuthService = {
         ERROR: {
           NO_PERMISSIONS: 'Current user doesn\'t have permissions.',
         },
         PermissionDenied: false,
       };
+
+      /**
+       * Get token in cookie based on key.
+       *
+       * @param  {String} key    the key
+       * @return {Object}  token data object
+       */
+      AuthService.getToken = function(key) {
+        return parseCookie(document.cookie)[key]
+      }
 
       /**
        * Returns promise which is resolved when connector iframe is loaded
@@ -132,7 +136,7 @@ angular.module('topcoderX')
        * @return {Promise} promise to get token v3
        */
       AuthService.retriveFreshToken = function () {
-        return proxyCall(GET_FRESH_TOKEN_REQUEST, GET_FRESH_TOKEN_SUCCESS, GET_FRESH_TOKEN_FAILURE)
+        return proxyCall()
           .then(function (data) {
             AuthService.setTokenV3(data.token);
             return AuthService.isAuthorized();
@@ -146,16 +150,9 @@ angular.module('topcoderX')
        * @return {Promise} promise which is resolved when user is logged out on the server
        */
       AuthService.logout = function () {
-        // send request to the server that we want to log out
-        // save loggingOut promise to be accessed any time
-        AuthService.logginOut = proxyCall(LOGOUT_REQUEST, LOGOUT_SUCCESS, LOGOUT_FAILURE).then(function () {
-          AuthService.logginOut = null;
-          // remove only token V3, which we set from the script manually
-          // token V2 will be removed automatically during logout server request
-          $cookies.remove($rootScope.appConfig.JWT_V3_NAME, { path: '/' });
-        });
-
-        return AuthService.logginOut;
+        $cookies.remove($rootScope.appConfig.JWT_V3_NAME, { path: '/' });
+        $window.location.href = $rootScope.appConfig.TC_LOGIN_URL + '?logout=true&retUrl=' + encodeURIComponent($window.location.href);
+        // return AuthService.logginOut;
       }
 
       AuthService.login = function () {
@@ -271,6 +268,29 @@ angular.module('topcoderX')
         }
 
         var currentUser = jwtHelper.decodeToken(tctV3);
+
+        Object.keys(currentUser).findIndex(function (key) {
+          if (key.includes('roles')) {
+            currentUser.roles = currentUser[key];
+            return true;
+          }
+          return false;
+        });
+        Object.keys(currentUser).findIndex(function (key) {
+          if (key.includes('handle')) {
+            currentUser.handle = currentUser[key];
+            return true;
+          }
+          return false;
+        });
+        Object.keys(currentUser).findIndex(function (key) {
+          if (key.includes('userId')) {
+            currentUser.userId = parseInt(currentUser[key], 10);
+            return true;
+          }
+          return false;
+        });
+
         currentUser.id = currentUser.userId;
         currentUser.token = tctV3;
 
@@ -289,7 +309,6 @@ angular.module('topcoderX')
             $rootScope.appConfig = res.data;
             if (connectorIFrame && !connectorIFrame.src) {
               connectorIFrame.src = $rootScope.appConfig.ACCOUNTS_CONNECTOR_URL;
-              url = $rootScope.appConfig.ACCOUNTS_CONNECTOR_URL;
             }
             return $q.resolve(res.data);
           }).catch(function (err) {

@@ -15,7 +15,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const jwtDecode = require('jwt-decode');
+const decodeToken = require('@topcoder-platform/tc-auth-lib').decodeToken;
 // const secure = require('ssl-express-www');
 const config = require('./config');
 const routes = require('./routes');
@@ -23,6 +23,7 @@ const logger = require('./common/logger');
 const errors = require('./common/errors');
 const constants = require('./common/constants');
 const {getAppHealth} = require('./controllers/AppHealthController');
+global.atob  = require('atob');
 
 const app = express();
 app.use(cors());
@@ -45,7 +46,7 @@ _.forEach(routes, (verbs, path) => {
       actions.push((req, res, next) => {
         const v3jwt = _.get(req.cookies, constants.JWT_V3_NAME);
         if (v3jwt) {
-          const decoded = jwtDecode(v3jwt);
+          const decoded = decodeToken(v3jwt);
           req.currentUser = {
             handle: decoded.handle.toLowerCase(),
             roles: decoded.roles,
