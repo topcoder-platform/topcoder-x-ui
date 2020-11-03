@@ -19,7 +19,7 @@ module.exports = {
   GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
   GITLAB_CLIENT_ID: process.env.GITLAB_CLIENT_ID,
   GITLAB_CLIENT_SECRET: process.env.GITLAB_CLIENT_SECRET,
-  
+
   // used as base to construct various URLs
   WEBSITE: process.env.WEBSITE || 'http://topcoderx.topcoder-dev.com',
   WEBSITE_SECURE: process.env.WEBSITE_SECURE || 'https://topcoderx.topcoder-dev.com',
@@ -61,99 +61,89 @@ module.exports = {
   },
   TOPCODER_VALUES: {
     dev: {
-      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts-auth0.topcoder-dev.com',
-      TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || 'https://api.topcoder-dev.com/v2/user/profile',
+      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts-auth0.topcoder-dev.com/',
     },
     prod: {
-      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts-auth0.topcoder.com',
-      TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || 'https://api.topcoder.com/v2/user/profile',
+      TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts.topcoder.com/member',
     },
   },
 };
 
 const frontendConfigs = {
-  "local":{
-      "JWT_V3_NAME":"v3jwt",
-      "JWT_V2_NAME":"tcjwt",
-      "COOKIES_SECURE":false,
-      "TC_LOGIN_URL": "https://accounts-auth0.topcoder-dev.com",
-      "TC_USER_PROFILE_URL": "http://api.topcoder-dev.com/v2/user/profile",
-      "API_URL": "https://127.0.0.1:8443",
-      "ADMIN_TOOL_URL": "http://localhost:8080/api/v2",
-      "ACCOUNTS_CONNECTOR_URL": "https://accounts-auth0.topcoder-dev.com",
-      "DIRECT_URL_BASE": "https://www.topcoder-dev/direct/projectOverview?formData.projectId=",
-      "OWNER_LOGIN_GITHUB_URL":"/api/v1/github/owneruser/login",
-      "OWNER_LOGIN_GITLAB_URL":"/api/v1/gitlab/owneruser/login",
-      "TOPCODER_URL": "https://topcoder-dev.com",
-      "GITHUB_TEAM_URL": "https://github.com/orgs/",
-      "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
+  "local": {
+    "JWT_V3_NAME": "v3jwt",
+    "JWT_V2_NAME": "tcjwt",
+    "COOKIES_SECURE": false,
+    "TC_LOGIN_URL": "https://accounts-auth0.topcoder-dev.com/",
+    "API_URL": "https://127.0.0.1:8443",
+    "ADMIN_TOOL_URL": "http://localhost:8080/api/v2",
+    "ACCOUNTS_CONNECTOR_URL": "https://accounts.topcoder-dev.com/connector.html",
+    "DIRECT_URL_BASE": "https://www.topcoder-dev/direct/projectOverview?formData.projectId=",
+    "OWNER_LOGIN_GITHUB_URL": "/api/v1/github/owneruser/login",
+    "OWNER_LOGIN_GITLAB_URL": "/api/v1/gitlab/owneruser/login",
+    "TOPCODER_URL": "https://topcoder-dev.com",
+    "GITHUB_TEAM_URL": "https://github.com/orgs/",
+    "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
   },
-  "heroku":{
-      "JWT_V3_NAME":"v3jwt",
-      "JWT_V2_NAME":"tcjwt",
-      "COOKIES_SECURE":false,
-      "TC_LOGIN_URL": "https://accounts-auth0.topcoder-dev.com",
-      "TC_USER_PROFILE_URL": "https://api.topcoder-dev.com/v2/user/profile",
-      "API_URL": "https://api.topcoder-dev.com",
-      "ADMIN_TOOL_URL": "https://api.topcoder-dev.com/v2",
-      "ACCOUNTS_CONNECTOR_URL": "https://accounts-auth0.topcoder-dev.com",
-      "DIRECT_URL_BASE": "https://www.topcoder-dev.com/direct/projectOverview?formData.projectId=",
-      "OWNER_LOGIN_GITHUB_URL":"/api/v1/github/owneruser/login",
-      "OWNER_LOGIN_GITLAB_URL":"/api/v1/gitlab/owneruser/login",
-      "TOPCODER_URL": "https://topcoder-dev.com",
-      "GITHUB_TEAM_URL": "https://github.com/orgs/",
-      "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
+  "heroku": {
+    "JWT_V3_NAME": "v3jwt",
+    "JWT_V2_NAME": "tcjwt",
+    "COOKIES_SECURE": false,
+    "TC_LOGIN_URL": "https://accounts-auth0.topcoder-dev.com/",
+    "API_URL": "https://api.topcoder-dev.com",
+    "ADMIN_TOOL_URL": "https://api.topcoder-dev.com/v2",
+    "ACCOUNTS_CONNECTOR_URL": "https://accounts.topcoder-dev.com/connector.html",
+    "DIRECT_URL_BASE": "https://www.topcoder-dev.com/direct/projectOverview?formData.projectId=",
+    "OWNER_LOGIN_GITHUB_URL": "/api/v1/github/owneruser/login",
+    "OWNER_LOGIN_GITLAB_URL": "/api/v1/gitlab/owneruser/login",
+    "TOPCODER_URL": "https://topcoder-dev.com",
+    "GITHUB_TEAM_URL": "https://github.com/orgs/",
+    "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
   },
-  "dev":{
-      "JWT_V3_NAME":"v3jwt",
-      "JWT_V2_NAME":"tcjwt",
-      "COOKIES_SECURE":false,
-      "TC_LOGIN_URL": "https://accounts-auth0.topcoder-dev.com",
-
-      // TODO: we can clean this conf, as no need https://github.com/topcoder-platform/topcoder-x-ui/issues/342
-      "TC_USER_PROFILE_URL": "https://api.topcoder-dev.com/v2/user/profile",
-
-      "API_URL": "https://api.topcoder-dev.com",
-      "ADMIN_TOOL_URL": "https://api.topcoder-dev.com/v2",
-      "ACCOUNTS_CONNECTOR_URL": "https://accounts-auth0.topcoder-dev.com",
-      "DIRECT_URL_BASE": "https://www.topcoder-dev.com/direct/projectOverview?formData.projectId=",
-      "OWNER_LOGIN_GITHUB_URL":"/api/v1/github/owneruser/login",
-      "OWNER_LOGIN_GITLAB_URL":"/api/v1/gitlab/owneruser/login",
-      "TOPCODER_URL": "https://topcoder-dev.com",
-      "GITHUB_TEAM_URL": "https://github.com/orgs/",
-      "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
+  "dev": {
+    "JWT_V3_NAME": "v3jwt",
+    "JWT_V2_NAME": "tcjwt",
+    "COOKIES_SECURE": false,
+    "TC_LOGIN_URL": "https://accounts-auth0.topcoder-dev.com/",
+    "API_URL": "https://api.topcoder-dev.com",
+    "ADMIN_TOOL_URL": "https://api.topcoder-dev.com/v2",
+    "ACCOUNTS_CONNECTOR_URL": "https://accounts.topcoder-dev.com/connector.html",
+    "DIRECT_URL_BASE": "https://www.topcoder-dev.com/direct/projectOverview?formData.projectId=",
+    "OWNER_LOGIN_GITHUB_URL": "/api/v1/github/owneruser/login",
+    "OWNER_LOGIN_GITLAB_URL": "/api/v1/gitlab/owneruser/login",
+    "TOPCODER_URL": "https://topcoder-dev.com",
+    "GITHUB_TEAM_URL": "https://github.com/orgs/",
+    "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
   },
-  "qa":{
-      "JWT_V3_NAME":"v3jwt",
-      "JWT_V2_NAME":"tcjwt",
-      "COOKIES_SECURE":false,
-      "TC_LOGIN_URL": "https://accounts-auth0.topcoder-dev.com",
-      "TC_USER_PROFILE_URL": "https://api.topcoder-dev.com/v2/user/profile",
-      "API_URL": "https://api.topcoder-qa.com",
-      "ADMIN_TOOL_URL": "https://api.topcoder-qa.com/v2",
-      "ACCOUNTS_CONNECTOR_URL": "https://accounts-auth0.topcoder-dev.com",
-      "DIRECT_URL_BASE": "https://www.topcoder-dev.com/direct/projectOverview?formData.projectId=",
-      "OWNER_LOGIN_GITHUB_URL":"/api/v1/github/owneruser/login",
-      "OWNER_LOGIN_GITLAB_URL":"/api/v1/gitlab/owneruser/login",
-      "TOPCODER_URL": "https://topcoder-dev.com",
-      "GITHUB_TEAM_URL": "https://github.com/orgs/",
-      "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
+  "qa": {
+    "JWT_V3_NAME": "v3jwt",
+    "JWT_V2_NAME": "tcjwt",
+    "COOKIES_SECURE": false,
+    "TC_LOGIN_URL": "https://accounts-auth0.topcoder-dev.com/",
+    "API_URL": "https://api.topcoder-qa.com",
+    "ADMIN_TOOL_URL": "https://api.topcoder-qa.com/v2",
+    "ACCOUNTS_CONNECTOR_URL": "https://accounts.topcoder-qa.com/connector.html",
+    "DIRECT_URL_BASE": "https://www.topcoder-dev.com/direct/projectOverview?formData.projectId=",
+    "OWNER_LOGIN_GITHUB_URL": "/api/v1/github/owneruser/login",
+    "OWNER_LOGIN_GITLAB_URL": "/api/v1/gitlab/owneruser/login",
+    "TOPCODER_URL": "https://topcoder-dev.com",
+    "GITHUB_TEAM_URL": "https://github.com/orgs/",
+    "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
   },
-  "prod":{
-      "JWT_V3_NAME":"v3jwt",
-      "JWT_V2_NAME":"tcjwt",
-      "COOKIES_SECURE":false,
-      "TC_LOGIN_URL": "https://accounts-auth0.topcoder.com",
-      "TC_USER_PROFILE_URL": "https://api.topcoder.com/v2/user/profile",
-      "API_URL": "https://api.topcoder.com",
-      "ADMIN_TOOL_URL": "https://api.topcoder.com/v2",
-      "ACCOUNTS_CONNECTOR_URL": "https://accounts-auth0.topcoder.com",
-      "DIRECT_URL_BASE": "https://www.topcoder.com/direct/projectOverview?formData.projectId=",
-      "OWNER_LOGIN_GITHUB_URL":"/api/v1/github/owneruser/login",
-      "OWNER_LOGIN_GITLAB_URL":"/api/v1/gitlab/owneruser/login",
-      "TOPCODER_URL": "https://topcoder-dev.com",
-      "GITHUB_TEAM_URL": "https://github.com/orgs/",
-      "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
+  "prod": {
+    "JWT_V3_NAME": "v3jwt",
+    "JWT_V2_NAME": "tcjwt",
+    "COOKIES_SECURE": false,
+    "TC_LOGIN_URL": "https://accounts.topcoder.com/member",
+    "API_URL": "https://api.topcoder.com",
+    "ADMIN_TOOL_URL": "https://api.topcoder.com/v2",
+    "ACCOUNTS_CONNECTOR_URL": "https://accounts.topcoder.com/connector.html",
+    "DIRECT_URL_BASE": "https://www.topcoder.com/direct/projectOverview?formData.projectId=",
+    "OWNER_LOGIN_GITHUB_URL": "/api/v1/github/owneruser/login",
+    "OWNER_LOGIN_GITLAB_URL": "/api/v1/gitlab/owneruser/login",
+    "TOPCODER_URL": "https://topcoder-dev.com",
+    "GITHUB_TEAM_URL": "https://github.com/orgs/",
+    "GITLAB_GROUP_URL": "https://gitlab.com/groups/"
   }
 };
 
@@ -166,7 +156,6 @@ module.exports.frontendConfigs = {
   JWT_V2_NAME: process.env.JWT_V2_NAME || frontendConfigs[activeEnv].JWT_V2_NAME,
   COOKIES_SECURE: process.env.COOKIES_SECURE || frontendConfigs[activeEnv].COOKIES_SECURE,
   TC_LOGIN_URL: process.env.TC_LOGIN_URL || frontendConfigs[activeEnv].TC_LOGIN_URL,
-  TC_USER_PROFILE_URL: process.env.TC_USER_PROFILE_URL || frontendConfigs[activeEnv].TC_USER_PROFILE_URL,
   API_URL: process.env.API_URL || frontendConfigs[activeEnv].API_URL,
   ADMIN_TOOL_URL: process.env.ADMIN_TOOL_URL || frontendConfigs[activeEnv].ADMIN_TOOL_URL,
   ACCOUNTS_CONNECTOR_URL: process.env.ACCOUNTS_CONNECTOR_URL || frontendConfigs[activeEnv].ACCOUNTS_CONNECTOR_URL,

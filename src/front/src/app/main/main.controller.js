@@ -2,8 +2,8 @@
 
 angular.module('topcoderX')
   .controller('MainController', ['$scope', '$rootScope', 'Alert', '$state', 'AuthService', 'IssueService',
-  'SettingService', 'Tutorial', 'ProjectService', '$log', '$location',
-    function ($scope, $rootScope, Alert, $state, AuthService, IssueService, SettingService, Tutorial, 
+    'SettingService', 'Tutorial', 'ProjectService', '$log', '$location',
+    function ($scope, $rootScope, Alert, $state, AuthService, IssueService, SettingService, Tutorial,
       ProjectService, $log, $location) {
       $scope.isLoaded = false;
       $scope.tableConfig = {
