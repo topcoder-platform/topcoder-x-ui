@@ -247,14 +247,11 @@ KAFKA_CLIENT_CERT_KEY: <key>
 KAFKA_URL:            silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
 NPM_CONFIG_PRODUCTION: false
 SESSION_SECRET:        kjsdfkj34857
-TC_LOGIN_URL:          https://accounts.topcoder-dev.com/member
-TC_USER_PROFILE_URL:   http://api.topcoder-dev.com/v2/user/profile
 TOPIC:                 topcoder-x
 WEBSITE:               https://x.topcoder-dev.com
 AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
 AWS_REGION: FAKE_REGION
 IS_LOCAL: true
-TC_LOGIN_URL: https://accounts.topcoder-dev.com/member
-TC_USER_PROFILE_URL: https://api.topcoder-dev.com/v2/user/profile
+TC_LOGIN_URL: https://accounts-auth0.topcoder-dev.com/
 ```

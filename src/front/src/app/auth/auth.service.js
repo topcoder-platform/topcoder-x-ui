@@ -24,6 +24,7 @@ angular.module('topcoderX')
         iframe.width = 0;
         iframe.height = 0;
         iframe.frameborder = 0;
+        iframe.crossorigin = 'anonymous';
 
         // set inline style cross-browser way to make iframe completely invisible
         angular.element(iframe).css({
@@ -164,10 +165,12 @@ angular.module('topcoderX')
        * This has to called once when app starts
        */
       AuthService.init = function () {
-        // add hidden iframe which is used to get API v3 token
-        configureConnector({
-          connectorUrl: $rootScope.appConfig ? $rootScope.appConfig.ACCOUNTS_CONNECTOR_URL : null,
-          frameId: 'tc-accounts-iframe',
+        AuthService.getAppConfig().then(function (data) {
+          // add hidden iframe which is used to get refresh token
+          configureConnector({
+            connectorUrl: data.TC_LOGIN_URL,
+            frameId: 'tc-accounts-iframe',
+          });
         });
       }
 

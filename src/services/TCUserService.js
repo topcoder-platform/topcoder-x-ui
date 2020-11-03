@@ -9,7 +9,7 @@
  * @version 1.0
  */
 const Joi = require('joi');
-const decodeToken = require('@topcoder-platform/tc-auth-lib').decodeToken;
+const decodeToken = require('tc-auth-lib').decodeToken;
 const errors = require('../common/errors');
 const helper = require('../common/helper');
 const UserMapping = require('../models').UserMapping;
@@ -20,14 +20,6 @@ const UserMapping = require('../models').UserMapping;
  * @returns {String} the handle
  */
 async function getHandle(token) {
-  //issue - https://github.com/topcoder-platform/topcoder-x-ui/issues/342
-
-  /* const handle = await request
-    .get(config.TOPCODER_VALUES[config.TOPCODER_ENV].TC_USER_PROFILE_URL)
-    .set('Authorization', `Bearer ${token}`)
-    .end()
-    .then((res) => res.body.handle);
-  */
   const decoded = decodeToken(token);
   return decoded.handle;
 }
