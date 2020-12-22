@@ -157,7 +157,7 @@ You can do this by clicking your logged in username in the upper right of the To
 
 Once you have registered your account, go into `Project Management` and add a new project for either a Gitlab or Github project you have access to.  Gitlab is likely easier for testing - you can create a free test project under your own account.
 
-Use Topcoder Direct ID `7377` since this has a valid billing account in the dev environment.
+Use Topcoder Connect ID `16665` since this has a valid billing account in the dev environment.
 
 Once it's been added, click `Manage` for the project in the list on `Project Management` and click `Add Webhooks`.  Once the webhook has been added, you should be able to see it in the Gitlab project under `Settings` --> `Integrations` --> `Webhooks`
 
@@ -237,10 +237,10 @@ IS_LOCAL: true
 Justins-Mac-Pro:~ justingasper$ heroku config --app topcoder-x-ui-dev
 === topcoder-x-ui-dev Config Vars
 BUILD_ENV:             heroku
-GITHUB_CLIENT_ID:       
-GITHUB_CLIENT_SECRET:   
-GITLAB_CLIENT_ID:       
-GITLAB_CLIENT_SECRET:   
+GITHUB_CLIENT_ID:
+GITHUB_CLIENT_SECRET:
+GITLAB_CLIENT_ID:
+GITLAB_CLIENT_SECRET:
 HOOK_BASE_URL:         https://topcoder-x-receiver-dev.herokuapp.com
 KAFKA_CLIENT_CERT:  <cert>
 KAFKA_CLIENT_CERT_KEY: <key>
