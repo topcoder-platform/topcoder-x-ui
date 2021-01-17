@@ -46,7 +46,8 @@ const projectSchema = {
     registeredWebhookId: Joi.string().allow(null),
     createdAt: Joi.date(),
     updatedAt: Joi.date(),
-    createCopilotPayments: Joi.boolean()
+    createCopilotPayments: Joi.boolean(),
+    isConnect: Joi.boolean().allow(null)
   },
   currentUser: currentUserSchema,
 };

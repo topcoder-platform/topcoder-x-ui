@@ -43,7 +43,8 @@ const schema = new Schema({
     type: Date,
     default: Date.now,
   },
-  createCopilotPayments: {type: String, required: false}
+  createCopilotPayments: {type: String, required: false},
+  isConnect: {type: Boolean, required: false, default: true}
 });
 
 module.exports = schema;

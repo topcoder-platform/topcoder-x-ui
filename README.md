@@ -87,3 +87,10 @@ Note: heroku domain should match subdomain of topcoder-dev or topcoder depending
 - click get link button to get the shareable link which can be used by topcoder member to self assign to the repository. Click to icon next to url to copy to clipboard.
 - normal member cannot use the application, allowed roles are configured in API, if normal user tries to access the app, error is shown in login page.
 
+## Topcoder Direct ID to Connect ID migration
+
+Direct ID migration can be done with script located in **topcoder-x-processor** codebase called direct-connect-migration
+```shell
+npm run direct-connect-migration
+```
+By default it takes 15 projects at time, but you can change this by specifying BATCH_SIZE environment variable.
