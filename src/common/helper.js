@@ -25,6 +25,7 @@ const NotFoundError = require('./errors').NotFoundError;
 const ValidationError = require('./errors').ValidationError;
 const dbHelper = require('./db-helper');
 
+
 bluebird.promisifyAll(bcrypt);
 bluebird.promisifyAll(parseDomain);
 
@@ -53,16 +54,9 @@ function _decorateWithLogging(service) {
     return;
   }
   _.forEach(service, (method, name) => {
-    const params = method.params || getParams(method);
     service[name] = async function serviceMethodWithLogging(...args) {
-      logger.debug(`ENTER ${name}`);
-      logger.debug('input arguments');
-      logger.debug(util.inspect(_combineObject(params, args)));
       try {
         const result = await method.apply(this, args);
-        logger.debug(`EXIT ${name}`);
-        logger.debug('output arguments');
-        logger.debug(util.inspect(result));
         return result;
       } catch (e) {
         logger.logFullError(e, name);
@@ -201,7 +195,8 @@ async function ensureExists(Model, criteria, modelName) {
  */
 async function getProviderType(repoUrl) {
   const parsedDomain = await parseDomain(repoUrl);
-  if (!parsedDomain || !parsedDomain.domain || (parsedDomain.domain !== 'github' && parsedDomain.domain !== 'gitlab')) {
+  if (!parsedDomain || !parsedDomain.domain || 
+    (parsedDomain.domain !== 'github' && parsedDomain.domain !== 'gitlab')) {
     throw new ValidationError('Invalid git repo url');
   }
   return parsedDomain.domain;
@@ -220,16 +215,20 @@ async function getProjectCopilotOrOwner(models, project, provider, isCopilot) {
     topcoderUsername: isCopilot ? project.copilot : project.owner,
   });
 
-  if (!userMapping || (provider === 'github' && !userMapping.githubUserId) || (provider === 'gitlab' && !userMapping.gitlabUserId)) {
+  if (!userMapping || 
+    (provider === 'github' && !userMapping.githubUserId) 
+    || (provider === 'gitlab' && !userMapping.gitlabUserId)) {
     throw new Error(`Couldn't find ${isCopilot ? 'copilot' : 'owner'} username for '${provider}' for this repository.`);
   }
 
-  return await dbHelper.scanOne(models.User, {
-    username: provider === 'github' ? userMapping.githubUsername : userMapping.gitlabUsername,
+  let user = await dbHelper.scanOne(models.User, {
+    username: provider === 'github' ? userMapping.githubUsername : // eslint-disable-line no-nested-ternary
+      userMapping.gitlabUsername,
     type: provider,
   });
-}
 
+  return user;
+}
 
 /**
  * Generate an unique identifier
@@ -240,6 +239,18 @@ function generateIdentifier() {
   return `${uuid()}-${new Date().getTime()}`;
 }
 
+/**
+ * Generate simple hash of string
+ *
+ * @param {String} s the str
+ * @returns {String} the hash
+ */
+function hashCode(s) {
+  return s.split("").reduce(function(a, b){
+    a = ((a << 5) - a) + b.charCodeAt(0); // eslint-disable-line no-bitwise, no-magic-numbers
+    return a & a; // eslint-disable-line no-bitwise
+  }, 0);
+}
 
 module.exports = {
   buildService,
@@ -250,4 +261,5 @@ module.exports = {
   generateIdentifier,
   getProviderType,
   getProjectCopilotOrOwner,
+  hashCode
 };

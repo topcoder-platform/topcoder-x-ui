@@ -57,9 +57,10 @@
                                                 <thead>
                                                     <tr>
                                                         <th class="col-lg-2">Project Name</th>
-                                                        <th class="col-lg-2">Topcoder Direct ID</th>
-                                                        <th class="col-lg-2">Gitlab/Github Repo Url</th>
+                                                        <th class="col-lg-2">Topcoder Connect ID</th>
+                                                        <th class="col-lg-2">Service Provider</th>
                                                         <th class="col-lg-2" ng-show="isAdminUser">Owner</th>
+                                                        <th class="col-lg-2">Copilot</th>
                                                         <th class="col-lg-3" data-sort-ignore="true"></th>
                                                     </tr>
                                                 </thead>
@@ -68,7 +69,7 @@
                                                         ng-class-odd="'footable-odd'">
                                                         <td class="col-lg-2">{{project.title}}</td>
                                                         <td class="col-lg-2">
-                                                            <a href="{{directUrlBase}}{{project.tcDirectId}}"
+                                                            <a href="{{connectUrlBase}}{{project.tcDirectId}}"
                                                                 target="_blank">{{project.tcDirectId}}</a>
                                                         </td>
                                                         <td class="col-lg-2">
@@ -76,6 +77,7 @@
                                                                 {{repoType(project.repoUrl)}} </a>
                                                         </td>
                                                         <td class="col-lg-2" ng-show="isAdminUser">{{project.owner}}</td>
+                                                        <td class="col-lg-2">{{project.copilot}}</td>
                                                         <td class="col-lg-2">
                                                             <button class="btn btn-sm btn-success" ng-click="goProject(project)">
                                                                 <strong>Manage</strong>
@@ -116,8 +118,8 @@
                                                 <thead>
                                                     <tr>
                                                         <th class="col-lg-2">Project Name</th>
-                                                        <th class="col-lg-2">Topcoder Direct ID</th>
-                                                        <th class="col-lg-2">Gitlab/Github Repo Url</th>
+                                                        <th class="col-lg-2">Topcoder Connect ID</th>
+                                                        <th class="col-lg-2">Service Provider</th>
                                                         <th class="col-lg-2" ng-show="isAdminUser">Owner</th>
                                                         <th class="col-lg-2" data-sort-ignore="true"></th>
                                                     </tr>

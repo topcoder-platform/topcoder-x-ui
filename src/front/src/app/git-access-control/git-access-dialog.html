@@ -1,0 +1,37 @@
+<div class="inmodal">
+    <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="close()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="reg-dialog-label">Configure Access Level and Valid Period</h4>
+    </div>
+    <div class="modal-body" style="background-color: #fff;">
+        <div class="row">
+            <label class="form-label">Access Level:</label>
+            <select class="form-control" ng-if="provider === 'gitlab'" ng-model="accessLevel" ng-change="updateAccessLevel(accessLevel)" required>
+                <option value ="10">Guest</option>
+                <option value ="20">Reporter</option>
+                <option value ="30">Developer</option>
+                <option value ="40">Maintainer</option>
+                <option value ="50">Owner</option>
+            </select>
+            <select class="form-control" ng-if="provider === 'github'" ng-model="accessLevel" ng-change="updateAccessLevel(accessLevel)" required>
+                <option value ="member">Member</option>
+                <option value ="maintainer">Maintainer</option>
+            </select>
+            <br />
+            <label ng-if="provider === 'gitlab'" class="form-label">Expired At:</label>
+            <datepicker ng-if="provider === 'gitlab'" date-format="yyyy-MM-dd" date-min-limit="{{dateLimit}}">
+                <input class="form-control" ng-model="expiredAt" type="text" ng-change="updateExpired(expiredAt)"/>
+            </datepicker>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-info" ng-click="setChanges()">
+            OK
+        </button>
+        <button type="button" class="btn btn-white" ng-click="close()">
+            Cancel
+        </button>
+    </div>
+</div>

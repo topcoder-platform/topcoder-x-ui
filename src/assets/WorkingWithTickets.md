@@ -2,19 +2,19 @@
 
 The basic flow for handling a ticket is as follows:
 
-1. Assign the ticket to yourself, change the label to "tcx_Assigned", remove the "tcx_OpenForPickup" label.  Please only assign tickets to yourself when you are ready to work on it.  I don't want tickets assigned to someone and then not have them work on a ticket for 24 hours.  The goal here is a quick turnaround for the client.  If you can't work on a ticket immediately, leave it for someone else.
+1. Assign the ticket to yourself, and the system will change the label to "tcx_Assigned", removing the "tcx_OpenForPickup" label.  Please only assign tickets to yourself when you are ready to work on it.  I don't want tickets assigned to someone and then not have them work on a ticket for 24 hours.  The goal here is a quick turnaround for the client.  If you can't work on a ticket immediately, leave it for someone else.
 
-1. Complete the ticket and create a merge request within 24 hours.  Please ensure your merge request can be merged automatically and that it's against the latest commit in Git when you create it.
+1. Complete the ticket and create a merge request within 24 hours.  Please ensure your merge request can be merged automatically (resolving any conflicts) and that it's against the latest commit in Git when you create it. 
 
 1. Change the label on the ticket to "tcx_ReadyForReview"
 
 After seeing a ticket marked as "tcx_ReadyForReview", the copilot will review that ticket, usually within 24 hours.
 
-Note that you are expected to keep your changes in-sync with Git - make sure to do a pull before you push changes to make sure there aren't any merge issues.
+Note that you are expected to keep your changes in-sync with Git - make sure to do a pull before you push changes to make sure there aren't any merge issues or conflicts.
 
 ### Accepted fix
 
-If a fix is accepted, a payment ticket will be created on the Topcoder platform within 5-10 minutes of the issue being closed.  You should see the payment in your PACTs within 24 hours.
+If a fix is accepted, the copilot will add label "tcx_FixAccepted" and close the ticket. The system will create a payment ticket on the Topcoder platform within 5-10 minutes of the issue being closed.  You should see the payment in your PACTs within 24 hours.
 
 ### Rejected fix
 
@@ -28,7 +28,7 @@ Each ticket in GitLab has a dollar value.  That is the amount you will be paid w
 
 # Important Rules:
 
-- You can assign any unassigned issue to yourself with an "Open for pick up" label (first come first serve)
+- You can assign any unassigned issue to yourself with an "tcx_OpenForPickup" label (first come first serve)
 
 - You can only assign **ONE AT A TIME**. The nature of it being assigned will indicate it is not available to anyone else.
 

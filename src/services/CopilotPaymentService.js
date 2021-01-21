@@ -181,12 +181,12 @@ async function getExistingChallengeIdIfExists(dbPayment) {
     project: dbPayment.project,
     username: dbPayment.username,
     closed: 'false',
-    challengeId: {gt: 0},
   });
 
   // if no existing challenge found then it will be created by processor
   if (existingPayments) {
     dbPayment.challengeId = existingPayments.challengeId;
+    dbPayment.challengeUUID = existingPayments.challengeUUID;
   }
   return dbPayment;
 }
@@ -212,7 +212,7 @@ async function create(topcoderUser, payment) {
   let dbPayment = await dbHelper.create(CopilotPayment, payment);
 
   dbPayment = await getExistingChallengeIdIfExists(dbPayment);
-  if (!_.isNumber(dbPayment.challengeId) && payment.amount <= 1) {
+  if (!_.isString(dbPayment.challengeUUID) && payment.amount <= 1) {
     throw new Error('The amount must be greater than 1');
   }
   await dbHelper.update(CopilotPayment, dbPayment.id, dbPayment);
@@ -242,15 +242,19 @@ async function update(topcoderUser, payment) {
 
   // if nothing is changed then discard
   if (dbPayment.project === payment.project && dbPayment.amount === payment.amount && dbPayment.description === payment.description) { // eslint-disable-line
-    return dbPayment.toJSON();
+    return dbPayment;
   }
 
   const existingProjectId = dbPayment.project;
   const existingChallengeId = dbPayment.challengeId;
+  const existingChallengeUUID = dbPayment.challengeUUID;
 
   if (existingProjectId !== payment.project) {
     dbPayment.challengeId = null;
     payment.challengeId = null;
+
+    dbPayment.challengeUUID = null;
+    payment.challengeUUID = null;
   }
 
   dbPayment.amount = payment.amount;
@@ -258,13 +262,13 @@ async function update(topcoderUser, payment) {
   dbPayment.project = payment.project;
 
   dbPayment = await getExistingChallengeIdIfExists(dbPayment);
-  if (!_.isNumber(dbPayment.challengeId) && payment.amount <= 1) {
+  if (!_.isNull(dbPayment.challengeUUID) && payment.amount <= 1) {
     throw new Error('The amount must be greater than 1');
   }
 
   await dbHelper.update(CopilotPayment, dbPayment.id, dbPayment);
   const paymentUpdateEvent = {
-    event: dbPayment.challengeId > 0 ? 'copilotPayment.update' : 'copilotPayment.add',
+    event: dbPayment.challengeUUID ? 'copilotPayment.update' : 'copilotPayment.add',
     data: {
       payment: _.assign({}, dbPayment),
       copilot: topcoderUser,
@@ -281,6 +285,7 @@ async function update(topcoderUser, payment) {
         payment: {
           project: existingProjectId,
           challengeId: existingChallengeId,
+          challengeUUID: existingChallengeUUID
         },
         copilot: topcoderUser,
       },

@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$scope', '$log', 'SettingService',
-    'GitAccessControlService', 'Alert', function (currentUser, $scope, $log, SettingService, GitAccessControlService, Alert) {
+    'GitAccessControlService', 'Alert', '$uibModal', function (currentUser, $scope, $log,
+        SettingService, GitAccessControlService, Alert, $uibModal) {
         $scope.settings = {};
         var vm = this;
         $scope.isLoaded = false;
@@ -17,7 +18,8 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
                 searchMethod: GitAccessControlService.getGithubOwnerTeams,
                 initialized: false,
                 accessLinkMethod: GitAccessControlService.getGithubShareableLink,
-                query: ''
+                removeAllUsersMethod: GitAccessControlService.removeAllGithubUsers,
+                query: '',
             },
             gitlab: {
                 pageNumber: 1,
@@ -29,7 +31,8 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
                 searchMethod: GitAccessControlService.getGitlabOwnerGroups,
                 initialized: false,
                 accessLinkMethod: GitAccessControlService.getGitlabShareableLink,
-                query: ''
+                removeAllUsersMethod: GitAccessControlService.removeAllGitlabUsers,
+                query: '',
             }
         }
 
@@ -37,7 +40,7 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
             var config = $scope.tableConfig[provider];
             config.isLoading = true;
             config.searchMethod.apply(vm, [config.pageNumber, config.pageSize, false]).then(function (res) {
-                config.items = provider === 'github' ? res.data.teams : res.data.groups;
+                config.items = provider === 'gitlab' ? res.data.groups : res.data.teams;
                 if (!config.initialized) {
                     config.totalPages = res.data.lastPage;
                 }
@@ -71,13 +74,50 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
          */
         $scope.getSharableLink = function (team, provider) {
             team.gettingLink = true;
+            const modalInstance = $uibModal.open({
+                size: 'md',
+                templateUrl: 'app/git-access-control/git-access-dialog.html',
+                controller: 'GitAccessDialogController',
+                resolve: {
+                    provider: function () {
+                        return provider;
+                    }
+                },
+            });
+            modalInstance.result.then(
+                function (data) {
+                    if (data) {
+                        const accessLevel = data.accessLevel;
+                        const expiredAt = data.expiredAt;
+                        var config = $scope.tableConfig[provider];
+                        var params = [team.id, accessLevel];
+                        if (expiredAt) {
+                            params.push(expiredAt);
+                        }
+                        config.accessLinkMethod.apply(vm, params).then(function (response) {
+                            team.accessLink = response.data.url;
+                            team.showLink = true;
+                            team.gettingLink = false;
+                        }).catch(function (err) {
+                            team.gettingLink = false;
+                            _handleError(err);
+                        });
+                    }
+                }
+            );
+        }
+
+        /**
+         * removeAllUsers Remove users of a team
+         */
+        $scope.removeAllUsers = function (team, provider) {
+            team.removingUsers = true;
             var config = $scope.tableConfig[provider];
-            config.accessLinkMethod.apply(vm, [team.id]).then(function (response) {
-                team.accessLink = response.data.url;
-                team.showLink = true;
-                team.gettingLink = false;
+            config.removeAllUsersMethod.apply(vm, [team.id]).then(function () {
+                team.removingUsers = false;
+                _handleMessage('Users are deleted from team:' + team.name + '!');
             }).catch(function (err) {
-                team.gettingLink = false;
+                team.removingUsers = false;
                 _handleError(err);
             });
         }
@@ -86,6 +126,11 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
         function _handleError(error, defaultMsg) {
             var errMsg = error.data ? error.data.message : defaultMsg;
             Alert.error(errMsg, $scope);
+        }
+
+        // handle messages
+        function _handleMessage(message) {
+            Alert.info(message, $scope);
         }
 
         // change to a specific page
@@ -145,11 +190,11 @@ angular.module('topcoderX').controller('GitAccessController', ['currentUser', '$
                     _searchLocal(config, obj.searchText, provider);
                     if (config.pageNumber > 1) {
                         $scope.changePage(1, provider);
-                    }    
+                    }
                 }).catch(function (err) {
                     _handleError(err, 'An error occurred while getting the data for ' + provider + '.');
                     $scope.isLoadingSearchData = false;
-                });    
+                });
             }
             else if (config.allItems.length > 0) {
                 _searchLocal(config, obj.searchText, provider);

@@ -44,6 +44,16 @@ const schema = new Schema({
       name: 'TeamIdIndex',
     },
   },
+  githubOrgId: {
+    type: String,
+    required: false,
+    index: {
+      global: true,
+      rangeKey: 'id',
+      project: true,
+      name: 'RepositoryIdIndex',
+    },
+  },
   ownerToken: {type: String, required: true},
   identifier: {
     type: String,
@@ -55,6 +65,17 @@ const schema = new Schema({
       name: 'IdentifierIndex',
     },
   },
+  accessLevel: {
+    type: String,
+    required: false,
+    index: {
+      global: true,
+      rangeKey: 'id',
+      project: true,
+      name: 'AccessLevelIndex',
+    },
+  },
+  organizationName: { type: String, required: false }
 });
 
 module.exports = schema;

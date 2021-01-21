@@ -27,17 +27,20 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                        </div>        
+                                        </div>
                                         <table ng-if="tableConfig.github.items.length!=0 || tableConfig.github.allItems.length!=0" class="footable table table-stripped toggle-arrow-tiny">
                                             <thead>
                                                 <tr>
                                                     <th class="col-lg-2" data-sort-ignore="true">Team Name</th>
+                                                    <th class="col-lg-2" data-sort-ignore="true">Organization</th>
                                                     <th class="col-lg-2" data-sort-ignore="true">Get Link</th>
+                                                    <th class="col-lg-2" data-sort-ignore="true">Remove All Users</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr ng-repeat="item in tableConfig.github.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
                                                     <td class="col-lg-2">{{item.name}}</td>
+                                                    <td class="col-lg-2">{{item.organization.login}}</td>
                                                     <td class="col-lg-2">
                                                         <button class="btn btn-sm btn-success" ng-hide="item.gettingLink" ng-click="getSharableLink(item, 'github')">
                                                             <strong>Get Link</strong>
@@ -55,6 +58,14 @@
                                                                 <i class="fa fa-clipboard"></i>
                                                             </a>
                                                         </div>
+                                                    </td>
+                                                    <td class="col-lg-2">
+                                                        <button class="btn btn-sm btn-danger" ng-hide="item.removingUsers" ng-click="removeAllUsers(item, 'github')">
+                                                            <strong>Remove All Users</strong>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-success disabled" ng-show="item.removingUsers">
+                                                            <i class="fa fa-spinner fa-spin"></i>
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -103,7 +114,7 @@
                             <uib-tab index="1" heading="Gitlab" select="tabChanged('gitlab')">
                                 <br/>
                                 <div ng-if="settings.gitlab==true">
-                                    <div ng-show="tableConfig.gitlab.initialized">                                        
+                                    <div ng-show="tableConfig.gitlab.initialized">
                                         <div ng-if="tableConfig.gitlab.items.length!=0 || tableConfig.gitlab.allItems.length!=0" class="row">
                                             <div class="col-lg-3">
                                                 <div class="input-group custom-search-form">
@@ -143,6 +154,14 @@
                                                                 <i class="fa fa-clipboard"></i>
                                                             </a>
                                                         </div>
+                                                    </td>
+                                                    <td class="col-lg-2">
+                                                        <button class="btn btn-sm btn-danger" ng-hide="item.removingUsers" ng-click="removeAllUsers(item, 'gitlab')">
+                                                            <strong>Remove All Users</strong>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-success disabled" ng-show="item.removingUsers">
+                                                            <i class="fa fa-spinner fa-spin"></i>
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             </tbody>

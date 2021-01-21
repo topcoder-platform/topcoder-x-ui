@@ -22,9 +22,16 @@ if (config.DYNAMODB.IS_LOCAL === 'true') {
 }
 
 dynamoose.setDefaults({
-  create: true,
+  create: false,
   update: false,
 });
+
+if (process.env.CREATE_DB) {
+  dynamoose.setDefaults({
+    create: true,
+    update: true,
+  });
+}
 
 const models = {};
 

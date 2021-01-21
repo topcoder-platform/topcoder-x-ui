@@ -30,7 +30,7 @@ const USER_ROLES = {
 // The user types
 const USER_TYPES = {
   GITHUB: 'github',
-  GITLAB: 'gitlab',
+  GITLAB: 'gitlab'
 };
 
 // The default page size for Gitlab API
@@ -52,8 +52,8 @@ const GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION = 300;
 const GITHUB_OWNER_CALLBACK_URL = '/api/v1/github/owneruser/callback';
 const GITLAB_OWNER_CALLBACK_URL = '/api/v1/gitlab/owneruser/callback';
 
-const OWNER_USER_LOGIN_SUCCESS_URL = '/#/app/settings';
-const USER_ADDED_TO_TEAM_SUCCESS_URL = '/#/members';
+const OWNER_USER_LOGIN_SUCCESS_URL = '/#!/app/settings';
+const USER_ADDED_TO_TEAM_SUCCESS_URL = '/#!/members';
 
 const TC_LOGIN_CALLBACK_URL = '/api/v1/tclogin';
 const JWT_V3_NAME = 'v3jwt';

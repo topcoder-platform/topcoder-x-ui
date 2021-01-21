@@ -157,7 +157,7 @@ You can do this by clicking your logged in username in the upper right of the To
 
 Once you have registered your account, go into `Project Management` and add a new project for either a Gitlab or Github project you have access to.  Gitlab is likely easier for testing - you can create a free test project under your own account.
 
-Use Topcoder Direct ID `7377` since this has a valid billing account in the dev environment.
+Use Topcoder Connect ID `16665` since this has a valid billing account in the dev environment.
 
 Once it's been added, click `Manage` for the project in the list on `Project Management` and click `Add Webhooks`.  Once the webhook has been added, you should be able to see it in the Gitlab project under `Settings` --> `Integrations` --> `Webhooks`
 
@@ -194,9 +194,6 @@ KAFKA_CLIENT_CERT_KEY: <key>
 KAFKA_URL:                   silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
 KAFKA_GROUP_ID                topcoder-x-processor
 LOG_LEVEL:                    debug
-MAILGUN_API_KEY:              key-5ebe7a0fae37a9008721ec0bfe5bdd95
-MAILGUN_DOMAIN:               sandbox3fcf4920781449f2a5293f8ef18e4bb6.mailgun.org
-MAILGUN_PUBLIC_KEY:           pubkey-cb9640c444199bcec987010b6d9ef0d2
 MAILGUN_SMTP_LOGIN:           postmaster@mail.x.topcoder-dev.com
 MAILGUN_SMTP_PASSWORD:        c8aefb446e76febdbc31d57ef30b9c10
 MAILGUN_SMTP_PORT:            587
@@ -212,8 +209,8 @@ AWS_REGION: FAKE_REGION
 IS_LOCAL: true
 AUTH0_URL:                    https://topcoder-dev.auth0.com/oauth/token
 AUTH0_AUDIENCE:               https://m2m.topcoder-dev.com/
-AUTH0_CLIENT_ID:              LU2Nt7YPHQ3lxrFNKitJ82syB4wIMR7G
-AUTH0_CLIENT_SECRET:          O8S2YOb-0lI4NS3smR4d4uf0VM9BN0y1Ra4ABRktGUPOXc34mUO25uJrCpU-TBAT
+AUTH0_CLIENT_ID:              <client id>
+AUTH0_CLIENT_SECRET:          <secret>
 ```
 
 #### Topcoder-X receiver
@@ -240,24 +237,21 @@ IS_LOCAL: true
 Justins-Mac-Pro:~ justingasper$ heroku config --app topcoder-x-ui-dev
 === topcoder-x-ui-dev Config Vars
 BUILD_ENV:             heroku
-GITHUB_CLIENT_ID:      92c7cb8cfe7561dd61b8
-GITHUB_CLIENT_SECRET:  ee677a9d6a8f29629d0cb74886d521df69293515
-GITLAB_CLIENT_ID:      6a4f73563e7a984eef7511e2a5a6cf38567d3664628360f632cfc6c8e4e5f612
-GITLAB_CLIENT_SECRET:  70367d8255e160828ae47f35ff71723202afc7be1f29a4c7319bc82c4dd47c6b
+GITHUB_CLIENT_ID:
+GITHUB_CLIENT_SECRET:
+GITLAB_CLIENT_ID:
+GITLAB_CLIENT_SECRET:
 HOOK_BASE_URL:         https://topcoder-x-receiver-dev.herokuapp.com
 KAFKA_CLIENT_CERT:  <cert>
 KAFKA_CLIENT_CERT_KEY: <key>
 KAFKA_URL:            silver-craft-01.srvs.cloudkafka.com:9093,silver-craft-01.srvs.cloudkafka.com:9094
 NPM_CONFIG_PRODUCTION: false
 SESSION_SECRET:        kjsdfkj34857
-TC_LOGIN_URL:          https://accounts.topcoder-dev.com/member
-TC_USER_PROFILE_URL:   http://api.topcoder-dev.com/v2/user/profile
 TOPIC:                 topcoder-x
 WEBSITE:               https://x.topcoder-dev.com
 AWS_ACCESS_KEY_ID:  FAKE_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY: FAKE_SECRET_ACCESS_KEY
 AWS_REGION: FAKE_REGION
 IS_LOCAL: true
-TC_LOGIN_URL: https://accounts.topcoder-dev.com/member
-TC_USER_PROFILE_URL: https://api.topcoder-dev.com/v2/user/profile
+TC_LOGIN_URL: https://accounts-auth0.topcoder-dev.com/
 ```

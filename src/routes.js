@@ -31,10 +31,16 @@ module.exports = {
       method: 'listOwnerUserTeams',
     },
   },
-  '/github/teams/:id/registrationurl': {
+  '/github/teams/:id/registrationurl/:accessLevel': {
     get: {
       controller: 'GithubController',
       method: 'getTeamRegistrationUrl',
+    },
+  },
+  '/github/teams/:id/users': {
+    delete: {
+      controller: 'GithubController',
+      method: 'deleteUsersFromTeam',
     },
   },
   '/github/teams/registration/:identifier': {
@@ -74,10 +80,22 @@ module.exports = {
       method: 'listOwnerUserGroups',
     },
   },
-  '/gitlab/groups/:id/registrationurl': {
+  '/gitlab/groups/:id/registrationurl/:accessLevel': {
     get: {
       controller: 'GitlabController',
       method: 'getGroupRegistrationUrl',
+    },
+  },
+  '/gitlab/groups/:id/registrationurl/:accessLevel/:expiredAt': {
+    get: {
+      controller: 'GitlabController',
+      method: 'getGroupRegistrationUrl',
+    },
+  },
+  '/gitlab/groups/:id/users': {
+    delete: {
+      controller: 'GitlabController',
+      method: 'deleteUsersFromTeam',
     },
   },
   '/gitlab/groups/registration/:identifier': {
@@ -97,7 +115,6 @@ module.exports = {
       allowAnonymous: true,
     },
   },
-
   '/tclogin': {
     get: {
       controller: 'TCUserController',
@@ -225,7 +242,7 @@ module.exports = {
       controller: 'AppConfigController',
       method: 'getAppConfig',
       allowNormalUser: true,
-      allowAnonymous: true
+      allowAnonymous: true,
     },
   },
 };

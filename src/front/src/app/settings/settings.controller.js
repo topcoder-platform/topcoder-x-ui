@@ -21,7 +21,7 @@ angular.module('topcoderX').controller('SettingController', ['currentUser', '$sc
 
         $scope.loginUrl = {
             github: Helper.baseUrl + $rootScope.appConfig.OWNER_LOGIN_GITHUB_URL,
-            gitlab: Helper.baseUrl + $rootScope.appConfig.OWNER_LOGIN_GITLAB_URL,
+            gitlab: Helper.baseUrl + $rootScope.appConfig.OWNER_LOGIN_GITLAB_URL
         }
 
         $scope.$on('dialog.finished', function (event, args) {
@@ -37,7 +37,7 @@ angular.module('topcoderX').controller('SettingController', ['currentUser', '$sc
             }
         });
 
-        // Revoke gitlab or github account
+        // Revoke an account
         $scope.revoke = function(provider) {
             $rootScope.dialog = {
                 proceed: false,
@@ -46,7 +46,7 @@ angular.module('topcoderX').controller('SettingController', ['currentUser', '$sc
             Dialog.show('Are you sure you want to revoke the authorization token for ' + provider + '?', $scope);
         }
 
-        // Renew gitlab or github account token
+        // Renew account token
         $scope.renew = function(provider) {
             SettingService.revokeUserSetting(currentUser.handle, provider).then(function () {
                 $window.location.href = $scope.loginUrl[provider];
@@ -60,7 +60,7 @@ angular.module('topcoderX').controller('SettingController', ['currentUser', '$sc
         if (tutorial) {
             setTimeout(function() {
                 var dialog = {
-                    message: 'Connect your Gitlab or Github account into Topcoder-X by pressing "Setup" button',
+                    message: 'Connect your account into Topcoder-X by pressing "Setup" button',
                     action: 'app.project'
                 };
                 $rootScope.tutorial = dialog;

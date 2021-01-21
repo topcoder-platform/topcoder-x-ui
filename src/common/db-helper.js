@@ -56,13 +56,9 @@ async function scan(model, scanParams) {
  * @returns {Promise<void>}
  */
 async function queryOneIssue(model, repositoryId, number, provider) {
-  logger.debug('Enter queryOne.');
 
   return await new Promise((resolve, reject) => {
 
-    logger.debug(`repositoryId : ${repositoryId}`);
-    logger.debug(`number : ${number}`);
-    logger.debug(`provider : ${provider}`);
     model.query('repositoryId').eq(repositoryId)
     .filter('number').eq(number)
     .filter('provider').eq(provider)
@@ -72,8 +68,6 @@ async function queryOneIssue(model, repositoryId, number, provider) {
         logger.debug(`queryOne. Error. ${err}`);
         return reject(err);
       }
-      logger.debug('queryOne. Result.');
-      logger.debug(result);
 
       return resolve(result.count === 0 ? null : result[0]);
     });

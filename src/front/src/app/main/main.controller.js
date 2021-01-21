@@ -2,8 +2,8 @@
 
 angular.module('topcoderX')
   .controller('MainController', ['$scope', '$rootScope', 'Alert', '$state', 'AuthService', 'IssueService',
-  'SettingService', 'Tutorial', 'ProjectService', '$log', '$location',
-    function ($scope, $rootScope, Alert, $state, AuthService, IssueService, SettingService, Tutorial, 
+    'SettingService', 'Tutorial', 'ProjectService', '$log', '$location',
+    function ($scope, $rootScope, Alert, $state, AuthService, IssueService, SettingService, Tutorial,
       ProjectService, $log, $location) {
       $scope.isLoaded = false;
       $scope.tableConfig = {
@@ -56,7 +56,6 @@ angular.module('topcoderX')
 
       $scope.logout = function () {
         AuthService.logout();
-        $state.go('auth');
       };
 
       // auth
@@ -184,5 +183,13 @@ angular.module('topcoderX')
           Tutorial.show(dialog, $scope);
         }
       }
-
+      //go to a new project page
+      $scope.goProject = function (project) {
+        if (project) {
+          $rootScope.project = project;
+        } else {
+          $rootScope.project = null;
+        }
+        $state.go('app.project');
+      };
     }]);

@@ -9,25 +9,6 @@
 
 angular.module('topcoderX')
   .config(['$httpProvider', 'jwtInterceptorProvider', function ($httpProvider, jwtInterceptorProvider) {
-    var refreshingToken = null;
-
-    function handleRefreshResponse(res, $authService) {
-      var ref;
-      var ref1;
-      var ref2;
-
-      const newToken = (ref = res.data) != null ? (ref1 = ref.result) != null ?
-        (ref2 = ref1.content) != null ? ref2.token : void 0 : void 0 : void 0;
-
-      $authService.setTokenV3(newToken);
-
-      return newToken;
-    };
-
-    function refreshingTokenComplete() {
-      refreshingToken = null;
-    };
-
     jwtInterceptorProvider.tokenGetter = [
       'AuthService', '$http', 'Helper', '$rootScope', 'config',
       function (AuthService, $http, Helper, $rootScope, config) {
@@ -43,18 +24,9 @@ angular.module('topcoderX')
           var currentToken = AuthService.getTokenV3();
 
           if (AuthService.getTokenV3() && AuthService.isTokenV3Expired()) {
-            if (refreshingToken === null) {
-              refreshingToken = $http({
-                method: 'GET',
-                url: $rootScope.appConfig.API_URL + "/v3/authorizations/1",
-                headers: {
-                  'Authorization': "Bearer " + currentToken
-                }
-              }).then(function (res) { handleRefreshResponse(res, AuthService) })["finally"](refreshingTokenComplete).catch(function () {
-                AuthService.login();
-              });
-            }
-            return refreshingToken;
+            var token = AuthService.getToken('v3jwt')
+            if (token) return token
+            else AuthService.login()
           } else {
             return currentToken;
           }

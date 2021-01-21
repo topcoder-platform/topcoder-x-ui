@@ -7,23 +7,24 @@
     "private": true,
     "main": "src/app.js",
     "engines": {
-        "node": "8",
-        "npm": "5"
+        "node": "14",
+        "npm": "6"
     },
     "scripts": {
-        "start": "node src/app.js",
+        "start": "node -r esm src/app.js",
         "serve": "./node_modules/.bin/concurrently \"npm run start:be\" \"npm run start:fe\"",
-        "start:be": "nodemon src/app.js ",
+        "start:be": "nodemon -r esm src/app.js",
         "start:fe": "gulp build:watch",
         "build": "gulp build",
         "test": "node ./node_modules/mocha/bin/mocha --recursive --timeout 999999 --colors tests/*.test.js --bail",
         "clean": "gulp clean",
         "test:fe": "gulp protractor",
         "lint": "gulp lint",
-        "heroku-postbuild": "gulp build"
+        "heroku-postbuild": "gulp build",
+        "create-tables": "CREATE_DB=true node scripts/create-update-tables.js"
     },
     "dependencies": {
-        "angular": "~1.7.9",
+        "angular": "~1.8.0",
         "angular-animate": "~1.7.4",
         "angular-clipboard": "~1.2.1",
         "angular-cookies": "~1.7.4",
@@ -36,6 +37,8 @@
         "angular-touch": "~1.7.4",
         "angular-ui-bootstrap": "~2.5.0",
         "angular-ui-router": "~1.0.23",
+        "angularjs-datepicker": "^2.1.23",
+        "atob": "^2.1.2",
         "auth0-angular": "~4.0.4",
         "auth0-js": "^9.11.3",
         "auth0-lock": "^11.17.2",
@@ -50,6 +53,7 @@
         "cors": "^2.8.4",
         "debug": "~2.6.3",
         "dynamoose": "^1.1.0",
+        "esm": "^3.2.25",
         "express": "^4.15.4",
         "express-jwt": "^5.3.0",
         "express-session": "^1.15.5",
@@ -57,7 +61,7 @@
         "font-awesome": "~4.3.0",
         "footable": "~2.0.3",
         "get-parameter-names": "^0.3.0",
-        "github-api": "^3.0.0",
+        "github-api": "^3.3.0",
         "gitlab": "^3.3.6",
         "guid": "0.0.12",
         "icheck": "1.0.2",
@@ -79,7 +83,8 @@
         "superagent-promise": "^1.1.0",
         "typescript": "~2.3.3",
         "uuid": "^3.3.2",
-        "winston": "^2.3.1"
+        "winston": "^2.3.1",
+        "tc-auth-lib": "topcoder-platform/tc-auth-lib#1.0.1"
     },
     "devDependencies": {
         "angular-mocks": "~1.4.4",

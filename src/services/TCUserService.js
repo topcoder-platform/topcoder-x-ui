@@ -9,15 +9,10 @@
  * @version 1.0
  */
 const Joi = require('joi');
-const superagent = require('superagent');
-const superagentPromise = require('superagent-promise');
-const config = require('../config');
+const decodeToken = require('tc-auth-lib').decodeToken;
 const errors = require('../common/errors');
 const helper = require('../common/helper');
 const UserMapping = require('../models').UserMapping;
-
-const request = superagentPromise(superagent, Promise);
-
 
 /**
  * gets the handle of tc user.
@@ -25,13 +20,8 @@ const request = superagentPromise(superagent, Promise);
  * @returns {String} the handle
  */
 async function getHandle(token) {
-  const handle = await request
-    .get(config.TOPCODER_VALUES[config.TOPCODER_ENV].TC_USER_PROFILE_URL)
-    .set('Authorization', `Bearer ${token}`)
-    .end()
-    .then((res) => res.body.handle);
-
-  return handle;
+  const decoded = decodeToken(token);
+  return decoded.handle;
 }
 
 getHandle.schema = Joi.object().keys({

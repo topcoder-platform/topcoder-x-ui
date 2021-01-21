@@ -103,6 +103,7 @@ async function revokeUserSetting(handle, provider) {
     });
     return true;
   }
+
   return false;
 }
 
@@ -145,7 +146,8 @@ async function getAccessTokenByHandle(handle, provider) {
   });
   let gitUserName;
   if (mapping) {
-    gitUserName = provider === constants.USER_TYPES.GITHUB ? 'githubUsername' : 'gitlabUsername';
+    gitUserName = provider === constants.USER_TYPES.GITHUB ? 'githubUsername' :   //eslint-disable-line no-nested-ternary
+      'gitlabUsername';
     return await dbHelper.scanOne(User, {
       username: mapping[gitUserName],
       type: provider,

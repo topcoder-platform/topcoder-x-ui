@@ -7,7 +7,7 @@ angular.module('topcoderX')
       $scope.title = 'Project Management';
 
       //direct base
-      $scope.directUrlBase = $rootScope.appConfig.DIRECT_URL_BASE;
+      $scope.connectUrlBase = $rootScope.appConfig.CONNECT_URL_BASE;
       $scope.isAdminUser = Helper.isAdminUser(currentUser);
       $scope.filter = {
         showAll: $scope.isAdminUser,
@@ -65,10 +65,17 @@ angular.module('topcoderX')
           }
         });
       };
-      $scope.getProjects('active');
 
       $scope.repoType = function (repo) {
-        return (repo.toLocaleLowerCase().indexOf("gitlab") >= 0 ? "Gitlab" : "Github");
+        if (repo.toLocaleLowerCase().indexOf("github") >= 0) {
+          return "Github";
+        }
+        else if (repo.toLocaleLowerCase().indexOf("gitlab") >= 0) {
+          return "Gitlab";
+        }
+        else {
+          return "Other";
+        }
       };
 
       $scope.init = function () {

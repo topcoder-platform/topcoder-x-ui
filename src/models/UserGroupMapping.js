@@ -1,5 +1,5 @@
 /**
- * This defines user mapping model.
+ * This defines user to team mapping model for Gitlab.
  */
 const dynamoose = require('dynamoose');
 
@@ -11,20 +11,26 @@ const schema = new Schema({
     required: true,
     hashKey: true,
   },
-  topcoderUsername: {
+  groupId: {
     type: String,
     required: true,
     index: {
       global: true,
       project: true,
       rangKey: 'id',
-      name: 'TopcoderUsernameIndex',
+      name: 'TopcoderGroupIdIndex',
     },
   },
-  githubUsername: String,
-  gitlabUsername: String,
-  githubUserId: Number,
-  gitlabUserId: Number
+  gitlabUserId: {
+    type: String,
+    required: true,
+    index: {
+      global: true,
+      project: true,
+      rangKey: 'id',
+      name: 'GitlabUserIdIndex',
+    },
+  },
 });
 
 module.exports = schema;

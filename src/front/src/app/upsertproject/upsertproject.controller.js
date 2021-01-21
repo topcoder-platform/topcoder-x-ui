@@ -24,6 +24,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       rocketChatWebhook: null,
       rocketChatChannelName: null,
       archived: false,
+      createCopilotPayments: false
     };
     if ($rootScope.project) {
       $scope.title = 'Manage a Project';
@@ -85,9 +86,14 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       if ($scope.editing) {
         ProjectService.update($scope.project).then(function () {
           Alert.info('Project Updated Successfully', $scope);
-          $state.go('app.projects');
+          setTimeout(function() {
+            $state.go('app.projects');
+          }, 3000);
         }).catch(function (error) {
           Alert.error(error.data.message, $scope);
+          setTimeout(function() {
+            $state.go('app.projects');
+          }, 3000);
         });
       } else {
         ProjectService.create($scope.project).then(function () {

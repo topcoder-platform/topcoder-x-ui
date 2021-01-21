@@ -12,7 +12,8 @@ angular.module('topcoderX', [
   'ui.router',
   'ui.bootstrap',
   'angular-clipboard',
-  'angular-jwt'])
+  'angular-jwt',
+  '720kb.datepicker'])
   // In the run phase of your Angular application
   .run(['AuthService', function (AuthService) {
     // init AuthService, it has to be done once, when app starts

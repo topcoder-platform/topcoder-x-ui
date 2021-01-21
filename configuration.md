@@ -34,7 +34,6 @@ The following config parameters are supported, they are defined in `src/config.j
 |IS_LOCAL | Use Amazon DynamoDB Local or server. |true |
 |AWS_CONNECTION_TIMEOUT | The timeout used to check if the app is healthy. |10000 |
 |TC_LOGIN_URL | TC login url | |
-|TC_USER_PROFILE_URL | TC user profile url | |
 
 ## GitHub OAuth App Setup
 

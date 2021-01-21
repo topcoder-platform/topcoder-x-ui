@@ -11,7 +11,7 @@ angular.module('topcoderX')
         const org = params[0];
         const team = url.replace(org, '').substring(1);
         $scope.link = $rootScope.appConfig.GITHUB_TEAM_URL + org + '/teams/' + team;
-      } else {
+      } else if (provider === 'github') {
         $scope.link = $rootScope.appConfig.GITLAB_GROUP_URL + url;
       }
     };
