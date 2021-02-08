@@ -178,7 +178,7 @@ getTeamRegistrationUrl.schema = Joi.object().keys({
   token: Joi.string().required(),
   ownerUsername: Joi.string().required(),
   teamId: Joi.string().required(),
-  accessLevel: Joi.string().required(),
+  accessLevel: Joi.string().valid('member', 'maintainer').required(),
 });
 
 /**

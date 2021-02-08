@@ -94,3 +94,11 @@ Direct ID migration can be done with script located in **topcoder-x-processor** 
 npm run direct-connect-migration
 ```
 By default it takes 15 projects at time, but you can change this by specifying BATCH_SIZE environment variable.
+
+## Repository url collisions scan
+
+To scan and log which projects has colliding (the same) repository urls run
+```shell
+npm run log-repository-collisions
+```
+By default it takes 15 projects at time, but you can change this by specifying BATCH_SIZE environment variable.

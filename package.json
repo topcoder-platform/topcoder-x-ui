@@ -21,7 +21,8 @@
         "test:fe": "gulp protractor",
         "lint": "gulp lint",
         "heroku-postbuild": "gulp build",
-        "create-tables": "CREATE_DB=true node scripts/create-update-tables.js"
+        "create-tables": "CREATE_DB=true node scripts/create-update-tables.js",
+        "log-repository-collisions": "node scripts/log-repository-collisions.js"
     },
     "dependencies": {
         "angular": "~1.8.0",
