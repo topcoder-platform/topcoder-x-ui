@@ -188,6 +188,10 @@ async function addUserToGroupCallback(req, res) {
       redirect_uri: `${config.WEBSITE}/api/${config.API_VERSION}/gitlab/normaluser/callback`,
     })
     .end();
+  // Throw error if github access token was not returned (ex. invalid code)
+  if (!result.body.access_token) {
+    throw new errors.UnauthorizedError('Gitlab authorization failed.', result.body.error_description);
+  }
   const token = result.body.access_token;
 
   // get group name
@@ -235,7 +239,8 @@ async function addUserToGroupCallback(req, res) {
     });
   }
   // redirect to success page
-  res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/gitlab/${currentGroup.full_path}`);
+  // For gitlab subgroups we need to replace / with something different. Default encoding doesn't work as angular route fails to match %2F
+  res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/gitlab/${currentGroup.full_path.replace('/', '@!2F')}`);
 }
 
 

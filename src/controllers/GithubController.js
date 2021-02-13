@@ -151,6 +151,10 @@ async function addUserToTeamCallback(req, res) {
     .query({client_id: config.GITHUB_CLIENT_ID, client_secret: config.GITHUB_CLIENT_SECRET, code})
     .set('Accept', 'application/json')
     .end();
+  // Throw error if github access token was not returned (e.g. invalid code)
+  if (!result.body.access_token) {
+    throw new errors.UnauthorizedError('Github authorization failed.', result.body.error_description);
+  }
   const token = result.body.access_token;
   // add user to team
   console.log(`adding ${token} to ${team.teamId} with ${team.ownerToken}`); /* eslint-disable-line no-console */

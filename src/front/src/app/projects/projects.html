@@ -61,6 +61,7 @@
                                                         <th class="col-lg-2">Service Provider</th>
                                                         <th class="col-lg-2" ng-show="isAdminUser">Owner</th>
                                                         <th class="col-lg-2">Copilot</th>
+                                                        <th class="col-lg-2">Copilot payments</th>
                                                         <th class="col-lg-3" data-sort-ignore="true"></th>
                                                     </tr>
                                                 </thead>
@@ -78,6 +79,14 @@
                                                         </td>
                                                         <td class="col-lg-2" ng-show="isAdminUser">{{project.owner}}</td>
                                                         <td class="col-lg-2">{{project.copilot}}</td>
+                                                        <td class="col-lg-2" data-value="{{project.createCopilotPayments}}">
+                                                            <div ng-if="project.createCopilotPayments === 'true'">
+                                                                <i class="fa fa-check green-check-icon"/>
+                                                            </div>
+                                                            <div ng-if="project.createCopilotPayments === 'false'">
+                                                                <i class="fa fa-times red-times-icon"/>
+                                                            </div>
+                                                        </td>
                                                         <td class="col-lg-2">
                                                             <button class="btn btn-sm btn-success" ng-click="goProject(project)">
                                                                 <strong>Manage</strong>
