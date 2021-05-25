@@ -65,6 +65,7 @@ module.exports = {
       TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts.topcoder.com/member',
     },
   },
+  DYNAMODB_WAIT_TABLE_FOR_ACTIVE_TIMEOUT: process.env.DYNAMODB_WAIT_TABLE_FOR_ACTIVE_TIMEOUT || 1000 * 60 * 10 // eslint-disable-line no-magic-numbers
 };
 
 module.exports.frontendConfigs = {

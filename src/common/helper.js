@@ -16,6 +16,7 @@ const Joi = require('joi');
 const getParams = require('get-parameter-names');
 const bluebird = require('bluebird');
 const bcrypt = require('bcryptjs');
+const moment = require('moment');
 const parseDomain = require('parse-domain');
 const config = require('../config');
 const logger = require('./logger');
@@ -147,9 +148,9 @@ function convertGitHubError(err, message) {
  */
 function convertGitLabError(err, message) {
   let resMsg = `${message}. ${err.message}.\n`;
-  const detail = _.get(err, 'response.body.message');
+  const detail = _.get(err, 'response.body.message') || _.get(err, 'response.text');
   if (detail) {
-    resMsg += ` Detail: ${detail}`;
+    resMsg += ` Detail: ${JSON.stringify(detail)}`;
   }
   const apiError = new errors.ApiError(
     err.status || _.get(err, 'response.status', constants.SERVICE_ERROR_STATUS),
@@ -252,6 +253,16 @@ function hashCode(s) {
   }, 0);
 }
 
+/**
+ * Check if expires_at is valid
+ *
+ * @param {String} expiresAt the date str yyyy-MM-dd
+ * @returns {Boolean} valid or not
+ */
+function isValidGitlabExpiresDate(expiresAt) {
+  return moment(expiresAt, 'YYYY-MM-DD', true).isValid();
+}
+
 module.exports = {
   buildService,
   buildController,
@@ -261,5 +272,6 @@ module.exports = {
   generateIdentifier,
   getProviderType,
   getProjectCopilotOrOwner,
-  hashCode
+  hashCode,
+  isValidGitlabExpiresDate
 };

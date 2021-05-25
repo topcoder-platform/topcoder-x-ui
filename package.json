@@ -80,7 +80,7 @@
         "parse-domain": "^2.1.2",
         "shortid": "^2.2.8",
         "ssl-express-www": "^3.0.3",
-        "superagent": "^3.6.0",
+        "superagent": "^6.1.0",
         "superagent-promise": "^1.1.0",
         "typescript": "~2.3.3",
         "uuid": "^3.3.2",

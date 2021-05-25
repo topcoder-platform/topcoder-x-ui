@@ -24,6 +24,7 @@
             <datepicker ng-if="provider === 'gitlab'" date-format="yyyy-MM-dd" date-min-limit="{{dateLimit}}">
                 <input class="form-control" ng-model="expiredAt" type="text" ng-change="updateExpired(expiredAt)"/>
             </datepicker>
+            <div ng-if="invalidExpiredAt === true">Invalid Expired At. Correct format is yyyy-MM-dd</div>
         </div>
     </div>
     <div class="modal-footer">

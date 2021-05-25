@@ -200,13 +200,14 @@ async function addGroupMember(groupId, ownerUserToken, normalUserToken, accessLe
     }
 
     let body = `user_id=${userId}&access_level=${accessLevel}`;
-    if (expiredAt) {
-      body = body + `&expires_at=${expiredAt} `;
+    if (expiredAt && helper.isValidGitlabExpiresDate(expiredAt)) {
+      body = body + `&expires_at=${expiredAt}`;
     }
     // add user to group
     await request
       .post(`${config.GITLAB_API_BASE_URL}/api/v4/groups/${groupId}/members`)
       .set('Authorization', `Bearer ${ownerUserToken}`)
+      .set('Content-Type', 'application/x-www-form-urlencoded')
       .send(body)
       .end();
     // return gitlab username
@@ -219,7 +220,8 @@ async function addGroupMember(groupId, ownerUserToken, normalUserToken, accessLe
       if (err instanceof errors.ApiError) {
         throw err;
       }
-      throw helper.convertGitLabError(err, 'Failed to add group member');
+      throw helper.convertGitLabError(
+        err, `Failed to add group member userId=${userId} accessLevel=${accessLevel} expiredAt=${expiredAt}`);
     }
     return {username, id: userId};
   }

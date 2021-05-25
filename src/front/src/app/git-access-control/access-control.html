@@ -17,7 +17,7 @@
                                 <div ng-if="settings.github==true">
                                     <div ng-show="tableConfig.github.initialized">
                                         <div ng-if="tableConfig.github.items.length!=0 || tableConfig.github.allItems.length!=0" class="row">
-                                            <div class="col-lg-3">
+                                            <div class="col-lg-4">
                                                 <div class="input-group custom-search-form">
                                                     <input ng-model="searchText" type="text" class="form-control" placeholder="Find teams" ng-change="onSearchChange('github', this)">
                                                     <span class="input-group-btn">
@@ -27,6 +27,7 @@
                                                     </span>
                                                 </div>
                                             </div>
+                                            <div class="col-lg-6 h5">Don't see your team? Make sure you have 'Maintainer' rights.</div>
                                         </div>
                                         <table ng-if="tableConfig.github.items.length!=0 || tableConfig.github.allItems.length!=0" class="footable table table-stripped toggle-arrow-tiny">
                                             <thead>
@@ -39,8 +40,14 @@
                                             </thead>
                                             <tbody>
                                                 <tr ng-repeat="item in tableConfig.github.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
-                                                    <td class="col-lg-2">{{item.name}}</td>
-                                                    <td class="col-lg-2">{{item.organization.login}}</td>
+                                                    <td class="col-lg-2">
+                                                        <a href="{{item.html_url}}"
+                                                        target="_blank">{{item.name}}</a>
+                                                    </td>
+                                                    <td class="col-lg-2">
+                                                        <a href="{{item.organization.html_url}}"
+                                                        target="_blank">{{item.organization.login}}</a>
+                                                    </td>
                                                     <td class="col-lg-2">
                                                         <button class="btn btn-sm btn-success" ng-hide="item.gettingLink" ng-click="getSharableLink(item, 'github')">
                                                             <strong>Get Link</strong>
@@ -116,7 +123,7 @@
                                 <div ng-if="settings.gitlab==true">
                                     <div ng-show="tableConfig.gitlab.initialized">
                                         <div ng-if="tableConfig.gitlab.items.length!=0 || tableConfig.gitlab.allItems.length!=0" class="row">
-                                            <div class="col-lg-3">
+                                            <div class="col-lg-4">
                                                 <div class="input-group custom-search-form">
                                                     <input ng-model="searchText" type="text" class="form-control" placeholder="Find groups"  ng-change="onSearchChange('gitlab', this)">
                                                     <span class="input-group-btn">
@@ -126,6 +133,7 @@
                                                     </span>
                                                 </div>
                                             </div>
+                                            <div class="col-lg-6 h5">Don't see your group? Make sure you have 'Owner' rights.</div>
                                         </div>
                                         <table ng-show="tableConfig.gitlab.items.length!=0 || tableConfig.gitlab.allItems.length!=0" class="footable table table-stripped toggle-arrow-tiny">
                                             <thead>
@@ -136,7 +144,10 @@
                                             </thead>
                                             <tbody>
                                                 <tr ng-repeat="item in tableConfig.gitlab.items" ng-class-even="'footable-even'" ng-class-odd="'footable-odd'">
-                                                    <td class="col-lg-2">{{item.name}}</td>
+                                                    <td class="col-lg-2">
+                                                        <a href="{{item.web_url}}"
+                                                        target="_blank">{{item.name}}</a>
+                                                    </td>
                                                     <td class="col-lg-2">
                                                         <button class="btn btn-sm btn-success" ng-hide="item.gettingLink" ng-click="getSharableLink(item, 'gitlab')">
                                                             <strong>Get Link</strong>

@@ -13,6 +13,7 @@ angular.module('topcoderX').controller('GitAccessDialogController', [
     $scope.provider = provider;
     $scope.accessLevel = '';
     $scope.expiredAt = '';
+    $scope.invalidExpiredAt = false;
     if ($scope.provider === 'github') {
       $scope.accessLevel = 'member';
     } else {
@@ -38,10 +39,15 @@ angular.module('topcoderX').controller('GitAccessDialogController', [
      * Set changes to father controller
      */
     $scope.setChanges = function () {
-      $uibModalInstance.close({
-        accessLevel: $scope.accessLevel,
-        expiredAt: $scope.expiredAt
-      });
+      if ($scope.expiredAt && !isValidDate($scope.expiredAt)) {
+        $scope.invalidExpiredAt = true
+      }
+      else {
+        $uibModalInstance.close({
+          accessLevel: $scope.accessLevel,
+          expiredAt: $scope.expiredAt
+        });
+      }
     };
 
     /**
@@ -49,6 +55,11 @@ angular.module('topcoderX').controller('GitAccessDialogController', [
     */
     $scope.close = function () {
       $uibModalInstance.close();
+    };
+
+    // Validates that the input string is a valid date formatted as "yyyy-MM-dd"
+    function isValidDate(dateString) {
+      return /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/.test(dateString)
     };
   },
 ]);
