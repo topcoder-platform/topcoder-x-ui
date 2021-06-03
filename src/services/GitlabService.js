@@ -47,13 +47,12 @@ async function ensureOwnerUser(token, topcoderUsername) {
   if (!userProfile) {
     throw new errors.UnauthorizedError('Can not get user from the access token.');
   }
-  const user = await dbHelper.scanOne(User, {
-    username: userProfile.username,
-    type: constants.USER_TYPES.GITLAB,
-    role: constants.USER_ROLES.OWNER,
-  });
+  const user = await dbHelper.queryOneUserByTypeAndRole(User, 
+    userProfile.username,
+    constants.USER_TYPES.GITLAB,
+    constants.USER_ROLES.OWNER);
 
-  const userMapping = await dbHelper.scanOne(UserMapping, {topcoderUsername});
+  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(UserMapping, topcoderUsername);
   if (!userMapping) {
     await dbHelper.create(UserMapping, {
       id: helper.generateIdentifier(),

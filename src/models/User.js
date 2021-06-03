@@ -33,7 +33,7 @@ const schema = new Schema({
     required: true,
     index: {
       global: true,
-      rangeKey: 'id',
+      rangeKey: 'type',
       project: true,
       name: 'UsernameIndex',
     },
@@ -52,13 +52,7 @@ const schema = new Schema({
   type: {
     type: String,
     required: true,
-    enum: _.values(constants.USER_TYPES),
-    index: {
-      global: true,
-      rangeKey: 'id',
-      name: 'TypeIndex',
-      project: true,
-    },
+    enum: _.values(constants.USER_TYPES)
   },
   // gitlab token data
   accessToken: {type: String, required: false},

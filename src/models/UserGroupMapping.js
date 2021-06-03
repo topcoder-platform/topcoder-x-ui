@@ -17,19 +17,13 @@ const schema = new Schema({
     index: {
       global: true,
       project: true,
-      rangKey: 'id',
-      name: 'TopcoderGroupIdIndex',
+      rangKey: 'gitlabUserId',
+      name: 'GroupIdIndex',
     },
   },
   gitlabUserId: {
     type: String,
-    required: true,
-    index: {
-      global: true,
-      project: true,
-      rangKey: 'id',
-      name: 'GitlabUserIdIndex',
-    },
+    required: true
   },
 });
 

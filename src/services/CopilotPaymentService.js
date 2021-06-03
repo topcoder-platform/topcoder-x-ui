@@ -177,11 +177,9 @@ updateAll.schema = {
  */
 async function getExistingChallengeIdIfExists(dbPayment) {
   // check if there is existing active challenge associated with this project
-  const existingPayments = await dbHelper.scanOne(CopilotPayment, {
-    project: dbPayment.project,
-    username: dbPayment.username,
-    closed: 'false',
-  });
+  const existingPayments = await dbHelper.queryOneActiveCopilotPayment(CopilotPayment, 
+    dbPayment.project,
+    dbPayment.username);
 
   // if no existing challenge found then it will be created by processor
   if (existingPayments) {
@@ -307,7 +305,7 @@ update.schema = paymentSchema;
 async function remove(id, topcoderUser) {
   const dbPayment = await _ensureEditPermissionAndGetInfo(id, topcoderUser);
   const payment = await getExistingChallengeIdIfExists(dbPayment);
-  await dbHelper.remove(CopilotPayment, {id});
+  await dbHelper.removeById(CopilotPayment, id);
   const paymentDeleteEvent = {
     event: 'copilotPayment.delete',
     data: {

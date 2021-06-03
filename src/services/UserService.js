@@ -23,9 +23,8 @@ const UserMapping = require('../models').UserMapping;
  * @returns {Object} the user setting
  */
 async function getUserSetting(handle) {
-  const mapping = await dbHelper.scanOne(UserMapping, {
-    topcoderUsername: handle.toLowerCase(),
-  });
+  const mapping = await dbHelper.queryOneUserMappingByTCUsername(
+    UserMapping, handle.toLowerCase());
   const setting = {
     github: false,
     gitlab: false,
@@ -38,20 +37,16 @@ async function getUserSetting(handle) {
 
   const users = [];
   if (mapping.githubUsername) {
-    const github = await dbHelper.scanOne(User, {
-      username: mapping.githubUsername,
-      type: constants.USER_TYPES.GITHUB,
-    });
+    const github = await dbHelper.queryOneUserByType(
+      User, mapping.githubUsername, constants.USER_TYPES.GITHUB);
     if (!_.isNil(github)) {
       users.push(github);
     }
   }
 
   if (mapping.gitlabUsername) {
-    const gitlab = await dbHelper.scanOne(User, {
-      username: mapping.gitlabUsername,
-      type: constants.USER_TYPES.GITLAB,
-    });
+    const gitlab = await dbHelper.queryOneUserByType(
+      User, mapping.gitlabUsername, constants.USER_TYPES.GITLAB);
     if (!_.isNil(gitlab)) {
       users.push(gitlab);
     }
@@ -80,27 +75,20 @@ getUserSetting.schema = Joi.object().keys({
  * @returns {Boolean} the execution status success or failed
  */
 async function revokeUserSetting(handle, provider) {
-  const mapping = await dbHelper.scanOne(UserMapping, {
-    topcoderUsername: handle.toLowerCase(),
-  });
+  const mapping = await dbHelper.queryOneUserMappingByTCUsername(
+    UserMapping, handle.toLowerCase());
 
   if (!mapping) {
     return false;
   }
 
   if (provider === 'github' && mapping.githubUsername) {
-    dbHelper.remove(User, {
-      username: mapping.githubUsername,
-      type: constants.USER_TYPES.GITHUB,
-    });
+    dbHelper.removeUser(User, mapping.githubUsername, constants.USER_TYPES.GITHUB);
     return true;
   }
 
   if (provider === 'gitlab' && mapping.gitlabUsername) {
-    dbHelper.remove(User, {
-      username: mapping.gitlabUsername,
-      type: constants.USER_TYPES.GITLAB,
-    });
+    dbHelper.removeUser(User, mapping.gitlabUsername, constants.USER_TYPES.GITLAB);
     return true;
   }
 
@@ -121,10 +109,7 @@ revokeUserSetting.schema = Joi.object().keys({
  * @returns {String} the user access token
  */
 async function getUserToken(username, tokenType) {
-  const user = await dbHelper.scanOne(User, {
-    username,
-    type: tokenType,
-  });
+  const user = await dbHelper.queryOneUserByType(User, username, tokenType);
 
   if (!user) {
     throw new errors.NotFoundError(`User doesn't exist ${username} with type ${tokenType}`);
@@ -141,17 +126,13 @@ async function getUserToken(username, tokenType) {
  * @returns {Object} the user if found; null otherwise
  */
 async function getAccessTokenByHandle(handle, provider) {
-  const mapping = await dbHelper.scanOne(UserMapping, {
-    topcoderUsername: handle.toLowerCase(),
-  });
+  const mapping = await dbHelper.queryOneUserMappingByTCUsername(
+    UserMapping, handle.toLowerCase());
   let gitUserName;
   if (mapping) {
     gitUserName = provider === constants.USER_TYPES.GITHUB ? 'githubUsername' :   //eslint-disable-line no-nested-ternary
       'gitlabUsername';
-    return await dbHelper.scanOne(User, {
-      username: mapping[gitUserName],
-      type: provider,
-    });
+    return await dbHelper.queryOneUserByType(User, mapping[gitUserName], provider);
   }
   return gitUserName;
 }

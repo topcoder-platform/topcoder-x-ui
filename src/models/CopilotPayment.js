@@ -23,7 +23,7 @@ const schema = new Schema({
     type: String,
     index: {
       global: true,
-      rangeKey: 'id',
+      rangeKey: 'username',
       project: true,
       name: 'ProjectIndex',
     },
@@ -32,52 +32,23 @@ const schema = new Schema({
   description: {type: String, required: true},
   challengeId: {
     type: Number,
-    required: false,
-    index: {
-      global: true,
-      rangeKey: 'id',
-      project: true,
-      name: 'ChallengeIdIndex',
-    },
+    required: false
   },
   challengeUUID: {
     type: String,
-    required: false,
-    index: {
-      global: true,
-      project: true,
-      name: 'ChallengeUUIdIndex'
-    }
+    required: false
   },
   closed: {
     type: String,
     required: true,
-    default: 'false',
-    index: {
-      global: true,
-      rangeKey: 'id',
-      project: true,
-      name: 'ClosedIndex',
-    },
+    default: 'false'
   },
   username: {
     type: String,
-    required: true,
-    index: {
-      global: true,
-      rangeKey: 'id',
-      project: true,
-      name: 'UsernameIndex',
-    },
+    required: true
   },
   status: {
-    type: String,
-    index: {
-      global: true,
-      rangeKey: 'id',
-      project: true,
-      name: 'StatusIndex',
-    },
+    type: String
   },
 });
 

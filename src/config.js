@@ -12,7 +12,6 @@ module.exports = {
   PORT: process.env.PORT || 80, // eslint-disable-line no-magic-numbers
   API_VERSION: process.env.API_VERSION || 'v1',
   LOG_LEVEL: process.env.LOG_LEVEL || 'debug',
-  // MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/topcoderx',
   SESSION_SECRET: process.env.SESSION_SECRET || 'kjsdfkj34857',
   // Github and gitlab client id and secret
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,

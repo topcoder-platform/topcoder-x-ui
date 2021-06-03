@@ -17,13 +17,33 @@ const logger = require('./logger');
  */
 async function getById(model, id) {
   return await new Promise((resolve, reject) => {
-    model.query('id').eq(id).consistent().all().exec((err, result) => {
+    model.queryOne('id').eq(id).consistent().all().exec((err, result) => {
       if (err) {
         logger.error(`DynamoDB getById error ${err}`);
         reject(err);
       }
 
-      return resolve(result[0]);
+      return resolve(result);
+    });
+  });
+}
+
+/**
+ * Get Data by model id
+ * @param {Object} model The dynamoose model to query
+ * @param {String} key The key name
+ * @param {String} value The value
+ * @returns {Promise<void>}
+ */
+async function getByKey(model, key, value) {
+  return await new Promise((resolve, reject) => {
+    model.queryOne(key).eq(value).all().exec((err, result) => {
+      if (err) {
+        logger.error(`DynamoDB getById error ${err}`);
+        reject(err);
+      }
+
+      return resolve(result);
     });
   });
 }
@@ -60,7 +80,7 @@ async function queryOneIssue(model, repositoryId, number, provider) {
   return await new Promise((resolve, reject) => {
 
     model.query('repositoryId').eq(repositoryId)
-    .filter('number').eq(number)
+    .where('number').eq(number)
     .filter('provider').eq(provider)
     .all()
     .exec((err, result) => {
@@ -75,19 +95,190 @@ async function queryOneIssue(model, repositoryId, number, provider) {
 }
 
 /**
- * Get single data by scan parameters
- * @param {Object} model The dynamoose model to scan
- * @param {Object} scanParams The scan parameters object
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
+ * @param {String} username The user username
+ * @param {String} type The type of user
  * @returns {Promise<void>}
  */
-async function scanOne(model, scanParams) {
+async function queryOneUserByType(model, username, type) {
   return await new Promise((resolve, reject) => {
-    model.scan(scanParams).consistent().all().exec((err, result) => {
-      if (err) {
-        logger.error(`DynamoDB scanOne error ${err}`);
-        reject(err);
+    model.query('username').eq(username)
+    .where('type')
+    .eq(type)
+    .all()
+    .exec((err, result) => {
+      if (err || !result) {
+        logger.debug(`queryOneUserByType. Error. ${err}`);
+        return reject(err);
       }
+      return resolve(result.count === 0 ? null : result[0]);
+    });
+  });
+}
 
+/**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
+ * @param {String} username The user username
+ * @param {String} type The type of user
+ * @param {String} role The role of user
+ * @returns {Promise<void>}
+ */
+async function queryOneUserByTypeAndRole(model, username, type, role) {
+  return await new Promise((resolve, reject) => {
+    model.query('username').eq(username)
+    .where('type')
+    .eq(type)
+    .filter('role')
+    .eq(role)
+    .all()
+    .exec((err, result) => {
+      if (err || !result) {
+        logger.debug(`queryOneUserByTypeAndRole. Error. ${err}`);
+        return reject(err);
+      }
+      return resolve(result.count === 0 ? null : result[0]);
+    });
+  });
+}
+
+/**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
+ * @param {String} tcusername The tc username
+ * @returns {Promise<void>}
+ */
+async function queryOneUserMappingByTCUsername(model, tcusername) {
+  return await new Promise((resolve, reject) => {
+    model.queryOne('topcoderUsername').eq(tcusername)
+    .all()
+    .exec((err, result) => {
+      if (err || !result) {
+        logger.debug(`queryOneUserMappingByTCUsername. Error. ${err}`);
+        return reject(err);
+      }
+      return resolve(result);
+    });
+  });
+}
+
+/**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
+ * @param {String} repoUrl The repository url
+ * @returns {Promise<void>}
+ */
+async function queryOneActiveProject(model, repoUrl) {
+  return await new Promise((resolve, reject) => {
+    model.query('repoUrl').eq(repoUrl)
+    .where('archived')
+    .eq('false')
+    .all()
+    .exec((err, result) => {
+      if (err || !result) {
+        logger.debug(`queryOneActiveProject. Error. ${err}`);
+        return reject(err);
+      }
+      return resolve(result.count === 0 ? null : result[0]);
+    });
+  });
+}
+
+/**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
+ * @param {String} project The project
+ * @param {String} username The username
+ * @returns {Promise<void>}
+ */
+async function queryOneActiveCopilotPayment(model, project, username) {
+  return await new Promise((resolve, reject) => {
+    model.query('project').eq(project)
+    .where('username')
+    .eq(username)
+    .filter('closed')
+    .eq('false')
+    .all()
+    .exec((err, result) => {
+      if (err || !result) {
+        logger.debug(`queryOneActiveProject. Error. ${err}`);
+        return reject(err);
+      }
+      return resolve(result.count === 0 ? null : result[0]);
+    });
+  });
+}
+
+/**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
+ * @param {String} groupId The gitlab group id
+ * @param {String} gitlabUserId The gitlab user id
+ * @returns {Promise<void>}
+ */
+async function queryOneUserGroupMapping(model, groupId, gitlabUserId) {
+  return await new Promise((resolve, reject) => {
+    model.query('groupId').eq(groupId)
+    .filter('gitlabUserId')
+    .eq(gitlabUserId)
+    .all()
+    .exec((err, result) => {
+      if (err || !result) {
+        logger.debug(`queryOneActiveProject. Error. ${err}`);
+        return reject(err);
+      }
+      return resolve(result.count === 0 ? null : result[0]);
+    });
+  });
+}
+
+/**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
+ * @param {String} teamId The github team id
+ * @param {String} githubUserName The github username
+ * @param {String} githubOrgId The github org id
+ * @returns {Promise<void>}
+ */
+async function queryOneUserTeamMapping(model, teamId, githubUserName, githubOrgId) {
+  return await new Promise((resolve, reject) => {
+    model.query('teamId').eq(teamId)
+    .filter('githubUserName')
+    .eq(githubUserName)
+    .filter('githubOrgId')
+    .eq(githubOrgId)
+    .all()
+    .exec((err, result) => {
+      if (err || !result) {
+        logger.debug(`queryOneActiveProject. Error. ${err}`);
+        return reject(err);
+      }
+      return resolve(result.count === 0 ? null : result[0]);
+    });
+  });
+}
+
+/**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
+ * @param {String} repoUrl The repository url
+ * @param {String} projectIdToFilter The projectId To Filter
+ * @returns {Promise<void>}
+ */
+async function queryOneActiveProjectWithFilter(model, repoUrl, projectIdToFilter) {
+  return await new Promise((resolve, reject) => {
+    model.query('repoUrl').eq(repoUrl)
+    .where('archived')
+    .eq('false')
+    .filter('id')
+    .not().eq(projectIdToFilter)
+    .all()
+    .exec((err, result) => {
+      if (err || !result) {
+        logger.debug(`queryOneActiveProject. Error. ${err}`);
+        return reject(err);
+      }
       return resolve(result.count === 0 ? null : result[0]);
     });
   });
@@ -140,10 +331,10 @@ async function update(Model, id, data) {
 /**
  * Delete item in database
  * @param {Object} Model The dynamoose model to delete
- * @param {Object} queryParams The query parameters object
+ * @param {String} id The id
  */
-async function remove(Model, queryParams) {
-  const dbItem = await scanOne(Model, queryParams);
+async function removeById(Model, id) {
+  const dbItem = await getById(Model, id);
   await new Promise((resolve, reject) => {
     dbItem.delete((err) => {
       if (err) {
@@ -156,12 +347,42 @@ async function remove(Model, queryParams) {
   });
 }
 
+/**
+ * Delete item in database
+ * @param {Object} Model The dynamoose model to delete
+ * @param {String} username The username
+ * @param {String} type The type
+ */
+async function removeUser(Model, username, type) {
+  const dbItem = await queryOneUserByType(Model, username, type);
+  await new Promise((resolve, reject) => {
+    dbItem.delete((err) => {
+      if (err) {
+        logger.error(`DynamoDB remove error ${err}`);
+        reject(err);
+      }
+
+      resolve(dbItem);
+    });
+  });
+}
+
+
 module.exports = {
   getById,
+  getByKey,
   scan,
-  scanOne,
   create,
   update,
-  remove,
-  queryOneIssue
+  removeById,
+  removeUser,
+  queryOneActiveCopilotPayment,
+  queryOneActiveProject,
+  queryOneActiveProjectWithFilter,
+  queryOneIssue,
+  queryOneUserByType,
+  queryOneUserByTypeAndRole,
+  queryOneUserGroupMapping,
+  queryOneUserTeamMapping,
+  queryOneUserMappingByTCUsername
 };

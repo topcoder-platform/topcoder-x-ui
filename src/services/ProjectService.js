@@ -72,16 +72,12 @@ const createProjectSchema = {
  * @private
  */
 async function _validateProjectData(project) {
-  const filter = {
-    repoUrl: project.repoUrl,
-    archived: 'false'
-  }
+  let existsInDatabase;
   if (project.id) {
-    filter.id = {
-      ne: project.id
-    }
+    existsInDatabase = await dbHelper.queryOneActiveProjectWithFilter(models.Project, project.repoUrl, project.id)
+  } else {
+    existsInDatabase = await dbHelper.queryOneActiveProject(models.Project, project.repoUrl)
   }
-  const existsInDatabase = await dbHelper.scanOne(models.Project, filter)
   if (existsInDatabase) {
     throw new errors.ValidationError(`This repo already has a Topcoder-X project associated with it.
     Copilot: ${existsInDatabase.copilot}, Owner: ${existsInDatabase.owner}`)

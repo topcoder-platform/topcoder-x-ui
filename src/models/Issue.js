@@ -42,7 +42,7 @@ const schema = new Schema({
     required: true,
     index: {
       global: true,
-      rangeKey: 'id',
+      rangeKey: 'number',
       project: true,
       name: 'RepositoryIdIndex',
     },

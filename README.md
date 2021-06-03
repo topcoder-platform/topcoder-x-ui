@@ -3,7 +3,7 @@
 ## Requirements
 
 - Nodejs 8 is required
-- MongoDB 3.2
+- DynamoDB
 - kafka
 - nodemon (for local development)
 
@@ -69,10 +69,9 @@ Server should be started at port 80.
 Follow the below steps to deploy the app to heroku
 1. `heroku login`
 2. `heroku create`
-3. `heroku addons:create mongolab`
-4. `heroku config:set NPM_CONFIG_PRODUCTION=false` so that heroku will install dev dependencies
-5. `git push heroku master` or `git push heroku develop:master` to deploy develop branch
-6. `heroku open` to load the app on browser
+3. `heroku config:set NPM_CONFIG_PRODUCTION=false` so that heroku will install dev dependencies
+4. `git push heroku master` or `git push heroku develop:master` to deploy develop branch
+5. `heroku open` to load the app on browser
 
 Note: heroku domain should match subdomain of topcoder-dev or topcoder depending upon target topcoder environment
 
