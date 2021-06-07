@@ -17,7 +17,7 @@ const schema = new Schema({
     index: {
       global: true,
       project: true,
-      rangKey: 'id',
+      rangeKey: 'id',
       name: 'TopcoderUsernameIndex',
     },
   },

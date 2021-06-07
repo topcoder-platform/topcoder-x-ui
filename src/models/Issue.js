@@ -16,26 +16,14 @@ const schema = new Schema({
   // From the receiver service
   number: {
     type: Number,
-    required: true,
-    index: {
-      global: true,
-      rangeKey: 'id',
-      project: true,
-      name: 'NumberIndex',
-    },
+    required: true
   },
   title: {type: String, required: true},
   body: {type: String},
   prizes: {type: [Number], required: true}, // extracted from title
   provider: {
     type: String,
-    required: true,
-    index: {
-      global: true,
-      rangeKey: 'id',
-      project: true,
-      name: 'ProviderIndex',
-    },
+    required: true
   }, // github or gitlab
   repositoryId: {
     type: Number,

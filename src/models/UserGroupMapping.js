@@ -17,7 +17,7 @@ const schema = new Schema({
     index: {
       global: true,
       project: true,
-      rangKey: 'gitlabUserId',
+      rangeKey: 'gitlabUserId',
       name: 'GroupIdIndex',
     },
   },

@@ -16,13 +16,7 @@ const schema = new Schema({
   },
   userProviderId: {
     type: Number,
-    required: true,
-    index: {
-      global: true,
-      rangeKey: 'id',
-      project: true,
-      name: 'UsesProviderIdIndex',
-    },
+    required: true
   },
   userProviderIdStr: {
     type: String,
@@ -41,13 +35,7 @@ const schema = new Schema({
   role: {
     type: String,
     required: true,
-    enum: _.values(constants.USER_ROLES),
-    index: {
-      global: true,
-      project: true,
-      name: 'RoleIndex',
-      rangeKey: 'id',
-    },
+    enum: _.values(constants.USER_ROLES)
   },
   type: {
     type: String,
