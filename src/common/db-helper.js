@@ -220,8 +220,8 @@ async function queryOneActiveCopilotPayment(model, project, username) {
 async function queryOneUserGroupMapping(model, groupId, gitlabUserId) {
   return await new Promise((resolve, reject) => {
     model.query('groupId').eq(groupId)
-    .filter('gitlabUserId')
-    .eq(gitlabUserId)
+    .where('gitlabUserId')
+    .eq(gitlabUserId.toString())
     .all()
     .exec((err, result) => {
       if (err || !result) {
@@ -244,7 +244,7 @@ async function queryOneUserGroupMapping(model, groupId, gitlabUserId) {
 async function queryOneUserTeamMapping(model, teamId, githubUserName, githubOrgId) {
   return await new Promise((resolve, reject) => {
     model.query('teamId').eq(teamId)
-    .filter('githubUserName')
+    .where('githubUserName')
     .eq(githubUserName)
     .filter('githubOrgId')
     .eq(githubOrgId)

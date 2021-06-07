@@ -15,24 +15,12 @@ const schema = new Schema({
   },
   ownerUsername: {
     type: String,
-    required: true,
-    index: {
-      global: true,
-      rangeKey: 'id',
-      project: true,
-      name: 'OwnerUsernameIndex',
-    },
+    required: true
   },
   type: {
     type: String,
     required: true,
-    enum: _.values(constants.USER_TYPES),
-    index: {
-      global: true,
-      rangeKey: 'id',
-      project: true,
-      name: 'TypeIndex',
-    },
+    enum: _.values(constants.USER_TYPES)
   },
   groupId: {
     type: String,
@@ -56,13 +44,7 @@ const schema = new Schema({
   },
   accessLevel: {
     type: String,
-    required: true,
-    index: {
-      global: true,
-      rangeKey: 'id',
-      project: true,
-      name: 'AccessLevelIndex',
-    },
+    required: true
   },
   expiredAt: {
     type: String,
