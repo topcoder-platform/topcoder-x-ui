@@ -130,7 +130,7 @@ async function getGroupRegistrationUrl(req) {
 async function addUserToGroup(req, res) {
   const identifier = req.params.identifier;
   // validate the identifier
-  await helper.ensureExists(OwnerUserGroup, {identifier}, 'OwnerUserGroup');
+  await helper.ensureExistsWithKey(OwnerUserGroup, 'identifier', identifier, 'OwnerUserGroup');
 
   // store identifier to session, to be compared in callback
   req.session.identifier = identifier;
@@ -161,15 +161,15 @@ async function addUserToGroupCallback(req, res) {
   if (!code) {
     throw new errors.ValidationError('Missing code.');
   }
-  const group = await helper.ensureExists(OwnerUserGroup, {identifier}, 'OwnerUserGroup');
+  const group = await helper.ensureExistsWithKey(OwnerUserGroup, 'identifier', identifier, 'OwnerUserGroup');
 
   if (!group) {
     throw new errors.NotFoundError('The group is not found or not accessible.');
   }
 
   // get owner user
-  const ownerUser = await helper.ensureExists(User,
-    {username: group.ownerUsername, type: constants.USER_TYPES.GITLAB, role: constants.USER_ROLES.OWNER}, 'User');
+  const ownerUser = await dbHelper.queryOneUserByTypeAndRole(User,
+    group.ownerUsername, constants.USER_TYPES.GITLAB, constants.USER_ROLES.OWNER);
 
   if (!ownerUser) {
     throw new errors.NotFoundError('The owner user is not found or not accessible.');
@@ -208,9 +208,8 @@ async function addUserToGroupCallback(req, res) {
     group.accessLevel,
     group.expiredAt);
   // associate gitlab username with TC username
-  const mapping = await dbHelper.scanOne(UserMapping, {
-    topcoderUsername: {eq: req.session.tcUsername},
-  });
+  
+  const mapping = await dbHelper.queryOneUserMappingByTCUsername(UserMapping, req.session.tcUsername);
   if (mapping) {
     await dbHelper.update(UserMapping, mapping.id, {
       gitlabUsername: gitlabUser.username,
@@ -226,10 +225,9 @@ async function addUserToGroupCallback(req, res) {
   }
   // We get gitlabUser.id and group.groupId and
   // associate github username and teamId
-  const gitlabUserToGroupMapping = await dbHelper.scanOne(UserGroupMapping, {
-    groupId: {eq: group.groupId},
-    gitlabUserId: {eq: gitlabUser.id},
-  });
+  const gitlabUserToGroupMapping = await dbHelper.queryOneUserGroupMapping(UserGroupMapping, 
+    group.groupId,
+    gitlabUser.id);
 
   if (!gitlabUserToGroupMapping) {
     await dbHelper.create(UserGroupMapping, {
@@ -253,7 +251,7 @@ async function deleteUsersFromTeam(req, res) {
   const groupId = req.params.id;
   let groupInDB;
   try {
-    groupInDB = await helper.ensureExists(OwnerUserGroup, {groupId}, 'OwnerUserGroup');
+    groupInDB = await helper.ensureExistsWithKey(OwnerUserGroup, 'groupId', groupId, 'OwnerUserGroup');
   } catch (err) {
     if (!(err instanceof errors.NotFoundError)) {
       throw err;
@@ -262,14 +260,17 @@ async function deleteUsersFromTeam(req, res) {
   // If groupInDB not exists, then just return
   if (groupInDB) {
     try {
-      const ownerUser = await helper.ensureExists(User,
-        {username: groupInDB.ownerUsername, type: constants.USER_TYPES.GITLAB, role: constants.USER_ROLES.OWNER}, 'User');
+      const ownerUser = await helper.queryOneUserByTypeAndRole(User,
+        groupInDB.ownerUsername, constants.USER_TYPES.GITLAB, constants.USER_ROLES.OWNER);
+      if (!ownerUser) {
+        throw new errors.NotFoundError('The owner user is not found or not accessible.');
+      }
       await GitlabService.refreshGitlabUserAccessToken(ownerUser);
       const userGroupMappings = await dbHelper.scan(UserGroupMapping, {groupId});
       // eslint-disable-next-line no-restricted-syntax
       for (const userGroupMapItem of userGroupMappings) {
         await GitlabService.deleteUserFromGitlabGroup(ownerUser.accessToken, groupId, userGroupMapItem.gitlabUserId);
-        await dbHelper.remove(UserGroupMapping, {id: userGroupMapItem.id});
+        await dbHelper.removeById(UserGroupMapping, userGroupMapItem.id);
       }
     } catch (err) {
       throw err;

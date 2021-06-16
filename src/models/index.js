@@ -24,12 +24,14 @@ if (config.DYNAMODB.IS_LOCAL === 'true') {
 dynamoose.setDefaults({
   create: false,
   update: false,
+  waitForActiveTimeout: config.DYNAMODB_WAIT_TABLE_FOR_ACTIVE_TIMEOUT
 });
 
 if (process.env.CREATE_DB) {
   dynamoose.setDefaults({
     create: true,
     update: true,
+    waitForActiveTimeout: config.DYNAMODB_WAIT_TABLE_FOR_ACTIVE_TIMEOUT
   });
 }
 

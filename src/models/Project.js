@@ -22,15 +22,18 @@ const schema = new Schema({
   title: {type: String, required: true},
   tcDirectId: {
     type: Number,
+    required: true
+  },
+  repoUrl: {
+    type: String, 
     required: true,
     index: {
       global: true,
-      rangeKey: 'id',
+      rangeKey: 'archived',
       project: true,
-      name: 'TcDirectIdIndex',
-    },
+      name: 'RepoUrlIndex'
+    }
   },
-  repoUrl: {type: String, required: true},
   repoId: {type: String, required: false},
   rocketChatWebhook: {type: String, required: false},
   rocketChatChannelName: {type: String, required: false},

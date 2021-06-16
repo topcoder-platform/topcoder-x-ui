@@ -47,13 +47,12 @@ async function ensureOwnerUser(token, topcoderUsername) {
   if (!userProfile) {
     throw new errors.UnauthorizedError('Can not get user from the access token.');
   }
-  const user = await dbHelper.scanOne(User, {
-    username: userProfile.username,
-    type: constants.USER_TYPES.GITLAB,
-    role: constants.USER_ROLES.OWNER,
-  });
+  const user = await dbHelper.queryOneUserByTypeAndRole(User, 
+    userProfile.username,
+    constants.USER_TYPES.GITLAB,
+    constants.USER_ROLES.OWNER);
 
-  const userMapping = await dbHelper.scanOne(UserMapping, {topcoderUsername});
+  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(UserMapping, topcoderUsername);
   if (!userMapping) {
     await dbHelper.create(UserMapping, {
       id: helper.generateIdentifier(),
@@ -200,13 +199,14 @@ async function addGroupMember(groupId, ownerUserToken, normalUserToken, accessLe
     }
 
     let body = `user_id=${userId}&access_level=${accessLevel}`;
-    if (expiredAt) {
-      body = body + `&expires_at=${expiredAt} `;
+    if (expiredAt && helper.isValidGitlabExpiresDate(expiredAt)) {
+      body = body + `&expires_at=${expiredAt}`;
     }
     // add user to group
     await request
       .post(`${config.GITLAB_API_BASE_URL}/api/v4/groups/${groupId}/members`)
       .set('Authorization', `Bearer ${ownerUserToken}`)
+      .set('Content-Type', 'application/x-www-form-urlencoded')
       .send(body)
       .end();
     // return gitlab username
@@ -219,7 +219,8 @@ async function addGroupMember(groupId, ownerUserToken, normalUserToken, accessLe
       if (err instanceof errors.ApiError) {
         throw err;
       }
-      throw helper.convertGitLabError(err, 'Failed to add group member');
+      throw helper.convertGitLabError(
+        err, `Failed to add group member userId=${userId} accessLevel=${accessLevel} expiredAt=${expiredAt}`);
     }
     return {username, id: userId};
   }

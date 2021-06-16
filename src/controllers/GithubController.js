@@ -116,7 +116,7 @@ async function addUserToTeam(req, res) {
   const identifier = req.params.identifier;
   console.log(`addUserToTeam called for ${identifier}`); /* eslint-disable-line no-console */
   // validate the identifier
-  await helper.ensureExists(OwnerUserTeam, {identifier}, 'OwnerUserTeam');
+  await helper.ensureExistsWithKey(OwnerUserTeam, 'identifier', identifier, 'OwnerUserTeam');
 
   // store identifier to session, to be compared in callback
   req.session.identifier = identifier;
@@ -144,7 +144,7 @@ async function addUserToTeamCallback(req, res) {
   if (!code) {
     throw new errors.ValidationError('Missing code.');
   }
-  const team = await helper.ensureExists(OwnerUserTeam, {identifier}, 'OwnerUserTeam');
+  const team = await helper.ensureExistsWithKey(OwnerUserTeam, 'identifier', identifier, 'OwnerUserTeam');
   // exchange code to get token
   const result = await request
     .post('https://github.com/login/oauth/access_token')
@@ -160,9 +160,7 @@ async function addUserToTeamCallback(req, res) {
   console.log(`adding ${token} to ${team.teamId} with ${team.ownerToken}`); /* eslint-disable-line no-console */
   const githubUser = await GithubService.addTeamMember(team.teamId, team.ownerToken, token, team.accessLevel);
   // associate github username with TC username
-  const mapping = await dbHelper.scanOne(UserMapping, {
-    topcoderUsername: {eq: req.session.tcUsername},
-  });
+  const mapping = await dbHelper.queryOneUserMappingByTCUsername(UserMapping, req.session.tcUsername);
 
   // get team details
   const teamDetails = await GithubService.getTeamDetails(team.ownerToken, team.teamId);
@@ -182,11 +180,10 @@ async function addUserToTeamCallback(req, res) {
   }
 
   // associate github username and teamId
-  const githubUserToTeamMapping = await dbHelper.scanOne(UserTeamMapping, {
-    teamId: {eq: team.teamId},
-    githubUserName: {eq: githubUser.username},
-    githubOrgId: {eq: team.githubOrgId},
-  });
+  const githubUserToTeamMapping = await dbHelper.queryOneUserTeamMapping(UserTeamMapping,
+    team.teamId,
+    githubUser.username,
+    team.githubOrgId);
 
   if (!githubUserToTeamMapping) {
     await dbHelper.create(UserTeamMapping, {
@@ -221,7 +218,7 @@ async function deleteUsersFromTeam(req, res) {
   let teamInDB;
   const teamId = req.params.id;
   try {
-    teamInDB = await helper.ensureExists(OwnerUserTeam, {teamId}, 'OwnerUserTeam');
+    teamInDB = await helper.ensureExistsWithKey(OwnerUserTeam, 'teamId', teamId, 'OwnerUserTeam');
   } catch (err) {
     if (!(err instanceof errors.NotFoundError)) {
       throw err;
@@ -238,7 +235,7 @@ async function deleteUsersFromTeam(req, res) {
       // eslint-disable-next-line no-restricted-syntax
       for (const userTeamMapItem of userTeamMappings) {
         await GithubService.deleteUserFromGithubTeam(token, teamId, githubOrgId, userTeamMapItem.githubUserName);
-        await dbHelper.remove(UserTeamMapping, {id: userTeamMapItem.id});
+        await dbHelper.removeById(UserTeamMapping, userTeamMapItem.id);
       }
     } catch (err) {
       throw err;

@@ -17,29 +17,17 @@ const schema = new Schema({
     index: {
       global: true,
       project: true,
-      rangKey: 'id',
+      rangeKey: 'githubUserName',
       name: 'TopcoderTeamIdIndex',
     },
   },
   githubOrgId: {
     type: String,
-    required: false,
-    index: {
-      global: true,
-      project: true,
-      rangKey: 'id',
-      name: 'GithubOrgIdIndex',
-    },
+    required: false
   },
   githubUserName: {
     type: String,
-    required: false,
-    index: {
-      global: true,
-      project: true,
-      rangKey: 'id',
-      name: 'GithubUserNameIndex',
-    },
+    required: false
   }
 });
 

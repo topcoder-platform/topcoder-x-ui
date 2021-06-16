@@ -22,7 +22,7 @@ Topcoder-X comprises 3 pieces:
 * Topcoder-X Processor that handles the messages created by the receiver.  The processor handles the interactions with the Topcoder platform, via the Topcoder challenge API, and it also handles adding comments back to Github / Gitlab when things are updated on the Topcoder challenge.
 * Topcoder-X UI that allows copilots and others to manage the Topcoder-X integrations with Github and Gitlab projects.  The user can add new Github and Gitlab integrations, including setting up default webhooks and labels for issues, all through the UI.
 
-All 3 pieces will be configured to use the same MongoDB and Kafka installations.
+All 3 pieces will be configured to use the same DynamoDB and Kafka installations.
 
 
 ## DynamoDB

@@ -16,6 +16,7 @@ const Joi = require('joi');
 const getParams = require('get-parameter-names');
 const bluebird = require('bluebird');
 const bcrypt = require('bcryptjs');
+const moment = require('moment');
 const parseDomain = require('parse-domain');
 const config = require('../config');
 const logger = require('./logger');
@@ -147,9 +148,9 @@ function convertGitHubError(err, message) {
  */
 function convertGitLabError(err, message) {
   let resMsg = `${message}. ${err.message}.\n`;
-  const detail = _.get(err, 'response.body.message');
+  const detail = _.get(err, 'response.body.message') || _.get(err, 'response.text');
   if (detail) {
-    resMsg += ` Detail: ${detail}`;
+    resMsg += ` Detail: ${JSON.stringify(detail)}`;
   }
   const apiError = new errors.ApiError(
     err.status || _.get(err, 'response.status', constants.SERVICE_ERROR_STATUS),
@@ -161,28 +162,32 @@ function convertGitLabError(err, message) {
 
 /**
  * Ensure entity exists for given criteria. Return error if no result.
- * @param {Object} Model the mongoose model to query
- * @param {Object|String|Number} criteria the criteria (if object) or id (if string/number)
+ * @param {Object} Model the dynamoose model to query
+ * @param {String|Number} criteria the id (if string/number)
  * @param {String} modelName the name of model
  * @returns {Object} the found entity
  */
 async function ensureExists(Model, criteria, modelName) {
-  let query;
-  let byId = true;
-  if (_.isObject(criteria)) {
-    byId = false;
-    query = dbHelper.scanOne(Model, criteria);
-  } else {
-    query = dbHelper.getById(Model, criteria);
-  }
-  const result = await query;
+  const result = await dbHelper.getById(Model, criteria);
   if (!result) {
-    let msg;
-    if (byId) {
-      msg = util.format('%s not found with id: %s', modelName, criteria);
-    } else {
-      msg = util.format('%s not found with criteria: %j', modelName, criteria);
-    }
+    const msg = util.format('%s not found with id: %s', modelName, criteria);
+    throw new NotFoundError(msg);
+  }
+  return result;
+}
+
+/**
+ * Ensure entity exists for given key and value. Return error if no result.
+ * @param {Object} Model the dynamoose model to query
+ * @param {String} key the key name to query
+ * @param {Any} value the value to query
+ * @param {String} modelName the name of model
+ * @returns {Object} the found entity
+ */
+async function ensureExistsWithKey(Model, key, value, modelName) {
+  const result = await dbHelper.getByKey(Model, key, value);
+  if (!result) {
+    const msg = util.format('%s not found with key: %s value: %s', modelName, key, value);
     throw new NotFoundError(msg);
   }
   return result;
@@ -211,9 +216,8 @@ async function getProviderType(repoUrl) {
  * @returns {Object} the owner/copilot for the project
  */
 async function getProjectCopilotOrOwner(models, project, provider, isCopilot) {
-  const userMapping = await dbHelper.scanOne(models.UserMapping, {
-    topcoderUsername: isCopilot ? project.copilot : project.owner,
-  });
+  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(models.UserMapping, 
+    isCopilot ? project.copilot : project.owner);
 
   if (!userMapping || 
     (provider === 'github' && !userMapping.githubUserId) 
@@ -221,11 +225,9 @@ async function getProjectCopilotOrOwner(models, project, provider, isCopilot) {
     throw new Error(`Couldn't find ${isCopilot ? 'copilot' : 'owner'} username for '${provider}' for this repository.`);
   }
 
-  let user = await dbHelper.scanOne(models.User, {
-    username: provider === 'github' ? userMapping.githubUsername : // eslint-disable-line no-nested-ternary
-      userMapping.gitlabUsername,
-    type: provider,
-  });
+  let user = await dbHelper.queryOneUserByType(models.User, 
+      provider === 'github' ? userMapping.githubUsername : // eslint-disable-line no-nested-ternary
+      userMapping.gitlabUsername, provider);
 
   return user;
 }
@@ -252,14 +254,26 @@ function hashCode(s) {
   }, 0);
 }
 
+/**
+ * Check if expires_at is valid
+ *
+ * @param {String} expiresAt the date str yyyy-MM-dd
+ * @returns {Boolean} valid or not
+ */
+function isValidGitlabExpiresDate(expiresAt) {
+  return moment(expiresAt, 'YYYY-MM-DD', true).isValid();
+}
+
 module.exports = {
   buildService,
   buildController,
   convertGitHubError,
   convertGitLabError,
   ensureExists,
+  ensureExistsWithKey,
   generateIdentifier,
   getProviderType,
   getProjectCopilotOrOwner,
-  hashCode
+  hashCode,
+  isValidGitlabExpiresDate
 };

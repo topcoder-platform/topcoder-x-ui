@@ -36,13 +36,12 @@ async function ensureOwnerUser(token, topcoderUsername) {
   } catch (err) {
     throw helper.convertGitHubError(err, 'Failed to ensure valid owner user.');
   }
-  const user = await dbHelper.scanOne(User, {
-    username: userProfile.login,
-    type: constants.USER_TYPES.GITHUB,
-    role: constants.USER_ROLES.OWNER,
-  });
+  const user = await dbHelper.queryOneUserByTypeAndRole(User,
+    userProfile.login,
+    constants.USER_TYPES.GITHUB,
+    constants.USER_ROLES.OWNER);
 
-  const userMapping = await dbHelper.scanOne(UserMapping, {topcoderUsername});
+  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(UserMapping, topcoderUsername);
   if (!userMapping) {
     await dbHelper.create(UserMapping, {
       id: helper.generateIdentifier(),
