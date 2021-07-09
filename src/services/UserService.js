@@ -15,7 +15,8 @@ const dbHelper = require('../common/db-helper');
 const errors = require('../common/errors');
 const constants = require('../common/constants');
 const User = require('../models').User;
-const UserMapping = require('../models').UserMapping;
+const GithubUserMapping = require('../models').GithubUserMapping;
+const GitlabUserMapping = require('../models').GitlabUserMapping;
 
 /**
  * gets user setting
@@ -23,30 +24,32 @@ const UserMapping = require('../models').UserMapping;
  * @returns {Object} the user setting
  */
 async function getUserSetting(handle) {
-  const mapping = await dbHelper.queryOneUserMappingByTCUsername(
-    UserMapping, handle.toLowerCase());
+  const githubMapping = await dbHelper.queryOneUserMappingByTCUsername(
+    GithubUserMapping, handle.toLowerCase());
+  const gitlabMapping = await dbHelper.queryOneUserMappingByTCUsername(
+    GitlabUserMapping, handle.toLowerCase());
   const setting = {
     github: false,
     gitlab: false,
     expired: {}
   };
 
-  if (!mapping) {
+  if (!githubMapping && !gitlabMapping) {
     return setting;
   }
 
   const users = [];
-  if (mapping.githubUsername) {
+  if (githubMapping && githubMapping.githubUsername) {
     const github = await dbHelper.queryOneUserByType(
-      User, mapping.githubUsername, constants.USER_TYPES.GITHUB);
+      User, githubMapping.githubUsername, constants.USER_TYPES.GITHUB);
     if (!_.isNil(github)) {
       users.push(github);
     }
   }
 
-  if (mapping.gitlabUsername) {
+  if (gitlabMapping && gitlabMapping.gitlabUsername) {
     const gitlab = await dbHelper.queryOneUserByType(
-      User, mapping.gitlabUsername, constants.USER_TYPES.GITLAB);
+      User, gitlabMapping.gitlabUsername, constants.USER_TYPES.GITLAB);
     if (!_.isNil(gitlab)) {
       users.push(gitlab);
     }
@@ -76,7 +79,7 @@ getUserSetting.schema = Joi.object().keys({
  */
 async function revokeUserSetting(handle, provider) {
   const mapping = await dbHelper.queryOneUserMappingByTCUsername(
-    UserMapping, handle.toLowerCase());
+    provider === 'github' ? GithubUserMapping : GitlabUserMapping, handle.toLowerCase());
 
   if (!mapping) {
     return false;
@@ -127,7 +130,7 @@ async function getUserToken(username, tokenType) {
  */
 async function getAccessTokenByHandle(handle, provider) {
   const mapping = await dbHelper.queryOneUserMappingByTCUsername(
-    UserMapping, handle.toLowerCase());
+    provider === 'github' ? GithubUserMapping : GitlabUserMapping, handle.toLowerCase());
   let gitUserName;
   if (mapping) {
     gitUserName = provider === constants.USER_TYPES.GITHUB ? 'githubUsername' :   //eslint-disable-line no-nested-ternary

@@ -216,7 +216,8 @@ async function getProviderType(repoUrl) {
  * @returns {Object} the owner/copilot for the project
  */
 async function getProjectCopilotOrOwner(models, project, provider, isCopilot) {
-  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(models.UserMapping, 
+  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(
+    provider === 'github' ? models.GithubUserMapping : models.GitlabUserMapping, 
     isCopilot ? project.copilot : project.owner);
 
   if (!userMapping || 

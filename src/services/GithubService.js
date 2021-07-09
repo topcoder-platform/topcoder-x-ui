@@ -17,7 +17,7 @@ const constants = require('../common/constants');
 const helper = require('../common/helper');
 const dbHelper = require('../common/db-helper');
 const User = require('../models').User;
-const UserMapping = require('../models').UserMapping;
+const GithubUserMapping = require('../models').GithubUserMapping;
 const OwnerUserTeam = require('../models').OwnerUserTeam;
 const errors = require('../common/errors');
 
@@ -41,16 +41,16 @@ async function ensureOwnerUser(token, topcoderUsername) {
     constants.USER_TYPES.GITHUB,
     constants.USER_ROLES.OWNER);
 
-  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(UserMapping, topcoderUsername);
+  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(GithubUserMapping, topcoderUsername);
   if (!userMapping) {
-    await dbHelper.create(UserMapping, {
+    await dbHelper.create(GithubUserMapping, {
       id: helper.generateIdentifier(),
       topcoderUsername,
       githubUserId: userProfile.id,
       githubUsername: userProfile.login,
     });
   } else {
-    await dbHelper.update(UserMapping, userMapping.id, {
+    await dbHelper.update(GithubUserMapping, userMapping.id, {
       githubUserId: userProfile.id,
       githubUsername: userProfile.login,
     });

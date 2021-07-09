@@ -20,7 +20,7 @@ const GithubService = require('../services/GithubService');
 const UserService = require('../services/UserService');
 const OwnerUserTeam = require('../models').OwnerUserTeam;
 const UserTeamMapping = require('../models').UserTeamMapping;
-const UserMapping = require('../models').UserMapping;
+const GithubUserMapping = require('../models').GithubUserMapping;
 const constants = require('../common/constants');
 
 const request = superagentPromise(superagent, Promise);
@@ -160,18 +160,19 @@ async function addUserToTeamCallback(req, res) {
   console.log(`adding ${token} to ${team.teamId} with ${team.ownerToken}`); /* eslint-disable-line no-console */
   const githubUser = await GithubService.addTeamMember(team.teamId, team.ownerToken, token, team.accessLevel);
   // associate github username with TC username
-  const mapping = await dbHelper.queryOneUserMappingByTCUsername(UserMapping, req.session.tcUsername);
+  const mapping = await dbHelper.queryOneUserMappingByTCUsername(GithubUserMapping, req.session.tcUsername);
 
   // get team details
   const teamDetails = await GithubService.getTeamDetails(team.ownerToken, team.teamId);
 
   if (mapping) {
-    await dbHelper.update(UserMapping, mapping.id, {
+    await dbHelper.update(GithubUserMapping, mapping.id, {
       githubUsername: githubUser.username,
       githubUserId: githubUser.id,
     });
   } else {
-    await dbHelper.create(UserMapping, {
+    console.log('User mapping not found. Create new mapping.'); /* eslint-disable-line no-console */
+    await dbHelper.create(GithubUserMapping, {
       id: helper.generateIdentifier(),
       topcoderUsername: req.session.tcUsername,
       githubUsername: githubUser.username,
