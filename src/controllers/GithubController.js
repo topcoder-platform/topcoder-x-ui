@@ -127,6 +127,8 @@ async function addUserToTeam(req, res) {
     config.GITHUB_CLIENT_ID
   }&redirect_uri=${
     encodeURIComponent(callbackUri)
+  }&scope=${
+    encodeURIComponent('admin:org')
   }&state=${identifier}`);
 }
 
@@ -156,14 +158,24 @@ async function addUserToTeamCallback(req, res) {
     throw new errors.UnauthorizedError('Github authorization failed.', result.body.error_description);
   }
   const token = result.body.access_token;
+
+  // get team details
+  const teamDetails = await GithubService.getTeamDetails(team.ownerToken, team.teamId);
+  const organisation = teamDetails.organization.login;
+
+  // Add member to organisation
+  const addOrganisationResult = await GithubService.addOrganisationMember(organisation, token);
+  console.log(`Add organisation member, state = ${addOrganisationResult.state}`); /* eslint-disable-line no-console */
+  if (addOrganisationResult.state === 'pending') {
+    const acceptInvitation = await GithubService.acceptOrganisationInvitation(organisation, token);
+    console.log(`Accept organisation invitation by member, state = ${acceptInvitation.state}`); /* eslint-disable-line no-console */
+  }
+
   // add user to team
   console.log(`adding ${token} to ${team.teamId} with ${team.ownerToken}`); /* eslint-disable-line no-console */
   const githubUser = await GithubService.addTeamMember(team.teamId, team.ownerToken, token, team.accessLevel);
   // associate github username with TC username
   const mapping = await dbHelper.queryOneUserMappingByTCUsername(GithubUserMapping, req.session.tcUsername);
-
-  // get team details
-  const teamDetails = await GithubService.getTeamDetails(team.ownerToken, team.teamId);
 
   if (mapping) {
     await dbHelper.update(GithubUserMapping, mapping.id, {

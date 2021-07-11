@@ -367,6 +367,25 @@ async function removeUser(Model, username, type) {
   });
 }
 
+/**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
+ * @param {String} organisation The organisation name
+ * @returns {Promise<void>}
+ */
+async function queryOneOrganisation(model, organisation) {
+  return await new Promise((resolve, reject) => {
+    model.queryOne('name').eq(organisation)
+    .all()
+    .exec((err, result) => {
+      if (err) {
+        logger.debug(`queryOneOrganisation. Error. ${err}`);
+        return reject(err);
+      }
+      return resolve(result);
+    });
+  });
+}
 
 module.exports = {
   getById,
@@ -379,6 +398,7 @@ module.exports = {
   queryOneActiveCopilotPayment,
   queryOneActiveProject,
   queryOneActiveProjectWithFilter,
+  queryOneOrganisation,
   queryOneIssue,
   queryOneUserByType,
   queryOneUserByTypeAndRole,
