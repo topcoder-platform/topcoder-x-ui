@@ -12,7 +12,8 @@ const Joi = require('joi');
 const decodeToken = require('tc-auth-lib').decodeToken;
 const errors = require('../common/errors');
 const helper = require('../common/helper');
-const UserMapping = require('../models').UserMapping;
+const GithubUserMapping = require('../models').GithubUserMapping;
+const GitlabUserMapping = require('../models').GitlabUserMapping;
 
 /**
  * gets the handle of tc user.
@@ -40,7 +41,12 @@ async function getUserMapping(query) {
       'At least one of topcoderUsername/gitlabUsername/githubUsername should be provided.');
   }
 
-  return await helper.ensureExists(UserMapping, query, 'UserMapping');
+  if (query.githubUsername) {
+    return await helper.ensureExists(GithubUserMapping, query, 'GithubUserMapping');
+  }
+  else {
+    return await helper.ensureExists(GitlabUserMapping, query, 'GitlabUserMapping');
+  }
 }
 
 getUserMapping.schema = Joi.object().keys({

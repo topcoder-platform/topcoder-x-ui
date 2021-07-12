@@ -20,7 +20,7 @@ const GitlabService = require('../services/GitlabService');
 const UserService = require('../services/UserService');
 const User = require('../models').User;
 const OwnerUserGroup = require('../models').OwnerUserGroup;
-const UserMapping = require('../models').UserMapping;
+const GitlabUserMapping = require('../models').GitlabUserMapping;
 const UserGroupMapping = require('../models').UserGroupMapping;
 
 const request = superagentPromise(superagent, Promise);
@@ -209,14 +209,14 @@ async function addUserToGroupCallback(req, res) {
     group.expiredAt);
   // associate gitlab username with TC username
   
-  const mapping = await dbHelper.queryOneUserMappingByTCUsername(UserMapping, req.session.tcUsername);
+  const mapping = await dbHelper.queryOneUserMappingByTCUsername(GitlabUserMapping, req.session.tcUsername);
   if (mapping) {
-    await dbHelper.update(UserMapping, mapping.id, {
+    await dbHelper.update(GitlabUserMapping, mapping.id, {
       gitlabUsername: gitlabUser.username,
       gitlabUserId: gitlabUser.id,
     });
   } else {
-    await dbHelper.create(UserMapping, {
+    await dbHelper.create(GitlabUserMapping, {
       id: helper.generateIdentifier(),
       topcoderUsername: req.session.tcUsername,
       gitlabUsername: gitlabUser.username,

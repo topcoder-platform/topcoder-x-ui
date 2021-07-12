@@ -19,7 +19,7 @@ const helper = require('../common/helper');
 const dbHelper = require('../common/db-helper');
 const errors = require('../common/errors');
 const User = require('../models').User;
-const UserMapping = require('../models').UserMapping;
+const GitlabUserMapping = require('../models').GitlabUserMapping;
 const OwnerUserGroup = require('../models').OwnerUserGroup;
 
 const request = superagentPromise(superagent, Promise);
@@ -52,16 +52,16 @@ async function ensureOwnerUser(token, topcoderUsername) {
     constants.USER_TYPES.GITLAB,
     constants.USER_ROLES.OWNER);
 
-  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(UserMapping, topcoderUsername);
+  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(GitlabUserMapping, topcoderUsername);
   if (!userMapping) {
-    await dbHelper.create(UserMapping, {
+    await dbHelper.create(GitlabUserMapping, {
       id: helper.generateIdentifier(),
       topcoderUsername,
       gitlabUserId: userProfile.id,
       gitlabUsername: userProfile.username,
     });
   } else {
-    await dbHelper.update(UserMapping, userMapping.id, {
+    await dbHelper.update(GitlabUserMapping, userMapping.id, {
       gitlabUserId: userProfile.id,
       gitlabUsername: userProfile.username,
     });

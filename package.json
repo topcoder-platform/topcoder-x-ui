@@ -22,6 +22,8 @@
         "lint": "gulp lint",
         "heroku-postbuild": "gulp build",
         "create-tables": "CREATE_DB=true node scripts/create-update-tables.js",
+        "migrate-user-mapping": "node scripts/migrate-user-mapping.js",
+        "add-organisation": "node scripts/add-organisation.js",
         "log-repository-collisions": "node scripts/log-repository-collisions.js"
     },
     "dependencies": {
