@@ -4,7 +4,8 @@ const dbHelper = require('../src/common/db-helper');
 const GithubUserMapping = require('../src/models').GithubUserMapping;
 const GitlabUserMapping = require('../src/models').GitlabUserMapping;
 
-if (process.env.IS_LOCAL) {
+if (process.env.IS_LOCAL=="true") {
+    console.log("IS LOCAL")
     AWS.config.update({
         endpoint: 'http://localhost:8000'
     });
