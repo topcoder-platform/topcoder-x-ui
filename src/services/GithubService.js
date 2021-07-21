@@ -17,9 +17,14 @@ const constants = require('../common/constants');
 const helper = require('../common/helper');
 const dbHelper = require('../common/db-helper');
 const User = require('../models').User;
-const UserMapping = require('../models').UserMapping;
+const GithubUserMapping = require('../models').GithubUserMapping;
 const OwnerUserTeam = require('../models').OwnerUserTeam;
+const Organisation = require('../models').Organisation;
 const errors = require('../common/errors');
+const superagent = require('superagent');
+const superagentPromise = require('superagent-promise');
+
+const request = superagentPromise(superagent, Promise);
 
 /**
  * Ensure the owner user is in database.
@@ -41,16 +46,16 @@ async function ensureOwnerUser(token, topcoderUsername) {
     constants.USER_TYPES.GITHUB,
     constants.USER_ROLES.OWNER);
 
-  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(UserMapping, topcoderUsername);
+  const userMapping = await dbHelper.queryOneUserMappingByTCUsername(GithubUserMapping, topcoderUsername);
   if (!userMapping) {
-    await dbHelper.create(UserMapping, {
+    await dbHelper.create(GithubUserMapping, {
       id: helper.generateIdentifier(),
       topcoderUsername,
       githubUserId: userProfile.id,
       githubUsername: userProfile.login,
     });
   } else {
-    await dbHelper.update(UserMapping, userMapping.id, {
+    await dbHelper.update(GithubUserMapping, userMapping.id, {
       githubUserId: userProfile.id,
       githubUsername: userProfile.login,
     });
@@ -230,6 +235,89 @@ addTeamMember.schema = Joi.object().keys({
 });
 
 /**
+ * Add organisation member.
+ * @param {String} organisation the organisation name
+ * @param {String} normalUserToken the normal user token
+ * @returns {Promise} the promise result
+ */
+async function addOrganisationMember(organisation, normalUserToken) {
+  let state;
+  try {
+    const dbOrganisation = await dbHelper.queryOneOrganisation(Organisation, organisation);
+    if (!dbOrganisation) {
+      console.log(`Personal access token not found for organisation ${organisation}.`);  /* eslint-disable-line no-console */
+      return {};
+    }
+    const githubNormalUser = new GitHub({
+      token: normalUserToken,
+    });
+    const normalUser = await githubNormalUser.getUser().getProfile();
+    const username = normalUser.data.login;
+    const base64PAT = Buffer.from(`${dbOrganisation.owner}:${dbOrganisation.personalAccessToken}`).toString('base64');
+    const result = await request
+      .put(`https://api.github.com/orgs/${organisation}/memberships/${username}`)
+      .send({role: 'member'})
+      .set('User-Agent', 'superagent')
+      .set('Accept', 'application/vnd.github.v3+json')
+      .set('Authorization', `Basic ${base64PAT}`)
+      .end();
+    state = _.get(result, 'body.state');
+  } catch (err) {
+    // if error is already exists discard
+    if (_.chain(err).get('body.errors').countBy({
+      code: 'already_exists',
+    }).get('true')
+      .isUndefined()
+      .value()) {
+      throw helper.convertGitHubError(err, 'Failed to add organisation member');
+    }
+  }
+  // return its state
+  return {state};
+}
+
+addOrganisationMember.schema = Joi.object().keys({
+  organisation: Joi.string().required(),
+  normalUserToken: Joi.string().required()
+});
+
+/**
+ * Accept organisation invitation by member.
+ * @param {String} organisation the organisation name
+ * @param {String} normalUserToken the normal user token
+ * @returns {Promise} the promise result
+ */
+async function acceptOrganisationInvitation(organisation, normalUserToken) {
+  let state;
+  try {
+    const result = await request
+      .patch(`https://api.github.com/user/memberships/orgs/${organisation}`)
+      .send({state: 'active'})
+      .set('User-Agent', 'superagent')
+      .set('Accept', 'application/vnd.github.v3+json')
+      .set('Authorization', `token ${normalUserToken}`)
+      .end();
+    state = _.get(result, 'body.state');
+  } catch (err) {
+    // if error is already exists discard
+    if (_.chain(err).get('body.errors').countBy({
+      code: 'already_exists',
+    }).get('true')
+      .isUndefined()
+      .value()) {
+      throw helper.convertGitHubError(err, 'Failed to accept organisation invitation');
+    }
+  }
+  // return its state
+  return {state};
+}
+
+acceptOrganisationInvitation.schema = Joi.object().keys({
+  organisation: Joi.string().required(),
+  normalUserToken: Joi.string().required()
+});
+
+/**
  * Gets the user id by username
  * @param {string} username the username
  * @returns {number} the user id
@@ -320,6 +408,8 @@ module.exports = {
   getUserIdByUsername,
   getTeamDetails,
   deleteUserFromGithubTeam,
+  addOrganisationMember,
+  acceptOrganisationInvitation
 };
 
 helper.buildService(module.exports);
