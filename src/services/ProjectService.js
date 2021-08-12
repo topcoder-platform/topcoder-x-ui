@@ -37,6 +37,7 @@ const projectSchema = {
     title: Joi.string().required(),
     tcDirectId: Joi.number().required(),
     repoUrl: Joi.string().required(),
+    repoUrls: Joi.array().required(),
     rocketChatWebhook: Joi.string().allow(null),
     rocketChatChannelName: Joi.string().allow(null),
     archived: Joi.boolean().required(),
@@ -74,9 +75,9 @@ const createProjectSchema = {
 async function _validateProjectData(project) {
   let existsInDatabase;
   if (project.id) {
-    existsInDatabase = await dbHelper.queryOneActiveProjectWithFilter(models.Project, project.repoUrl, project.id)
+    existsInDatabase = await dbHelper.queryOneActiveProjectWithFilter(models.Project, project.repoUrls[0], project.id)
   } else {
-    existsInDatabase = await dbHelper.queryOneActiveProject(models.Project, project.repoUrl)
+    existsInDatabase = await dbHelper.queryOneActiveProject(models.Project, project.repoUrls[0])
   }
   if (existsInDatabase) {
     throw new errors.ValidationError(`This repo already has a Topcoder-X project associated with it.
@@ -122,6 +123,7 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
 async function create(project, currentUser) {
   const currentUserTopcoderHandle = currentUser.handle;
   project.owner = currentUserTopcoderHandle;
+  project.repoUrls = _.map(project.repoUrl.split(','), repoUrl => repoUrl.trim());
   await _validateProjectData(project);
   /**
      * Uncomment below code to enable the function of raising event when 'project was created'
@@ -139,13 +141,15 @@ async function create(project, currentUser) {
 
   const createdProject = await dbHelper.create(models.Project, project);
 
-  try {
-    await createLabel({projectId: project.id}, currentUser);
-    await createHook({projectId: project.id}, currentUser);
-    await addWikiRules({projectId: project.id}, currentUser);
-  }
-  catch (err) {
-    throw new Error('Project created. Adding the webhook, issue labels, and wiki rules failed.');
+  for (const repoUrl of project.repoUrls) { // eslint-disable-line no-restricted-syntax
+    try {
+      await createLabel({projectId: project.id}, currentUser, repoUrl);
+      await createHook({projectId: project.id}, currentUser, repoUrl);
+      await addWikiRules({projectId: project.id}, currentUser, repoUrl);
+    }
+    catch (err) {
+      throw new Error(`Project created. Adding the webhook, issue labels, and wiki rules failed. Repo ${repoUrl}`);
+    }
   }
 
   return createdProject;
@@ -185,6 +189,7 @@ async function update(project, currentUser) {
     dbProject[item[0]] = item[1];
     return item;
   });
+  dbProject.repoUrls = _.map(dbProject.repoUrl.split(','), repoUrl => repoUrl.trim());
   dbProject.updatedAt = new Date();
 
   return await dbHelper.update(models.Project, dbProject.id, dbProject);
@@ -252,13 +257,14 @@ getAll.schema = Joi.object().keys({
  * creates label
  * @param {Object} body the request body
  * @param {String} currentUser the topcoder current user
+ * @param {String} repoUrl the repo url of the project
  * @returns {Object} result
  */
-async function createLabel(body, currentUser) {
+async function createLabel(body, currentUser, repoUrl) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
-  const provider = await helper.getProviderType(dbProject.repoUrl);
+  const provider = await helper.getProviderType(repoUrl);
   const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
-  const results = dbProject.repoUrl.split('/');
+  const results = repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];
   const excludePart = 3;
@@ -318,19 +324,21 @@ createLabel.schema = Joi.object().keys({
     projectId: Joi.string().required(),
   }),
   currentUser: currentUserSchema,
+  repoUrl: Joi.string().required()
 });
 
 /**
  * creates hook
  * @param {Object} body the request body
  * @param {String} currentUser the topcoder current user
+ * @param {String} repoUrl the repo url of the project
  * @returns {Object} result
  */
-async function createHook(body, currentUser) {
+async function createHook(body, currentUser, repoUrl) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
-  const provider = await helper.getProviderType(dbProject.repoUrl);
+  const provider = await helper.getProviderType(repoUrl);
   const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
-  const results = dbProject.repoUrl.split('/');
+  const results = repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];
   const excludePart = 3;
@@ -443,13 +451,14 @@ createHook.schema = createLabel.schema;
  * adds the wiki rules the project's repository
  * @param {Object} body the request body
  * @param {String} currentUser the topcoder current user
+ * @param {String} repoUrl the repo url of the project
  * @returns {Object} result
  */
-async function addWikiRules(body, currentUser) {
+async function addWikiRules(body, currentUser, repoUrl) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
-  const provider = await helper.getProviderType(dbProject.repoUrl);
+  const provider = await helper.getProviderType(repoUrl);
   const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, dbProject.copilot !== undefined);
-  const results = dbProject.repoUrl.split('/');
+  const results = repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];
   const excludePart = 3;
@@ -511,7 +520,7 @@ async function transferOwnerShip(body, currentUser) {
     throw new errors.ForbiddenError('You can\'t transfer the ownership of this project');
   }
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
-  const provider = await helper.getProviderType(dbProject.repoUrl);
+  const provider = await helper.getProviderType(dbProject.repoUrls[0]);
   const setting = await userService.getUserSetting(body.owner);
   if (!setting.gitlab && !setting.github) {
     throw new errors.ValidationError(`User ${body.owner} doesn't currently have Topcoder-X access.

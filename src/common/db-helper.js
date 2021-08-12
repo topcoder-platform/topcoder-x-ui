@@ -59,7 +59,7 @@ async function scan(model, scanParams) {
     model.scan(scanParams).exec((err, result) => {
       if (err) {
         logger.error(`DynamoDB scan error ${err}`);
-        reject(err);
+        return reject(err);
       }
 
       return resolve(result.count === 0 ? [] : result);
@@ -171,8 +171,8 @@ async function queryOneUserMappingByTCUsername(model, tcusername) {
  */
 async function queryOneActiveProject(model, repoUrl) {
   return await new Promise((resolve, reject) => {
-    model.query('repoUrl').eq(repoUrl)
-    .where('archived')
+    model.scan('repoUrls').contains(repoUrl)
+    .filter('archived')
     .eq('false')
     .all()
     .exec((err, result) => {
@@ -202,7 +202,7 @@ async function queryOneActiveCopilotPayment(model, project, username) {
     .all()
     .exec((err, result) => {
       if (err || !result) {
-        logger.debug(`queryOneActiveProject. Error. ${err}`);
+        logger.debug(`queryOneActiveCopilotPayment. Error. ${err}`);
         return reject(err);
       }
       return resolve(result.count === 0 ? null : result[0]);
@@ -225,7 +225,7 @@ async function queryOneUserGroupMapping(model, groupId, gitlabUserId) {
     .all()
     .exec((err, result) => {
       if (err || !result) {
-        logger.debug(`queryOneActiveProject. Error. ${err}`);
+        logger.debug(`queryOneUserGroupMapping. Error. ${err}`);
         return reject(err);
       }
       return resolve(result.count === 0 ? null : result[0]);
@@ -251,7 +251,7 @@ async function queryOneUserTeamMapping(model, teamId, githubUserName, githubOrgI
     .all()
     .exec((err, result) => {
       if (err || !result) {
-        logger.debug(`queryOneActiveProject. Error. ${err}`);
+        logger.debug(`queryOneUserTeamMapping. Error. ${err}`);
         return reject(err);
       }
       return resolve(result.count === 0 ? null : result[0]);
@@ -268,15 +268,15 @@ async function queryOneUserTeamMapping(model, teamId, githubUserName, githubOrgI
  */
 async function queryOneActiveProjectWithFilter(model, repoUrl, projectIdToFilter) {
   return await new Promise((resolve, reject) => {
-    model.query('repoUrl').eq(repoUrl)
-    .where('archived')
+    model.scan('repoUrls').contains(repoUrl)
+    .filter('archived')
     .eq('false')
     .filter('id')
     .not().eq(projectIdToFilter)
     .all()
     .exec((err, result) => {
       if (err || !result) {
-        logger.debug(`queryOneActiveProject. Error. ${err}`);
+        logger.debug(`queryOneActiveProjectWithFilter. Error. ${err}`);
         return reject(err);
       }
       return resolve(result.count === 0 ? null : result[0]);
@@ -296,7 +296,7 @@ async function create(Model, data) {
     dbItem.save((err) => {
       if (err) {
         logger.error(`DynamoDB create error ${err}`);
-        reject(err);
+        return reject(err);
       }
 
       return resolve(dbItem);

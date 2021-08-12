@@ -251,7 +251,7 @@ async function getUserIdByUsername(username) {
     }
     return users[0].id;
   } catch (err) {
-    throw helper.convertGitLabError(err, 'Failed to get detail about user from gitlab.');
+    throw helper.convertGitLabError(err, 'Failed to get detail about user from gitlab');
   }
 }
 

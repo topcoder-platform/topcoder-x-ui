@@ -64,10 +64,11 @@
               TC Connect Project ID is required.</span>
             <br />
             <br />
-            <label class="form-label">Repo URL:</label>
+            <label class="form-label">Repo URLs:</label>
             <input class="form-control" type="url" ng-model="project.repoUrl" required />
             <small class="form-hint"> The URL to the repository on Github or Gitlab. For example:
-              "https://github.com/topcoder-platform/topcoder-x-receiver"</small>
+              "https://github.com/topcoder-platform/topcoder-x-receiver".
+              Note that you can comma-separate multiple repositories in this text field.</small>
             <span ng-show="projectForm.project.repoUrl.$touched && projectForm.project.repoUrl.$invalid">The
               TC Repo URL is required.</span>
             <br />

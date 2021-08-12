@@ -17,19 +17,21 @@ async function main() {
             archived: 'false'
         }).consistent().limit(BATCH_SIZE).startAt(previousKey).exec()
         for (const project of projects) {
-            // If url was already found colliding go to a next iteration
-            if (collidingUrls.includes(project.repoUrl)) continue;
-            const collisions = await models.Project.scan({
-                repoUrl: project.repoUrl,
-                archived: 'false'
-            }).exec()
-            // If scan found only this project go to a next interation
-            if (collisions.length < 2) continue;
-            logger.info(`Repository ${project.repoUrl} has ${collisions.length} collisions`);
-            _.forEach(collisions, collision => {
-                logger.info(`--- ID: ${collision.id}`)
-            })
-            collidingUrls.push(project.repoUrl)
+            for (const repoUrl of project.repoUrls) {
+                // If url was already found colliding go to a next iteration
+                if (collidingUrls.includes(repoUrl)) continue;
+                const collisions = await models.Project.scan({
+                    repoUrl: { contains: project.repoUrl },
+                    archived: 'false'
+                }).exec()
+                // If scan found only this project go to a next interation
+                if (collisions.length < 2) continue;
+                logger.info(`Repository ${repoUrl} has ${collisions.length} collisions`);
+                _.forEach(collisions, collision => {
+                    logger.info(`--- ID: ${collision.id}`)
+                })
+                collidingUrls.push(repoUrl)
+            }
         }
         previousKey = projects.lastKey
         previousSize = projects.scannedCount

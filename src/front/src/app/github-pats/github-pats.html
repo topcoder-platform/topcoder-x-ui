@@ -1,0 +1,95 @@
+<div ng-controller="GithubPATsController">
+    <div class="col-md-10 col-md-offset-1" ng-include src="'components/alert/alert.html'"></div>
+    <div ng-include src="'components/dialog/dialog.html'"></div>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-4">
+            <h2>Github Personal Access Token</h2>
+        </div>
+        <div class="pull-right">
+            <div class="col-lg-6 with-button">
+                <button class="btn btn-sm btn-info add-payment-btn" ng-click="addPAT()">
+                    <i class="fa fa-plus"></i> Add a PAT</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrapper wrapper-content animated fadeInRight">
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-content">
+                        <div class="row">
+                            <div ng-show="tableConfig.initialized">
+                                <div ng-if="tableConfig.items.length==0 && tableConfig.initialized">
+                                    <div class="text-center m-t-lg">
+                                        <h4>You don't have any PATs, Please
+                                            <button class="btn btn-sm btn-info" ng-click="addPAT()">
+                                                <strong>
+                                                    Add a PAT
+                                                </strong>
+                                            </button>
+                                        </h4>
+                                    </div>
+                                </div>
+                                <table ng-if="tableConfig.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-lg-2 footable-sortable" ng-click="sort('name')"
+                                                ng-class="{'footable-sorted': tableConfig.sortBy === 'name' && tableConfig.sortDir === 'asc', 'footable-sorted-desc': tableConfig.sortBy === 'name' && tableConfig.sortDir === 'desc'}">
+                                                Organisation
+                                                <span class="footable-sort-indicator"></span>
+                                            </th>
+                                            <th class="col-lg-2 footable-sortable" ng-click="sort('owner')"
+                                                ng-class="{'footable-sorted': tableConfig.sortBy === 'owner' && tableConfig.sortDir === 'asc', 'footable-sorted-desc': tableConfig.sortBy === 'owner' && tableConfig.sortDir === 'desc'}">
+                                                Owner Github Username
+                                                <span class="footable-sort-indicator"></span>
+                                            </th>
+                                            <th data-sort-ignore="true" class="col-lg-2">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="pat in tableConfig.items" ng-class-even="'footable-even'"
+                                            ng-class-odd="'footable-odd'">
+                                            <td class="col-lg-2">{{pat.name}}</td>
+                                            <td class="col-lg-2">{{pat.owner}}</td>
+                                            <td class="col-lg-2">
+                                                <button class="btn btn-sm btn-danger" ng-click="deletePAT(pat)">
+                                                    <strong>Delete</strong>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="5">
+                                                <ul class="pagination pull-right">
+                                                    <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === 1}">
+                                                        <a ng-click="changePage(1)">«</a>
+                                                    </li>
+                                                    <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === 1}">
+                                                        <a ng-click="changePage(tableConfig.pageNumber - 1)">‹</a>
+                                                    </li>
+                                                    <li class="footable-page" ng-class="{'active' : item === tableConfig.pageNumber}"
+                                                        ng-repeat="item in getPageArray()">
+                                                        <a ng-click="changePage(item)">{{item}}</a>
+                                                    </li>
+                                                    <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === tableConfig.pages}">
+                                                        <a ng-click="changePage(tableConfig.pageNumber + 1)">›</a>
+                                                    </li>
+                                                    <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === tableConfig.pages}">
+                                                        <a ng-click="changePage(tableConfig.pages)">»</a>
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

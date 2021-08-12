@@ -1,0 +1,123 @@
+<div ng-controller="UserMappingsController">
+    <div class="col-md-10 col-md-offset-1" ng-include src="'components/alert/alert.html'"></div>
+    <div ng-include src="'components/dialog/dialog.html'"></div>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-4">
+            <h2>User Mappings</h2>
+        </div>
+        <div class="pull-right">
+            <div class="col-lg-6 with-button">
+                <button class="btn btn-sm btn-info add-payment-btn" ng-click="addUserMapping()">
+                    <i class="fa fa-plus"></i> Add a User Mapping</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrapper wrapper-content animated fadeInRight">
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-content">
+                        <div class="row">
+                            <div ng-show="tableConfig.initialized">
+                                <div ng-if="tableConfig.items.length!=0 || tableConfig.query" class="row">
+                                    <div class="col-lg-4">
+                                        <div class="input-group custom-search-form">
+                                            <input ng-model="tableConfig.query" type="text" class="form-control" placeholder="Find user mapping" ng-keyup="$event.keyCode == 13 && onSearchIconClicked()">
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button" ng-click="onSearchIconClicked()">
+                                                    <span class="glyphicon glyphicon-search"></span>
+                                                </button>
+                                                <button class="btn btn-danger" type="button" ng-click="onSearchReset()">
+                                                    <span class="glyphicon glyphicon-remove"></span>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div ng-if="tableConfig.items.length==0 && tableConfig.initialized">
+                                    <div class="text-center m-t-lg">
+                                        <h4>You don't have any User Mappings, Please
+                                            <button class="btn btn-sm btn-info" ng-click="addUserMapping()">
+                                                <strong>
+                                                    Add a User Mapping
+                                                </strong>
+                                            </button>
+                                        </h4>
+                                    </div>
+                                </div>
+                                <table ng-if="tableConfig.items.length!=0" class="footable table table-stripped toggle-arrow-tiny">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-lg-2 footable-sortable" ng-click="sort('topcoderUsername')"
+                                                ng-class="{'footable-sorted': tableConfig.sortBy === 'topcoderUsername' && tableConfig.sortDir === 'asc', 'footable-sorted-desc': tableConfig.sortBy === 'topcoderUsername' && tableConfig.sortDir === 'desc'}">
+                                                Topcoder Username
+                                                <span class="footable-sort-indicator"></span>
+                                            </th>
+                                            <th class="col-lg-2 footable-sortable" ng-click="sort('githubUsername')"
+                                                ng-class="{'footable-sorted': tableConfig.sortBy === 'githubUsername' && tableConfig.sortDir === 'asc', 'footable-sorted-desc': tableConfig.sortBy === 'githubUsername' && tableConfig.sortDir === 'desc'}">
+                                                Github Username
+                                                <span class="footable-sort-indicator"></span>
+                                            </th>
+                                            <th data-sort-ignore="true" class="col-lg-2">Github UserID</th>
+                                            <th class="col-lg-2 footable-sortable" ng-click="sort('gitlabUsername')"
+                                                ng-class="{'footable-sorted': tableConfig.sortBy === 'gitlabUsername' && tableConfig.sortDir === 'asc', 'footable-sorted-desc': tableConfig.sortBy === 'gitlabUsername' && tableConfig.sortDir === 'desc'}">
+                                                Gitlab Username
+                                                <span class="footable-sort-indicator"></span>
+                                            </th>
+                                            <th data-sort-ignore="true" class="col-lg-2">Gitlab UserID</th>
+                                            <th data-sort-ignore="true" class="col-lg-2">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="userMapping in tableConfig.items" ng-class-even="'footable-even'"
+                                            ng-class-odd="'footable-odd'">
+                                            <td class="col-lg-2">{{userMapping.topcoderUsername}}</td>
+                                            <td class="col-lg-2">{{userMapping.githubUsername}}</td>
+                                            <td class="col-lg-2">{{userMapping.githubUserId}}</td>
+                                            <td class="col-lg-2">{{userMapping.gitlabUsername}}</td>
+                                            <td class="col-lg-2">{{userMapping.gitlabUserId}}</td>
+                                            <td class="col-lg-2">
+                                                <button class="btn btn-sm btn-success" ng-click="editUserMapping(userMapping)">
+                                                    <strong>Edit</strong>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" ng-click="deleteUserMapping(userMapping)">
+                                                    <strong>Delete</strong>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="5">
+                                                <ul class="pagination pull-right">
+                                                    <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === 1}">
+                                                        <a ng-click="changePage(1)">«</a>
+                                                    </li>
+                                                    <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === 1}">
+                                                        <a ng-click="changePage(tableConfig.pageNumber - 1)">‹</a>
+                                                    </li>
+                                                    <li class="footable-page" ng-class="{'active' : item === tableConfig.pageNumber}"
+                                                        ng-repeat="item in getPageArray()">
+                                                        <a ng-click="changePage(item)">{{item}}</a>
+                                                    </li>
+                                                    <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === tableConfig.pages}">
+                                                        <a ng-click="changePage(tableConfig.pageNumber + 1)">›</a>
+                                                    </li>
+                                                    <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === tableConfig.pages}">
+                                                        <a ng-click="changePage(tableConfig.pages)">»</a>
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

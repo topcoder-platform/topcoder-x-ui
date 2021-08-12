@@ -64,6 +64,7 @@ async function search(criteria, currentUserTopcoderHandle) {
     for (const issue of docs) { // eslint-disable-line guard-for-in,no-restricted-syntax
       issue.projectId = await dbHelper.getById(models.Project, issue.projectId);
       issue.assignedAt = moment(issue.assignedAt).format('YYYY-MM-DD HH:mm:ss');
+      if (!issue.repoUrl && issue.projectId.repoUrls) issue.repoUrl = issue.projectId.repoUrls[0];
     }
 
     const offset = (criteria.page - 1) * criteria.perPage;
@@ -124,9 +125,9 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
  */
 async function create(issue, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(issue.projectId, currentUser);
-  const provider = await helper.getProviderType(dbProject.repoUrl);
+  const provider = await helper.getProviderType(dbProject.repoUrls[0]);
   const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
-  const results = dbProject.repoUrl.split('/');
+  const results = dbProject.repoUrls[0].split('/');
   const index = 1;
   const repoName = results[results.length - index];
   const excludePart = 3;
@@ -209,9 +210,9 @@ create.schema = {
  */
 async function recreate(issue, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(issue.projectId, currentUser);
-  const provider = await helper.getProviderType(dbProject.repoUrl);
+  const provider = await helper.getProviderType(dbProject.repoUrls[0]);
   const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
-  const results = dbProject.repoUrl.split('/');
+  const results = dbProject.repoUrls[0].split('/');
   const index = 1;
   const repoName = results[results.length - index];
   const excludePart = 3;

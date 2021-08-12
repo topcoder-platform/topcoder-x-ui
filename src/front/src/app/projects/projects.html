@@ -74,8 +74,8 @@
                                                                 target="_blank">{{project.tcDirectId}}</a>
                                                         </td>
                                                         <td class="col-lg-2">
-                                                            <a href="{{project.repoUrl}}" target="_blank">
-                                                                {{repoType(project.repoUrl)}} </a>
+                                                            <a ng-repeat="repoUrl in project.repoUrls" href="{{repoUrl}}" target="_blank">
+                                                                {{repoType(repoUrl)}}&nbsp; </a>
                                                         </td>
                                                         <td class="col-lg-2" ng-show="isAdminUser">{{project.owner}}</td>
                                                         <td class="col-lg-2">{{project.copilot}}</td>
