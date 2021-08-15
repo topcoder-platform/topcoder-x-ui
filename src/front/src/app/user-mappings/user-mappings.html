@@ -21,7 +21,7 @@
                     <div class="ibox-content">
                         <div class="row">
                             <div ng-show="tableConfig.initialized">
-                                <div ng-if="tableConfig.items.length!=0 || tableConfig.query" class="row">
+                                <div class="row">
                                     <div class="col-lg-4">
                                         <div class="input-group custom-search-form">
                                             <input ng-model="tableConfig.query" type="text" class="form-control" placeholder="Find user mapping" ng-keyup="$event.keyCode == 13 && onSearchIconClicked()">
@@ -104,9 +104,6 @@
                                                     </li>
                                                     <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === tableConfig.pages}">
                                                         <a ng-click="changePage(tableConfig.pageNumber + 1)">›</a>
-                                                    </li>
-                                                    <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === tableConfig.pages}">
-                                                        <a ng-click="changePage(tableConfig.pages)">»</a>
                                                     </li>
                                                 </ul>
                                             </td>

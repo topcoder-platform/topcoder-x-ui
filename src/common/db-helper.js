@@ -1,4 +1,7 @@
+// eslint-disable-line max-lines
+const _ = require('lodash');
 const logger = require('./logger');
+const models = require('../models');
 
 /*
  * Copyright (c) 2018 TopCoder, Inc. All rights reserved.
@@ -62,6 +65,50 @@ async function scan(model, scanParams) {
         return reject(err);
       }
 
+      return resolve(result.count === 0 ? [] : result);
+    });
+  });
+}
+
+/**
+ * Get data collection by scan parameters with paging
+ * @param {Object} model The dynamoose model to scan
+ * @param {String} size The size of result
+ * @param {String} lastKey The lastKey param
+ * @returns {Promise<void>}
+ */
+async function scanAll(model, size, lastKey) {
+  return await new Promise((resolve, reject) => {
+    const scanMethod = model.scan({}).limit(size);
+    if (lastKey) scanMethod.startAt(lastKey);
+    scanMethod.exec((err, result) => {
+      if (err) {
+        logger.error(`DynamoDB scan error ${err}`);
+        return reject(err);
+      }
+      return resolve(result.count === 0 ? [] : result);
+    });
+  });
+}
+
+/**
+ * Get data collection by scan with search
+ * @param {Object} model The dynamoose model to scan
+ * @param {String} size The size of result
+ * @param {String} lastKey The lastKey param
+ * @param {String} containsKey The contains key param
+ * @param {String} contains The contains value
+ * @returns {Promise<void>}
+ */
+async function scanAllWithSearch(model, size, lastKey, containsKey, contains) {
+  return await new Promise((resolve, reject) => {
+    const scanMethod = model.scan(containsKey).contains(contains).limit(size);
+    if (lastKey) scanMethod.startAt(lastKey);
+    scanMethod.exec((err, result) => {
+      if (err) {
+        logger.error(`DynamoDB scan error ${err}`);
+        return reject(err);
+      }
       return resolve(result.count === 0 ? [] : result);
     });
   });
@@ -171,16 +218,16 @@ async function queryOneUserMappingByTCUsername(model, tcusername) {
  */
 async function queryOneActiveProject(model, repoUrl) {
   return await new Promise((resolve, reject) => {
-    model.scan('repoUrls').contains(repoUrl)
-    .filter('archived')
-    .eq('false')
-    .all()
-    .exec((err, result) => {
-      if (err || !result) {
-        logger.debug(`queryOneActiveProject. Error. ${err}`);
-        return reject(err);
-      }
-      return resolve(result.count === 0 ? null : result[0]);
+    queryOneActiveRepository(models.Repository, repoUrl).then((repo) => {
+      if (!repo) resolve(null);
+      else model.queryOne('id').eq(repo.projectId).consistent()
+        .exec((err, result) => {
+          if (err) {
+            logger.debug(`queryOneActiveProject. Error. ${err}`);
+            return reject(err);
+          }
+          return resolve(result);
+        });
     });
   });
 }
@@ -268,18 +315,16 @@ async function queryOneUserTeamMapping(model, teamId, githubUserName, githubOrgI
  */
 async function queryOneActiveProjectWithFilter(model, repoUrl, projectIdToFilter) {
   return await new Promise((resolve, reject) => {
-    model.scan('repoUrls').contains(repoUrl)
-    .filter('archived')
-    .eq('false')
-    .filter('id')
-    .not().eq(projectIdToFilter)
-    .all()
-    .exec((err, result) => {
-      if (err || !result) {
-        logger.debug(`queryOneActiveProjectWithFilter. Error. ${err}`);
-        return reject(err);
-      }
-      return resolve(result.count === 0 ? null : result[0]);
+    queryActiveRepositoriesExcludeByProjectId(models.Repository, repoUrl, projectIdToFilter).then((repos) => {
+      if (!repos || repos.length === 0) resolve(null);
+      else model.queryOne('id').eq(repos[0].projectId).consistent()
+        .exec((err, result) => {
+          if (err) {
+            logger.debug(`queryOneActiveProjectWithFilter. Error. ${err}`);
+            return reject(err);
+          }
+          return resolve(result);
+        });
     });
   });
 }
@@ -387,22 +432,138 @@ async function queryOneOrganisation(model, organisation) {
   });
 }
 
+/**
+ * Query one active repository
+ * @param {Object} model the dynamoose model
+ * @param {String} url the repository url
+ * @returns {Promise<Object>}
+ */
+async function queryOneActiveRepository(model, url) {
+  return await new Promise((resolve, reject) => {
+    model.queryOne({
+      url,
+      archived: 'false'
+    })
+    .all()
+    .exec((err, result) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(result);
+    });
+  });
+}
+
+/**
+ * Query active repository with project id exclude filter.
+ * @param {String} url the repository url
+ * @param {String} projectId the project id
+ * @returns {Promise<Object>}
+ */
+async function queryActiveRepositoriesExcludeByProjectId(url, projectId) {
+  return await new Promise((resolve, reject) => {
+    models.Repository.query({
+      url,
+      archived: 'false'
+    })
+    .filter('projectId')
+    .not().eq(projectId)
+    .all()
+    .exec((err, result) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(result);
+    });
+  });
+}
+
+/**
+ * Query repository by project id.
+ * @param {String} projectId the project id
+ * @returns {Promise<Object>}
+ */
+async function queryRepositoriesByProjectId(projectId) {
+  return await new Promise((resolve, reject) => {
+    models.Repository.query({
+      projectId
+    })
+    .all()
+    .exec((err, result) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(result);
+    });
+  });
+}
+
+/**
+ * Query repository by project id with url filter.
+ * @param {String} projectId the project id
+ * @param {String} url the repo url
+ * @returns {Promise<Object>}
+ */
+async function queryRepositoryByProjectIdFilterUrl(projectId, url) {
+  return await new Promise((resolve, reject) => {
+    models.Repository.query({
+      projectId
+    })
+    .filter('url')
+    .eq(url)
+    .all()
+    .exec((err, result) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(result.count === 0 ? null : result[0]);
+    });
+  });
+}
+
+/**
+ * Find array of repo url of given project id
+ * @param {String} projectId the project id
+ * @returns {Promise<Object>}
+ */
+async function populateRepoUrls(projectId) {
+  return await new Promise((resolve, reject) => {
+    models.Repository.query({
+      projectId
+    })
+    .all()
+    .exec((err, result) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(_.map(result, 'url'));
+    });
+  });
+}
+
 module.exports = {
   getById,
   getByKey,
   scan,
+  scanAll,
+  scanAllWithSearch,
   create,
   update,
   removeById,
   removeUser,
+  populateRepoUrls,
+  queryActiveRepositoriesExcludeByProjectId,
   queryOneActiveCopilotPayment,
   queryOneActiveProject,
   queryOneActiveProjectWithFilter,
+  queryOneActiveRepository,
   queryOneOrganisation,
   queryOneIssue,
   queryOneUserByType,
   queryOneUserByTypeAndRole,
   queryOneUserGroupMapping,
   queryOneUserTeamMapping,
-  queryOneUserMappingByTCUsername
+  queryOneUserMappingByTCUsername,
+  queryRepositoriesByProjectId,
+  queryRepositoryByProjectIdFilterUrl
 };

@@ -14,7 +14,8 @@ angular.module('topcoderX')
         sortDir: 'asc',
         totalPages: 1,
         initialized: false,
-        query: ''
+        query: '',
+        lastKey: []
       };
 
       $scope.addUserMapping = function () {
@@ -37,10 +38,15 @@ angular.module('topcoderX')
       $scope.getUserMappings = function () {
         var config = $scope.tableConfig;
         config.isLoading = true;
-        UserMappingsService.search(config.query, config.sortBy, config.sortDir, config.pageNumber, config.pageSize)
+        UserMappingsService.search(config.query, config.sortBy, config.sortDir, config.pageNumber, config.pageSize, config.lastKey[config.pageNumber]) // eslint-disable-line max-len
           .then(function (res) {
             config.items = res.data.docs;
-            config.pages = res.data.pages;
+            if (res.data.lastKey && (res.data.lastKey.githubLastKey || res.data.lastKey.gitlabLastKey)) {
+              config.lastKey[config.pageNumber + 1] = res.data.lastKey;
+              if (!config.pages || config.pages <= config.pageNumber) {
+                config.pages = config.pageNumber + 1;
+              }
+            }
             config.initialized = true;
             config.isLoading = false;
           }).catch(function (err) {

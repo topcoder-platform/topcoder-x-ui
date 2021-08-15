@@ -64,7 +64,10 @@ async function search(criteria, currentUserTopcoderHandle) {
     for (const issue of docs) { // eslint-disable-line guard-for-in,no-restricted-syntax
       issue.projectId = await dbHelper.getById(models.Project, issue.projectId);
       issue.assignedAt = moment(issue.assignedAt).format('YYYY-MM-DD HH:mm:ss');
-      if (!issue.repoUrl && issue.projectId.repoUrls) issue.repoUrl = issue.projectId.repoUrls[0];
+      if (!issue.repoUrl) {
+        const repoUrls = await dbHelper.populateRepoUrls(issue.projectId.id);
+        issue.repoUrl = repoUrls && repoUrls.length > 0 ? repoUrls[0] : undefined;
+      }
     }
 
     const offset = (criteria.page - 1) * criteria.perPage;
@@ -118,91 +121,6 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
 }
 
 /**
- * create issue
- * @param {Object} issue the issue detail
- * @param {String} currentUser the topcoder current user
- * @returns {Object} created issue
- */
-async function create(issue, currentUser) {
-  const dbProject = await _ensureEditPermissionAndGetInfo(issue.projectId, currentUser);
-  const provider = await helper.getProviderType(dbProject.repoUrls[0]);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
-  const results = dbProject.repoUrls[0].split('/');
-  const index = 1;
-  const repoName = results[results.length - index];
-  const excludePart = 3;
-  const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
-  const title = `[$${issue.prize}] ${issue.title}`;
-  if (provider === 'github') {
-    try {
-      const github = new GitHub({token: userRole.accessToken});
-      const githubIssueWrapper = github.getIssues(repoOwner, repoName);
-      const newIssue = {
-        title,
-        body: issue.comment,
-        labels: [config.OPEN_FOR_PICKUP_ISSUE_LABEL],
-      };
-      const createdIssueResp = await githubIssueWrapper.createIssue(newIssue);
-      const createdIssueData = createdIssueResp.data;
-      return {
-        success: true,
-        url: createdIssueData.html_url,
-        number: createdIssueData.number,
-      };
-    } catch (err) {
-      // if error is already exists discard
-      if (_.chain(err).get('body.errors').countBy({
-        code: 'already_exists',
-      }).get('true')
-        .isUndefined()
-        .value()) {
-        throw helper.convertGitHubError(err, 'Failed to create issue.');
-      }
-    }
-  } else {
-    try {
-      const client = new Gitlab({
-        url: config.GITLAB_API_BASE_URL,
-        oauthToken: userRole.accessToken,
-      });
-      const response = await client.Issues.create(`${repoOwner}/${repoName}`, {
-        title,
-        description: issue.comment,
-        labels: config.OPEN_FOR_PICKUP_ISSUE_LABEL,
-      });
-      return {
-        success: true,
-        url: response.web_url,
-        number: response.iid
-      };
-    } catch (err) {
-      if (_.get(err, 'error.message') !== 'Label already exists') {
-        throw helper.convertGitLabError(err, 'Failed to create labels.');
-      }
-    }
-  }
-  return {
-    success: false,
-  };
-}
-
-const currentUserSchema = Joi.object().keys({
-  handle: Joi.string().required(),
-  roles: Joi.array().required(),
-});
-
-create.schema = {
-  issue: {
-    projectId: Joi.string().required(),
-    prize: Joi.number().required(),
-    title: Joi.string().required(),
-    comment: Joi.string().required(),
-    repoUrl: Joi.string().required(),
-  },
-  currentUser: currentUserSchema,
-};
-
-/**
  * recreate issue
  * @param {Object} issue the issue detail
  * @param {String} currentUser the topcoder current user
@@ -210,9 +128,9 @@ create.schema = {
  */
 async function recreate(issue, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(issue.projectId, currentUser);
-  const provider = await helper.getProviderType(dbProject.repoUrls[0]);
+  const provider = await helper.getProviderType(issue.url);
   const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
-  const results = dbProject.repoUrls[0].split('/');
+  const results = issue.url.split('/');
   const index = 1;
   const repoName = results[results.length - index];
   const excludePart = 3;
@@ -305,6 +223,11 @@ async function recreate(issue, currentUser) {
   };
 }
 
+const currentUserSchema = Joi.object().keys({
+  handle: Joi.string().required(),
+  roles: Joi.array().required(),
+});
+
 recreate.schema = {
   issue: {
     projectId: Joi.string().required(),
@@ -317,7 +240,6 @@ recreate.schema = {
 
 module.exports = {
   search,
-  create,
   recreate,
 };
 

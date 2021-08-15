@@ -9,6 +9,7 @@
  * @version 1.0
  */
 const helper = require('../common/helper');
+const dbHelper = require('../common/db-helper');
 const ProjectService = require('../services/ProjectService');
 const models = require('../models');
 
@@ -49,7 +50,8 @@ async function getAll(req) {
  */
 async function createLabel(req) {
   const dbProject = await helper.ensureExists(models.Project, req.body.projectId, 'Project');
-  for (const repoUrl of dbProject.repoUrls) { // eslint-disable-line no-restricted-syntax
+  const repoUrls = await dbHelper.populateRepoUrls(dbProject.id);
+  for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
     try {
       await ProjectService.createLabel(req.body, req.currentUser, repoUrl);
     }
@@ -70,7 +72,8 @@ async function createLabel(req) {
  */
 async function createHook(req) {
   const dbProject = await helper.ensureExists(models.Project, req.body.projectId, 'Project');
-  for (const repoUrl of dbProject.repoUrls) { // eslint-disable-line no-restricted-syntax
+  const repoUrls = await dbHelper.populateRepoUrls(dbProject.id);
+  for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
     try {
       await ProjectService.createHook(req.body, req.currentUser, repoUrl);
     }
@@ -91,7 +94,8 @@ async function createHook(req) {
  */
 async function addWikiRules(req) {
   const dbProject = await helper.ensureExists(models.Project, req.body.projectId, 'Project');
-  for (const repoUrl of dbProject.repoUrls) { // eslint-disable-line no-restricted-syntax
+  const repoUrls = await dbHelper.populateRepoUrls(dbProject.id);
+  for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
     try {
       await ProjectService.addWikiRules(req.body, req.currentUser, repoUrl);
     }

@@ -156,6 +156,8 @@ const searchSchema = {
     page: Joi.number().integer().min(1).required(),
     perPage: Joi.number().integer().min(1).required(),
     query: Joi.string(),
+    gitlabLastKey: Joi.string(),
+    githubLastKey: Joi.string()
   }).required(),
 };
 
@@ -179,30 +181,35 @@ const removeUserMappingSchema = {
  * @returns {Array} user mappings
  */
 async function search(criteria) {
-  const githubUserMappings = await dbHelper.scan(GithubUserMapping, {});
-  const gitlabUserMappings = await dbHelper.scan(GitlabUserMapping, {});
-  const offset = (criteria.page - 1) * criteria.perPage;
+  let githubUserMappings;
+  let gitlabUserMappings;
 
-  const filteredGithubUserMappings = _(githubUserMappings).slice(offset).take(criteria.perPage)
-      .filter(userMapping => {
-        if (!criteria.query) return true;
-        else {
-          return _.includes(userMapping.topcoderUsername.toLowerCase(), criteria.query.toLowerCase()) ||
-            _.includes(userMapping.githubUsername.toLowerCase(), criteria.query.toLowerCase())
-        }
-      })
-      .value();
-  const filteredGitlabUserMappings = _(gitlabUserMappings).slice(offset).take(criteria.perPage)
-      .filter(userMapping => {
-        if (!criteria.query) return true;
-        else {
-          return _.includes(userMapping.topcoderUsername.toLowerCase(), criteria.query.toLowerCase()) ||
-            _.includes(userMapping.gitlabUsername.toLowerCase(), criteria.query.toLowerCase())
-        }
-      })
-      .value();
+  if (criteria.query) {
+    githubUserMappings = await dbHelper.scanAllWithSearch(
+      GithubUserMapping,
+      criteria.perPage / 2, // eslint-disable-line
+      criteria.githubLastKey ? JSON.parse(criteria.githubLastKey) : undefined, // eslint-disable-line
+      'topcoderUsername',
+      criteria.query.toLowerCase());
+    gitlabUserMappings = await dbHelper.scanAllWithSearch(
+      GitlabUserMapping,
+      criteria.perPage / 2,  // eslint-disable-line
+      criteria.gitlabLastKey ? JSON.parse(criteria.gitlabLastKey) : undefined, // eslint-disable-line
+      'topcoderUsername',
+      criteria.query.toLowerCase());
+  }
+  else {
+    githubUserMappings = await dbHelper.scanAll(
+      GithubUserMapping,
+      criteria.perPage / 2, // eslint-disable-line
+      criteria.githubLastKey ? JSON.parse(criteria.githubLastKey) : undefined); // eslint-disable-line
+    gitlabUserMappings = await dbHelper.scanAll(
+      GitlabUserMapping,
+      criteria.perPage / 2,  // eslint-disable-line
+      criteria.gitlabLastKey ? JSON.parse(criteria.gitlabLastKey) : undefined); // eslint-disable-line
+  }
 
-  const userMappings = _.concat(filteredGithubUserMappings, filteredGitlabUserMappings);
+  const userMappings = _.concat(githubUserMappings, gitlabUserMappings);
   const orderedUserMappings = _.orderBy(userMappings, criteria.sortBy, criteria.sortDir);
   const tcUsernames = _.map(orderedUserMappings, 'topcoderUsername');
   const uniqueTcUsernames = _.uniq(tcUsernames);
@@ -238,7 +245,10 @@ async function search(criteria) {
   }));
 
   const result = {
-    pages: Math.ceil(githubUserMappings.length / criteria.perPage) || 1,
+    lastKey : {
+      githubLastKey: githubUserMappings.lastKey ? JSON.stringify(githubUserMappings.lastKey) : undefined, // eslint-disable-line
+      gitlabLastKey: gitlabUserMappings.lastKey ? JSON.stringify(gitlabUserMappings.lastKey) : undefined // eslint-disable-line
+    },
     docs,
   };
   return result;
