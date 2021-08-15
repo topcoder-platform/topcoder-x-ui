@@ -18,9 +18,11 @@ angular.module('topcoderX')
      * @param {Number} pageNo the page number
      * @param {Number} pageSize the page size
      */
-    service.search = function (query, sortBy, sortDir, pageNo, pageSize) {
-      if (query) return service.searchWithQuery(query, sortBy, sortDir, pageNo, pageSize);
-      else return $http.get(baseUrl + '/api/v1/users/mappings?sortBy=' + sortBy + '&sortDir=' + sortDir + '&page=' + pageNo + '&perPage=' + pageSize)
+    service.search = function (query, sortBy, sortDir, pageNo, pageSize, lastKey) {
+      if (query) return service.searchWithQuery(query, sortBy, sortDir, pageNo, pageSize, lastKey);
+      else return $http.get(baseUrl + '/api/v1/users/mappings?sortBy=' + sortBy + '&sortDir=' + sortDir + '&page=' + pageNo + '&perPage=' + pageSize + 
+        (lastKey && lastKey.githubLastKey ? '&githubLastKey=' + lastKey.githubLastKey : '' ) + 
+        (lastKey && lastKey.gitlabLastKey ? '&gitlabLastKey=' + lastKey.gitlabLastKey : '' ))
         .then(function (response) {
           return response;
         });
@@ -34,8 +36,10 @@ angular.module('topcoderX')
      * @param {Number} pageNo the page number
      * @param {Number} pageSize the page size
      */
-    service.searchWithQuery = function (query, sortBy, sortDir, pageNo, pageSize) {
-      return $http.get(baseUrl + '/api/v1/users/mappings?query=' + query + '&sortBy=' + sortBy + '&sortDir=' + sortDir + '&page=' + pageNo + '&perPage=' + pageSize)
+    service.searchWithQuery = function (query, sortBy, sortDir, pageNo, pageSize, lastKey) {
+      return $http.get(baseUrl + '/api/v1/users/mappings?query=' + query + '&sortBy=' + sortBy + '&sortDir=' + sortDir + '&page=' + pageNo + '&perPage=' + pageSize + 
+        (lastKey && lastKey.githubLastKey ? '&githubLastKey=' + lastKey.githubLastKey : '' ) + 
+        (lastKey && lastKey.gitlabLastKey ? '&gitlabLastKey=' + lastKey.gitlabLastKey : '' ))
         .then(function (response) {
           return response;
         });

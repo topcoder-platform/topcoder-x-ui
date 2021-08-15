@@ -70,20 +70,21 @@ const createProjectSchema = {
 /**
  * ensures the requested project detail is valid
  * @param {Object} project the project detail
+ * @param {String} repoUrl the repo url
  * @private
  */
-async function _validateProjectData(project) {
+async function _validateProjectData(project, repoUrl) {
   let existsInDatabase;
   if (project.id) {
-    existsInDatabase = await dbHelper.queryOneActiveProjectWithFilter(models.Project, project.repoUrls[0], project.id)
+    existsInDatabase = await dbHelper.queryOneActiveProjectWithFilter(models.Project, repoUrl, project.id)
   } else {
-    existsInDatabase = await dbHelper.queryOneActiveProject(models.Project, project.repoUrls[0])
+    existsInDatabase = await dbHelper.queryOneActiveProject(models.Project, repoUrl)
   }
   if (existsInDatabase) {
     throw new errors.ValidationError(`This repo already has a Topcoder-X project associated with it.
     Copilot: ${existsInDatabase.copilot}, Owner: ${existsInDatabase.owner}`)
   }
-  const provider = await helper.getProviderType(project.repoUrl);
+  const provider = await helper.getProviderType(repoUrl);
   const userRole = project.copilot ? project.copilot : project.owner;
   const setting = await userService.getUserSetting(userRole);
   if (!setting[provider]) {
@@ -123,8 +124,10 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
 async function create(project, currentUser) {
   const currentUserTopcoderHandle = currentUser.handle;
   project.owner = currentUserTopcoderHandle;
-  project.repoUrls = _.map(project.repoUrl.split(','), repoUrl => repoUrl.trim());
-  await _validateProjectData(project);
+  const repoUrls = _.map(project.repoUrl.split(','), repoUrl => repoUrl.trim());
+  for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
+    await _validateProjectData(project, repoUrl);
+  }
   /**
      * Uncomment below code to enable the function of raising event when 'project was created'
      *
@@ -141,7 +144,13 @@ async function create(project, currentUser) {
 
   const createdProject = await dbHelper.create(models.Project, project);
 
-  for (const repoUrl of project.repoUrls) { // eslint-disable-line no-restricted-syntax
+  for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
+    await dbHelper.create(models.Repository, {
+      id: helper.generateIdentifier(),
+      projectId: project.id,
+      url: repoUrl,
+      archived: project.archived
+    })
     try {
       await createLabel({projectId: project.id}, currentUser, repoUrl);
       await createHook({projectId: project.id}, currentUser, repoUrl);
@@ -165,7 +174,10 @@ create.schema = createProjectSchema;
  */
 async function update(project, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(project.id, currentUser);
-  await _validateProjectData(project);
+  const repoUrls = _.map(project.repoUrl.split(','), repoUrl => repoUrl.trim());
+  for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
+    await _validateProjectData(project, repoUrl);
+  }
   if (dbProject.archived === 'false' && project.archived === true) {
     // project archived detected.
     const result = {
@@ -189,9 +201,19 @@ async function update(project, currentUser) {
     dbProject[item[0]] = item[1];
     return item;
   });
-  dbProject.repoUrls = _.map(dbProject.repoUrl.split(','), repoUrl => repoUrl.trim());
+  const oldRepositories = await dbHelper.queryRepositoriesByProjectId(dbProject.id);
+  for (const repo of oldRepositories) { // eslint-disable-line
+    await dbHelper.removeById(models.Repository, repo.id);
+  }
+  for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
+    await dbHelper.create(models.Repository, {
+      id: helper.generateIdentifier(),
+      projectId: dbProject.id,
+      url: repoUrl,
+      archived: project.archived
+    })
+  }
   dbProject.updatedAt = new Date();
-
   return await dbHelper.update(models.Project, dbProject.id, dbProject);
 }
 
@@ -220,6 +242,9 @@ async function getAll(query, currentUser) {
       }
       return project;
     });
+    for (const project of projects) { // eslint-disable-line
+      project.repoUrls = await dbHelper.populateRepoUrls(project.id);
+    }  
     return _.orderBy(projects, ['updatedAt', 'title'], ['desc', 'asc']);
   }
 
@@ -242,6 +267,9 @@ async function getAll(query, currentUser) {
     }
     return project;
   });
+  for (const project of projects) { // eslint-disable-line
+    project.repoUrls = await dbHelper.populateRepoUrls(project.id);
+  }
   return _.orderBy(projects, ['updatedAt', 'title'], ['desc', 'asc']);
 }
 
@@ -336,6 +364,7 @@ createLabel.schema = Joi.object().keys({
  */
 async function createHook(body, currentUser, repoUrl) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
+  const dbRepo = await dbHelper.queryRepositoryByProjectIdFilterUrl(dbProject.id, repoUrl);
   const provider = await helper.getProviderType(repoUrl);
   const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
   const results = repoUrl.split('/');
@@ -343,16 +372,16 @@ async function createHook(body, currentUser, repoUrl) {
   const repoName = results[results.length - index];
   const excludePart = 3;
   const repoOwner = _(results).slice(excludePart, results.length - 1).join('/');
-  const updateExisting = dbProject.registeredWebhookId !== undefined;
+  const updateExisting = dbRepo.registeredWebhookId !== undefined;
   if (provider === 'github') {
     try {
       const github = new GitHub({token: userRole.accessToken});
       const repoWrapper = github.getRepo(repoOwner, repoName);
       await new Promise((resolve, reject) => {
         repoWrapper.listHooks(async (err, hooks) => {
-          if (!err && dbProject.registeredWebhookId &&
-            _.find(hooks, {id: parseInt(dbProject.registeredWebhookId, 10)})) {
-            await repoWrapper.deleteHook(dbProject.registeredWebhookId);
+          if (!err && dbRepo.registeredWebhookId &&
+            _.find(hooks, {id: parseInt(dbRepo.registeredWebhookId, 10)})) {
+            await repoWrapper.deleteHook(dbRepo.registeredWebhookId);
           }
           repoWrapper.createHook({
             name: 'web',
@@ -371,13 +400,13 @@ async function createHook(body, currentUser, repoUrl) {
               content_type: 'json',
               secret: dbProject.secretWebhookKey,
             },
-          }, (error, hook) => {
+          }, async (error, hook) => {
             if (error) {
               return reject(error);
             }
             if (hook && hook.id) {
-              dbProject.registeredWebhookId = hook.id.toString();
-              update(dbProject, currentUser);
+              dbRepo.registeredWebhookId = hook.id.toString();
+              await dbHelper.update(models.Repository, dbRepo.id, dbRepo);
             }
             return resolve();
           });
@@ -404,9 +433,9 @@ async function createHook(body, currentUser, repoUrl) {
         oauthToken: userRole.accessToken,
       });
       const hooks = await client.ProjectHooks.all(`${repoOwner}/${repoName}`);
-      if (hooks && dbProject.registeredWebhookId &&
-        _.find(hooks, {id: parseInt(dbProject.registeredWebhookId, 10)})) {
-        await client.ProjectHooks.remove(`${repoOwner}/${repoName}`, dbProject.registeredWebhookId);
+      if (hooks && dbRepo.registeredWebhookId &&
+        _.find(hooks, {id: parseInt(dbRepo.registeredWebhookId, 10)})) {
+        await client.ProjectHooks.remove(`${repoOwner}/${repoName}`, dbRepo.registeredWebhookId);
       }
       const hook = await client.ProjectHooks.add(`${repoOwner}/${repoName}`,
         `${config.HOOK_BASE_URL}/webhooks/gitlab`, {
@@ -423,8 +452,8 @@ async function createHook(body, currentUser, repoUrl) {
         }
       );
       if (hook && hook.id) {
-        dbProject.registeredWebhookId = hook.id.toString();
-        await update(dbProject, currentUser);
+        dbRepo.registeredWebhookId = hook.id.toString();
+        await dbHelper.update(models.Repository, dbRepo.id, dbRepo);
       }
     } catch (err) {
       const errMsg = 'Failed to create webhook';
@@ -520,14 +549,18 @@ async function transferOwnerShip(body, currentUser) {
     throw new errors.ForbiddenError('You can\'t transfer the ownership of this project');
   }
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
-  const provider = await helper.getProviderType(dbProject.repoUrls[0]);
+
+  const repoUrls = await dbHelper.populateRepoUrls(dbProject.id);
   const setting = await userService.getUserSetting(body.owner);
-  if (!setting.gitlab && !setting.github) {
-    throw new errors.ValidationError(`User ${body.owner} doesn't currently have Topcoder-X access.
-    Please have them sign in and set up their Gitlab and Github accounts with Topcoder-X before transferring ownership.`);
-  } else if (!setting[provider]) {
-    throw new errors.ValidationError(`User ${body.owner} doesn't currently have Topcoder-X access setup for ${provider}.
-    Please have them sign in and set up their ${provider} accounts with Topcoder-X before transferring ownership.`);
+  for (const repoUrl of repoUrls) { // eslint-disable-line
+    const provider = await helper.getProviderType(repoUrl);
+    if (!setting.gitlab && !setting.github) {
+      throw new errors.ValidationError(`User ${body.owner} doesn't currently have Topcoder-X access.
+      Please have them sign in and set up their Gitlab and Github accounts with Topcoder-X before transferring ownership.`);
+    } else if (!setting[provider]) {
+      throw new errors.ValidationError(`User ${body.owner} doesn't currently have Topcoder-X access setup for ${provider}.
+      Please have them sign in and set up their ${provider} accounts with Topcoder-X before transferring ownership.`);
+    }
   }
 
   return await dbHelper.update(models.Project, dbProject.id, {

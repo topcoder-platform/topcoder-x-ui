@@ -226,10 +226,6 @@ module.exports = {
       controller: 'IssueController',
       method: 'search',
     },
-    post: {
-      controller: 'IssueController',
-      method: 'create',
-    },
   },
   '/issues/recreate': {
     post: {
