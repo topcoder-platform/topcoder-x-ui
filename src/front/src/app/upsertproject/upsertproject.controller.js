@@ -32,6 +32,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       $scope.project.id = $rootScope.project.id;
       $scope.project.copilot = $rootScope.project.copilot;
       $scope.project.owner = $rootScope.project.owner;
+      $scope.project.repoUrl = $rootScope.project.repoUrls.join(',');
       $scope.editing = true;
     } else {
       $scope.title = 'Add a Project';

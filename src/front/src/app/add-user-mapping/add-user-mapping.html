@@ -1,0 +1,36 @@
+<div ng-controller="AddUserMappingController">
+    <div class="col-md-10 col-md-offset-1" ng-include src="'components/alert/alert.html'"></div>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-4">
+            <h2>{{title}}</h2>
+        </div>
+    </div>
+
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="text-center m-t-lg">
+                    <form name="userMappingForm">
+                        <label class="form-label">Topcoder Handle:</label>
+                        <input class="form-control" type="text" ng-model="userMapping.topcoderUsername" required />
+                        <span ng-show="userMappingForm.userMapping.topcoderUsername.$touched && userMappingForm.userMapping.topcoderUsername.$invalid">The
+                            Topcoder Handle is required.</span>
+                        <br />
+                        <label class="form-label">Github Username:</label>
+                        <input class="form-control" type="text" ng-model="userMapping.githubUsername" />
+                        <br />
+                        <label class="form-label">Gitlab Username:</label>
+                        <input class="form-control" type="text" ng-model="userMapping.gitlabUsername" />
+                        <br />
+                        <br />
+                        <button type="submit" class="with-button btn btn-sm btn-info" ng-click="userMappingForm.$valid && save()">
+                            <strong>
+                                Save
+                            </strong>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

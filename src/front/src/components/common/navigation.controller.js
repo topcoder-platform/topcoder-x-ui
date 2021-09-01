@@ -12,14 +12,25 @@ angular.module('topcoderX') // eslint-disable-line angular/no-services
       const decodedToken = jwtHelper.decodeToken(token);
       $scope.user = {};
       $scope.user['copilot'] = false;
+      $scope.user['admin'] = false;
       Object.keys(decodedToken).findIndex(function (key) {
         if (key.includes('roles')) {
-          if (key.indexOf('copilot') > -1) {
+          if (key.indexOf('copilot') > -1 || decodedToken[key].includes('copilot')) {
             $scope.user['copilot'] = true;
             $log.info('User is a copilot');
           } else {
             $log.info('user is not a copilot');
           }
+
+          var administratorRoles = $rootScope.appConfig.administratorRoles.map(function (x) {
+            return x.toLowerCase();
+          });
+          administratorRoles.forEach(function (administratorRole) {
+            if (decodedToken[key].includes(administratorRole)) {
+              $scope.user['admin'] = true;
+              $log.info('User is an admin');
+            }
+          });
           return true;
         }
         return false;

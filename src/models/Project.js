@@ -24,24 +24,12 @@ const schema = new Schema({
     type: Number,
     required: true
   },
-  repoUrl: {
-    type: String, 
-    required: true,
-    index: {
-      global: true,
-      rangeKey: 'archived',
-      project: true,
-      name: 'RepoUrlIndex'
-    }
-  },
-  repoId: {type: String, required: false},
   rocketChatWebhook: {type: String, required: false},
   rocketChatChannelName: {type: String, required: false},
   archived: {type: String, required: true},
   owner: {type: String, required: true},
   secretWebhookKey: {type: String, required: true},
   copilot: {type: String, required: false},
-  registeredWebhookId: {type: String, required: false},
   updatedAt: {
     type: Date,
     default: Date.now,

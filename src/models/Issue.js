@@ -35,6 +35,9 @@ const schema = new Schema({
       name: 'RepositoryIdIndex',
     },
   },
+  repoUrl: {
+    type: String
+  },
   labels: {
     type: Array,
     required: false,

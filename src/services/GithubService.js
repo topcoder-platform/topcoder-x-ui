@@ -331,7 +331,7 @@ async function getUserIdByUsername(username) {
     }
     return user.data.id;
   } catch (err) {
-    throw helper.convertGitHubError(err, 'Failed to get detail about user from github');
+    throw new Error(`The user with username ${username} is not found on github`);
   }
 }
 

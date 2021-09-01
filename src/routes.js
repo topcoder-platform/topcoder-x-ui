@@ -226,10 +226,6 @@ module.exports = {
       controller: 'IssueController',
       method: 'search',
     },
-    post: {
-      controller: 'IssueController',
-      method: 'create',
-    },
   },
   '/issues/recreate': {
     post: {
@@ -243,6 +239,49 @@ module.exports = {
       method: 'getAppConfig',
       allowNormalUser: true,
       allowAnonymous: true,
+    },
+  },
+  '/github/pat': {
+    get: {
+      controller: 'GithubPATsController',
+      method: 'search',
+      allowedRoles: config.ADMINISTRATOR_ROLES,
+    },
+    post: {
+      controller: 'GithubPATsController',
+      method: 'create',
+      allowedRoles: config.ADMINISTRATOR_ROLES,
+    },
+  },
+  '/github/pat/:id': {
+    delete: {
+      controller: 'GithubPATsController',
+      method: 'remove',
+      allowedRoles: config.ADMINISTRATOR_ROLES,
+    },
+  },
+  '/users/mappings': {
+    get: {
+      controller: 'UserController',
+      method: 'search',
+      allowedRoles: config.ADMINISTRATOR_ROLES,
+    },
+    post: {
+      controller: 'UserController',
+      method: 'create',
+      allowedRoles: config.ADMINISTRATOR_ROLES,
+    },
+    put: {
+      controller: 'UserController',
+      method: 'update',
+      allowedRoles: config.ADMINISTRATOR_ROLES,
+    },
+  },
+  '/users/mappings/:username': {
+    delete: {
+      controller: 'UserController',
+      method: 'remove',
+      allowedRoles: config.ADMINISTRATOR_ROLES,
     },
   },
 };

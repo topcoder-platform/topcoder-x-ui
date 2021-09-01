@@ -1,0 +1,40 @@
+<div ng-controller="AddGithubPATController">
+    <div class="col-md-10 col-md-offset-1" ng-include src="'components/alert/alert.html'"></div>
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-4">
+            <h2>{{title}}</h2>
+        </div>
+    </div>
+
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="text-center m-t-lg">
+                    <form name="patForm">
+                        <label class="form-label">Organisation:</label>
+                        <input class="form-control" type="text" ng-model="pat.name" required />
+                        <span ng-show="patForm.pat.name.$touched && patForm.pat.name.$invalid">The
+                            Organisation is required.</span>
+                        <br />
+                        <label class="form-label">Owner Github Username:</label>
+                        <input class="form-control" type="text" ng-model="pat.owner" required />
+                        <span ng-show="patForm.pat.owner.$touched && patForm.pat.owner.$invalid">The
+                            Owner Github Username is required.</span>
+                        <br />
+                        <label class="form-label">Personal Access Token (PAT):</label>
+                        <input class="form-control" type="password" ng-model="pat.personalAccessToken" required />
+                        <span ng-show="patForm.pat.personalAccessToken.$touched && patForm.pat.personalAccessToken.$invalid">The
+                            PAT is required.</span>
+                        <br />
+                        <br />
+                        <button type="submit" class="with-button btn btn-sm btn-info" ng-click="patForm.$valid && save()">
+                            <strong>
+                                Save
+                            </strong>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

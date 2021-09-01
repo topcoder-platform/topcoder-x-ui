@@ -17,6 +17,8 @@ const constants = require('../common/constants');
 const User = require('../models').User;
 const GithubUserMapping = require('../models').GithubUserMapping;
 const GitlabUserMapping = require('../models').GitlabUserMapping;
+const GithubService = require('./GithubService');
+const GitlabService = require('./GitlabService');
 
 /**
  * gets user setting
@@ -145,11 +147,253 @@ getUserToken.schema = Joi.object().keys({
   tokenType: Joi.string().required(),
 });
 
+
+
+const searchSchema = {
+  criteria: Joi.object().keys({
+    sortBy: Joi.string().valid('topcoderUsername', 'githubUsername', 'gitlabUsername').required(),
+    sortDir: Joi.string().valid('asc', 'desc').default('asc'),
+    page: Joi.number().integer().min(1).required(),
+    perPage: Joi.number().integer().min(1).required(),
+    query: Joi.string(),
+    gitlabLastKey: Joi.string(),
+    githubLastKey: Joi.string()
+  }).required(),
+};
+
+const createUserMappingSchema = {
+  userMapping: {
+    topcoderUsername: Joi.string().required(),
+    githubUsername: Joi.string(),
+    githubUserId: Joi.number(),
+    gitlabUsername: Joi.string(),
+    gitlabUserId: Joi.number(),
+  },
+};
+
+const removeUserMappingSchema = {
+  topcoderUsername: Joi.string().required(),
+};
+
+/**
+ * searches user mappings
+ * @param {Object} criteria the search criteria
+ * @returns {Array} user mappings
+ */
+async function search(criteria) {
+  let githubUserMappings;
+  let gitlabUserMappings;
+
+  if (criteria.query) {
+    githubUserMappings = await dbHelper.scanAllWithSearch(
+      GithubUserMapping,
+      criteria.perPage / 2, // eslint-disable-line
+      criteria.githubLastKey ? JSON.parse(criteria.githubLastKey) : undefined, // eslint-disable-line
+      'topcoderUsername',
+      criteria.query.toLowerCase());
+    gitlabUserMappings = await dbHelper.scanAllWithSearch(
+      GitlabUserMapping,
+      criteria.perPage / 2,  // eslint-disable-line
+      criteria.gitlabLastKey ? JSON.parse(criteria.gitlabLastKey) : undefined, // eslint-disable-line
+      'topcoderUsername',
+      criteria.query.toLowerCase());
+  }
+  else {
+    githubUserMappings = await dbHelper.scanAll(
+      GithubUserMapping,
+      criteria.perPage / 2, // eslint-disable-line
+      criteria.githubLastKey ? JSON.parse(criteria.githubLastKey) : undefined); // eslint-disable-line
+    gitlabUserMappings = await dbHelper.scanAll(
+      GitlabUserMapping,
+      criteria.perPage / 2,  // eslint-disable-line
+      criteria.gitlabLastKey ? JSON.parse(criteria.gitlabLastKey) : undefined); // eslint-disable-line
+  }
+
+  const userMappings = _.concat(githubUserMappings, gitlabUserMappings);
+  const orderedUserMappings = _.orderBy(userMappings, criteria.sortBy, criteria.sortDir);
+  const tcUsernames = _.map(orderedUserMappings, 'topcoderUsername');
+  const uniqueTcUsernames = _.uniq(tcUsernames);
+  const docs = await Promise.all(_.map(uniqueTcUsernames, async (tcUsername) => {
+    const mapping = {
+      topcoderUsername: tcUsername
+    };
+    const githubMapping = _.find(githubUserMappings, (object) => object.topcoderUsername === tcUsername); // eslint-disable-line lodash/matches-prop-shorthand
+    const gitlabMapping = _.find(gitlabUserMappings, (object) => object.topcoderUsername === tcUsername); // eslint-disable-line lodash/matches-prop-shorthand
+    if (githubMapping) {
+      mapping.githubUsername = githubMapping.githubUsername;
+      mapping.githubUserId = githubMapping.githubUserId;
+    }
+    else {
+      const dbGithubMapping = await dbHelper.queryOneUserMappingByTCUsername(GithubUserMapping, tcUsername);
+      if (dbGithubMapping) {
+        mapping.githubUsername = dbGithubMapping.githubUsername;
+        mapping.githubUserId = dbGithubMapping.githubUserId;
+      }
+    }
+    if (gitlabMapping) {
+      mapping.gitlabUsername = gitlabMapping.gitlabUsername;
+      mapping.gitlabUserId = gitlabMapping.gitlabUserId;
+    }
+    else {
+      const dbGitlabMapping = await dbHelper.queryOneUserMappingByTCUsername(GitlabUserMapping, tcUsername);
+      if (dbGitlabMapping) {
+        mapping.gitlabUsername = dbGitlabMapping.gitlabUsername;
+        mapping.gitlabUserId = dbGitlabMapping.gitlabUserId;
+      }
+    }
+    return mapping;
+  }));
+
+  const result = {
+    lastKey : {
+      githubLastKey: githubUserMappings.lastKey ? JSON.stringify(githubUserMappings.lastKey) : undefined, // eslint-disable-line
+      gitlabLastKey: gitlabUserMappings.lastKey ? JSON.stringify(gitlabUserMappings.lastKey) : undefined // eslint-disable-line
+    },
+    docs,
+  };
+  return result;
+}
+
+search.schema = searchSchema;
+
+/**
+ * creates userMapping
+ * @param {Object} userMapping details
+ * @returns {Object} created userMapping
+ */
+async function create(userMapping) {
+  if (userMapping.githubUsername) {
+    const existGithubMapping = await dbHelper.queryOneUserMappingByTCUsername(
+      GithubUserMapping, userMapping.topcoderUsername);
+    if (existGithubMapping) {
+      return { error: true, exist: true, provider: 'Github' };
+    }
+    else {
+      const githubUserId = await GithubService.getUserIdByUsername(userMapping.githubUsername);
+      const mappingToSave = {
+        id: helper.generateIdentifier(),
+        topcoderUsername: userMapping.topcoderUsername,
+        githubUsername: userMapping.githubUsername,
+        githubUserId
+      };
+      await dbHelper.create(GithubUserMapping, mappingToSave);
+    }
+  }
+  if (userMapping.gitlabUsername) {
+    const existGitlabMapping = await dbHelper.queryOneUserMappingByTCUsername(
+      GitlabUserMapping, userMapping.topcoderUsername);
+    if (existGitlabMapping) {
+      return { error: true, exist: true, provider: 'Gitlab' };
+    }
+    else {
+      const gitlabUserId = await GitlabService.getUserIdByUsername(userMapping.gitlabUsername);
+      const mappingToSave = {
+        id: helper.generateIdentifier(),
+        topcoderUsername: userMapping.topcoderUsername,
+        gitlabUsername: userMapping.gitlabUsername,
+        gitlabUserId
+      };
+      await dbHelper.create(GitlabUserMapping, mappingToSave);
+    }
+  }
+
+  return {success: true};
+}
+
+create.schema = createUserMappingSchema;
+
+
+
+/**
+ * updates userMapping
+ * @param {Object} userMapping details
+ * @returns {Object} updated userMapping
+ */
+async function update(userMapping) {
+  const existGithubMapping = await dbHelper.queryOneUserMappingByTCUsername(
+    GithubUserMapping, userMapping.topcoderUsername);
+  const existGitlabMapping = await dbHelper.queryOneUserMappingByTCUsername(
+    GitlabUserMapping, userMapping.topcoderUsername);
+  if (userMapping.githubUsername) {
+    const githubUserId = await GithubService.getUserIdByUsername(userMapping.githubUsername);
+    const mappingToSave = {
+      topcoderUsername: userMapping.topcoderUsername,
+      githubUsername: userMapping.githubUsername,
+      githubUserId
+    };
+    if (existGithubMapping) {
+      mappingToSave.id = existGithubMapping.id;
+      await dbHelper.update(GithubUserMapping, existGithubMapping.id, mappingToSave);
+    }
+    else {
+      mappingToSave.id = helper.generateIdentifier();
+      await dbHelper.create(GithubUserMapping, mappingToSave);
+    }
+  }
+  else {
+    if (existGithubMapping) {
+      await dbHelper.removeById(GithubUserMapping, existGithubMapping.id);
+    }
+  }
+  if (userMapping.gitlabUsername) {
+    const gitlabUserId = await GitlabService.getUserIdByUsername(userMapping.gitlabUsername);
+    const mappingToSave = {
+      topcoderUsername: userMapping.topcoderUsername,
+      gitlabUsername: userMapping.gitlabUsername,
+      gitlabUserId
+    };
+    if (existGitlabMapping) {
+      mappingToSave.id = existGitlabMapping.id;
+      await dbHelper.update(GitlabUserMapping, existGitlabMapping.id, mappingToSave);
+    }
+    else {
+      mappingToSave.id = helper.generateIdentifier();
+      await dbHelper.create(GitlabUserMapping, mappingToSave);
+    }
+  }
+  else {
+    if (existGitlabMapping) {
+      await dbHelper.removeById(GitlabUserMapping, existGitlabMapping.id);
+    }
+  }
+  return {success: true};
+}
+
+update.schema = createUserMappingSchema;
+
+
+
+/**
+ * delete user mapping item
+ * @param {string} topcoderUsername tc handle
+ * @returns {Object} the success status
+ */
+async function remove(topcoderUsername) {
+  const dbGithubMapping = await dbHelper.queryOneUserMappingByTCUsername(
+    GithubUserMapping, topcoderUsername);
+  const dbGitlabMapping = await dbHelper.queryOneUserMappingByTCUsername(
+    GitlabUserMapping, topcoderUsername);
+
+  if (dbGithubMapping) {
+    await dbHelper.removeById(GithubUserMapping, dbGithubMapping.id);
+  }
+  if (dbGitlabMapping) {
+    await dbHelper.removeById(GitlabUserMapping, dbGitlabMapping.id);
+  }
+  return {success: true};
+}
+
+remove.schema = removeUserMappingSchema;
+
 module.exports = {
   getUserSetting,
   revokeUserSetting,
   getUserToken,
   getAccessTokenByHandle,
+  search,
+  create,
+  remove,
+  update,
 };
 
 helper.buildService(module.exports);

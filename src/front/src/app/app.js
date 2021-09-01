@@ -95,14 +95,6 @@ angular.module('topcoderX', [
           data: { pageTitle: 'Project Management' },
           resolve: { auth: authenticate }
         })
-        .state('app.issue', {
-          url: '/upsertissue',
-          controller: 'IssueController',
-          controllerAs: 'vm',
-          templateUrl: 'app/upsertissue/upsertissue.html',
-          data: { pageTitle: 'Project Management' },
-          resolve: { auth: authenticate }
-        })
         // following code is commented to hide the menu
         // un comment this when pages are developed
         // .state('app.challenges', {
@@ -162,9 +154,35 @@ angular.module('topcoderX', [
           controller: 'AddCopilotPaymentController',
           controllerAs: 'vm',
           resolve: { auth: authenticate }
+        })
+        .state('app.githubPATs', {
+          url: '/github-pats',
+          templateUrl: 'app/github-pats/github-pats.html',
+          controller: 'GithubPATsController',
+          controllerAs: 'vm',
+          resolve: { auth: authenticate }
+        })
+        .state('app.addPAT', {
+          url: '/github-pats',
+          templateUrl: 'app/add-github-pat/add-github-pat.html',
+          controller: 'AddGithubPATController',
+          controllerAs: 'vm',
+          resolve: { auth: authenticate }
+        })
+        .state('app.userMappings', {
+          url: '/user-mappings',
+          templateUrl: 'app/user-mappings/user-mappings.html',
+          controller: 'UserMappingsController',
+          controllerAs: 'vm',
+          resolve: { auth: authenticate }
+        })
+        .state('app.addUserMapping', {
+          url: '/user-mappings',
+          templateUrl: 'app/add-user-mapping/add-user-mapping.html',
+          controller: 'AddUserMappingController',
+          controllerAs: 'vm',
+          resolve: { auth: authenticate }
         });
-
-
       $urlRouterProvider.otherwise('/app/main');
       $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|tel|file|blob):/);
     }]);

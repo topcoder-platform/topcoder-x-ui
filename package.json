@@ -24,7 +24,8 @@
         "create-tables": "CREATE_DB=true node scripts/create-update-tables.js",
         "migrate-user-mapping": "node scripts/migrate-user-mapping.js",
         "add-organisation": "node scripts/add-organisation.js",
-        "log-repository-collisions": "node scripts/log-repository-collisions.js"
+        "log-repository-collisions": "node scripts/log-repository-collisions.js",
+        "migrate-repo-url": "node scripts/migrate-repo-url.js"
     },
     "dependencies": {
         "angular": "~1.8.0",

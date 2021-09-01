@@ -9,7 +9,9 @@
  * @version 1.0
  */
 const helper = require('../common/helper');
+const dbHelper = require('../common/db-helper');
 const ProjectService = require('../services/ProjectService');
+const models = require('../models');
 
 /**
  * create project
@@ -47,7 +49,19 @@ async function getAll(req) {
  * @returns {Object} the result
  */
 async function createLabel(req) {
-  return await ProjectService.createLabel(req.body, req.currentUser);
+  const dbProject = await helper.ensureExists(models.Project, req.body.projectId, 'Project');
+  const repoUrls = await dbHelper.populateRepoUrls(dbProject.id);
+  for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
+    try {
+      await ProjectService.createLabel(req.body, req.currentUser, repoUrl);
+    }
+    catch (err) {
+      throw new Error(`Adding the labels failed. Repo ${repoUrl}`);
+    }
+  }
+  return {
+    success: false
+  };
 }
 
 /**
@@ -57,7 +71,19 @@ async function createLabel(req) {
  * @returns {Object} the result
  */
 async function createHook(req) {
-  return await ProjectService.createHook(req.body, req.currentUser);
+  const dbProject = await helper.ensureExists(models.Project, req.body.projectId, 'Project');
+  const repoUrls = await dbHelper.populateRepoUrls(dbProject.id);
+  for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
+    try {
+      await ProjectService.createHook(req.body, req.currentUser, repoUrl);
+    }
+    catch (err) {
+      throw new Error(`Adding the webhook failed. Repo ${repoUrl}`);
+    }
+  }
+  return {
+    success: false
+  };
 }
 
 /**
@@ -67,7 +93,19 @@ async function createHook(req) {
  * @returns {Object} the result
  */
 async function addWikiRules(req) {
-  return await ProjectService.addWikiRules(req.body, req.currentUser);
+  const dbProject = await helper.ensureExists(models.Project, req.body.projectId, 'Project');
+  const repoUrls = await dbHelper.populateRepoUrls(dbProject.id);
+  for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
+    try {
+      await ProjectService.addWikiRules(req.body, req.currentUser, repoUrl);
+    }
+    catch (err) {
+      throw new Error(`Adding the wiki rules failed. Repo ${repoUrl}`);
+    }
+  }
+  return {
+    success: false
+  };
 }
 
 /**

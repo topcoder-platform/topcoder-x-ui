@@ -45,10 +45,54 @@ async function getUserToken(req) {
   return await UserService.getUserToken(req.query.username, req.query.tokenType);
 }
 
+/**
+ * searches user mappings according to criteria
+ * @param {Object} req the request
+ * @param {Object} res  the response
+ * @returns {Object} the result
+ */
+async function search(req) {
+  return await UserService.search(req.query);
+}
+
+/**
+ * create user mapping
+ * @param {Object} req the request
+ * @param {Object} res the response
+ * @returns {Object} the result
+ */
+async function create(req) {
+  return await UserService.create(req.body.userMapping);
+}
+
+/**
+ * update user mapping
+ * @param {Object} req the request
+ * @param {Object} res the response
+ * @returns {Object} the result
+ */
+async function update(req) {
+  return await UserService.update(req.body.userMapping);
+}
+
+/**
+ * remove user mapping
+ * @param {Object} req the request
+ * @param {Object} res the response
+ * @returns {Object} the result
+ */
+async function remove(req) {
+  return await UserService.remove(req.params.username);
+}
+
 module.exports = {
   getUserSetting,
   revokeUserSetting,
   getUserToken,
+  search,
+  create,
+  remove,
+  update,
 };
 
 helper.buildController(module.exports);

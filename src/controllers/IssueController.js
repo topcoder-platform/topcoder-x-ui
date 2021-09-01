@@ -22,16 +22,6 @@ async function search(req) {
 }
 
 /**
- * create an issue
- * @param {Object} req the request
- * @param {Object} res the response
- * @returns {Object} the result
- */
-async function create(req) {
-  return await IssueService.create(req.body, req.currentUser);
-}
-
-/**
  * recreate an issue
  * Remove the related db record.
  * Recreate new record and create new challenge.
@@ -45,7 +35,6 @@ async function recreate(req) {
 
 module.exports = {
   search,
-  create,
   recreate
 };
 
