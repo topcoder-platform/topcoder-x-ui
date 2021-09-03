@@ -187,16 +187,12 @@ async function search(criteria) {
   if (criteria.query) {
     githubUserMappings = await dbHelper.scanAllWithSearch(
       GithubUserMapping,
-      criteria.perPage / 2, // eslint-disable-line
-      criteria.githubLastKey ? JSON.parse(criteria.githubLastKey) : undefined, // eslint-disable-line
       'topcoderUsername',
-      criteria.query.toLowerCase());
+      criteria.query);
     gitlabUserMappings = await dbHelper.scanAllWithSearch(
       GitlabUserMapping,
-      criteria.perPage / 2,  // eslint-disable-line
-      criteria.gitlabLastKey ? JSON.parse(criteria.gitlabLastKey) : undefined, // eslint-disable-line
       'topcoderUsername',
-      criteria.query.toLowerCase());
+      criteria.query);
   }
   else {
     githubUserMappings = await dbHelper.scanAll(

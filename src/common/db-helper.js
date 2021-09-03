@@ -94,16 +94,13 @@ async function scanAll(model, size, lastKey) {
 /**
  * Get data collection by scan with search
  * @param {Object} model The dynamoose model to scan
- * @param {String} size The size of result
- * @param {String} lastKey The lastKey param
  * @param {String} containsKey The contains key param
  * @param {String} contains The contains value
  * @returns {Promise<void>}
  */
-async function scanAllWithSearch(model, size, lastKey, containsKey, contains) {
+async function scanAllWithSearch(model, containsKey, contains) {
   return await new Promise((resolve, reject) => {
-    const scanMethod = model.scan(containsKey).contains(contains).limit(size);
-    if (lastKey) scanMethod.startAt(lastKey);
+    const scanMethod = model.scan(containsKey).contains(contains).all();
     scanMethod.exec((err, result) => {
       if (err) {
         logger.error(`DynamoDB scan error ${err}`);
