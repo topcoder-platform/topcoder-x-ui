@@ -15,7 +15,8 @@ angular.module('topcoderX')
         totalPages: 1,
         initialized: false,
         query: '',
-        lastKey: []
+        lastKey: [],
+        pages: 1
       };
 
       $scope.addUserMapping = function () {
@@ -40,7 +41,14 @@ angular.module('topcoderX')
         config.isLoading = true;
         UserMappingsService.search(config.query, config.sortBy, config.sortDir, config.pageNumber, config.pageSize, config.lastKey[config.pageNumber]) // eslint-disable-line max-len
           .then(function (res) {
-            config.items = res.data.docs;
+            if (config.query) {
+              config.allItems = res.data.docs;
+              config.items = config.allItems.slice(0, config.pageSize);
+              config.pages = Math.ceil(config.allItems.length / config.pageSize);
+            }
+            else {
+              config.items = res.data.docs;
+            }
             if (res.data.lastKey && (res.data.lastKey.githubLastKey || res.data.lastKey.gitlabLastKey)) {
               config.lastKey[config.pageNumber + 1] = res.data.lastKey;
               if (!config.pages || config.pages <= config.pageNumber) {
@@ -122,14 +130,28 @@ angular.module('topcoderX')
         if (pageNumber === 0 || pageNumber > $scope.tableConfig.pages ||
           (pageNumber === $scope.tableConfig.pages &&
             $scope.tableConfig.pageNumber === pageNumber)) {
-          return false;
+              return false;
         }
         $scope.tableConfig.pageNumber = pageNumber;
-        $scope.getUserMappings();
+        if ($scope.tableConfig.query && $scope.tableConfig.allItems) {
+          var start = ($scope.tableConfig.pageNumber - 1) * $scope.tableConfig.pageSize - 1;
+          if (pageNumber === 1) {
+            start = 0;
+          }
+          $scope.tableConfig.items = $scope.tableConfig.allItems.slice(
+            start, $scope.tableConfig.pageSize);
+            $scope.tableConfig.initialized = true;
+            $scope.tableConfig.isLoading = false;
+        }
+        else {
+          $scope.getUserMappings();
+        }
       };
 
       $scope.onSearchIconClicked = function () {
         $scope.tableConfig.pageNumber = 1;
+        $scope.tableConfig.pages = 1;
+        $scope.tableConfig.allItems = [];
         $scope.getUserMappings();
       };
 
@@ -137,6 +159,8 @@ angular.module('topcoderX')
         var config = $scope.tableConfig;
         config.query = '';
         $scope.tableConfig.pageNumber = 1;
+        $scope.tableConfig.pages = 1;
+        $scope.tableConfig.allItems = [];
         $scope.getUserMappings();
       };
 
