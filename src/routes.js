@@ -142,6 +142,12 @@ module.exports = {
       method: 'update',
     },
   },
+  '/projects/search': {
+    get: {
+      controller: 'ProjectController',
+      method: 'search',
+    },
+  },
   '/projects/label': {
     post: {
       controller: 'ProjectController',

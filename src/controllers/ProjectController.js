@@ -43,6 +43,15 @@ async function getAll(req) {
 }
 
 /**
+ * search all projects
+ * @param {Object} req the request
+ * @returns {Array} the result
+ */
+async function search(req) {
+  return await ProjectService.search(req.query, req.currentUser);
+}
+
+/**
  * create label
  * @param {Object} req the request
  * @param {Object} res the response
@@ -126,6 +135,7 @@ module.exports = {
   createHook,
   addWikiRules,
   transferOwnerShip,
+  search,
 };
 
 helper.buildController(module.exports);
