@@ -30,7 +30,7 @@
                                 <uib-tab index="0" heading="Current Projects" select="getProjects('active')">
                                     <br />
                                     <div ng-if="isLoaded">
-                                        <div ng-show="allProjects.length===0">
+                                        <div ng-show="projects.length===0 && !tableConfig.query">
                                             <div class="text-center m-t-lg">
                                                 <h4>You don't have active projects right now. Please
                                                     <button class="btn btn-sm btn-info" ng-click="goProject()">
@@ -41,15 +41,18 @@
                                                 </h4>
                                             </div>
                                         </div>
-                                        <div ng-hide="allProjects.length===0">
+                                        <div ng-hide="projects.length===0 && !tableConfig.query">
                                             <div class="col-lg-4" style="padding-left: 0px">
                                                 <div class="input-group custom-search-form">
-                                                    <input ng-model="searchText" type="text" class="form-control" placeholder="Find projects" ng-change="onSearchChange(this)">
+                                                    <input ng-model="tableConfig.query" type="text" class="form-control" placeholder="Find projects" ng-keyup="$event.keyCode == 13 && onSearchIconClicked()">
                                                     <span class="input-group-btn">
-                                                        <button class="btn btn-default" type="button" ng-click="onSearchIconClicked('github')">
+                                                        <button class="btn btn-default" type="button" ng-click="onSearchIconClicked()">
                                                             <span class="glyphicon glyphicon-search"></span>
                                                         </button>
-                                                    </span>
+                                                        <button class="btn btn-danger" type="button" ng-click="onSearchReset()">
+                                                            <span class="glyphicon glyphicon-remove"></span>
+                                                        </button>
+                                                    </span>        
                                                 </div>
                                             </div>
                                             <table class="footable table table-stripped toggle-arrow-tiny"
@@ -94,10 +97,24 @@
                                                         </td>
                                                     </tr>
                                                 </tbody>
-                                                <tfoot ng-hide="searchText">
+                                                <tfoot>
                                                     <tr>
-                                                        <td colspan="{{isAdminUser? 5: 4}}">
-                                                            <ul class="pagination pull-right"></ul>
+                                                        <td colspan="5">
+                                                            <ul class="pagination pull-right">
+                                                                <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === 1}">
+                                                                    <a ng-click="changePage(1)">«</a>
+                                                                </li>
+                                                                <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === 1}">
+                                                                    <a ng-click="changePage(tableConfig.pageNumber - 1)">‹</a>
+                                                                </li>
+                                                                <li class="footable-page" ng-class="{'active' : item === tableConfig.pageNumber}"
+                                                                    ng-repeat="item in getPageArray()">
+                                                                    <a ng-click="changePage(item)">{{item}}</a>
+                                                                </li>
+                                                                <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === tableConfig.pages}">
+                                                                    <a ng-click="changePage(tableConfig.pageNumber + 1)">›</a>
+                                                                </li>
+                                                            </ul>
                                                         </td>
                                                     </tr>
                                                 </tfoot>
@@ -108,16 +125,19 @@
                                 <uib-tab index="1" heading="Archived Projects" select="getProjects('archived')">
                                     <br />
                                     <div ng-if="isLoaded">
-                                        <div ng-show="allProjects.length===0" class="text-center m-t-lg">
+                                        <div ng-show="projects.length===0 && !tableConfig.query" class="text-center m-t-lg">
                                             <p>No projects have been archived.</p>
                                         </div>
-                                        <div ng-hide="allProjects.length===0">
+                                        <div ng-hide="projects.length===0 && !tableConfig.query">
                                             <div class="col-lg-4" style="padding-left: 0px">
                                                 <div class="input-group custom-search-form">
-                                                    <input ng-model="searchText" type="text" class="form-control" placeholder="Find projects" ng-change="onSearchChange(this)">
+                                                    <input ng-model="tableConfig.query" type="text" class="form-control" placeholder="Find projects" ng-keyup="$event.keyCode == 13 && onSearchIconClicked()">
                                                     <span class="input-group-btn">
                                                         <button class="btn btn-default" type="button" ng-click="onSearchIconClicked()">
                                                             <span class="glyphicon glyphicon-search"></span>
+                                                        </button>
+                                                        <button class="btn btn-danger" type="button" ng-click="onSearchReset()">
+                                                            <span class="glyphicon glyphicon-remove"></span>
                                                         </button>
                                                     </span>
                                                 </div>
@@ -148,10 +168,24 @@
                                                         </td>
                                                     </tr>
                                                 </tbody>
-                                                <tfoot ng-hide="searchText">
+                                                <tfoot>
                                                     <tr>
-                                                        <td colspan="{{isAdminUser? 5: 4}}">
-                                                            <ul class="pagination pull-right"></ul>
+                                                        <td colspan="5">
+                                                            <ul class="pagination pull-right">
+                                                                <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === 1}">
+                                                                    <a ng-click="changePage(1)">«</a>
+                                                                </li>
+                                                                <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === 1}">
+                                                                    <a ng-click="changePage(tableConfig.pageNumber - 1)">‹</a>
+                                                                </li>
+                                                                <li class="footable-page" ng-class="{'active' : item === tableConfig.pageNumber}"
+                                                                    ng-repeat="item in getPageArray()">
+                                                                    <a ng-click="changePage(item)">{{item}}</a>
+                                                                </li>
+                                                                <li class="footable-page-arrow" ng-class="{'disabled': tableConfig.pageNumber === tableConfig.pages}">
+                                                                    <a ng-click="changePage(tableConfig.pageNumber + 1)">›</a>
+                                                                </li>
+                                                            </ul>
                                                         </td>
                                                     </tr>
                                                 </tfoot>

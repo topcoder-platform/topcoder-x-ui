@@ -23,10 +23,15 @@ angular.module('topcoderX')
     };
 
     /**
-     * Get all projects
+     * Get projects
      */
-    ProjectService.getProjects = function (status, showAll) {
-      var url = Helper.baseUrl + '/api/v1/projects?status=' + status + '&showAll=' + showAll;
+    ProjectService.getProjects = function (status, showAll, perPage, lastKey, query) {
+      var url = Helper.baseUrl + '/api/v1/projects?status=' + status + '&showAll=' + showAll + '&perPage=' + perPage +
+        (lastKey ? '&lastKey=' + lastKey : '' );
+      if (query) {
+        url = Helper.baseUrl + '/api/v1/projects/search?status=' + status + '&showAll=' + showAll + '&perPage=' + perPage +
+           '&query=' + query;
+      }
       if (projectsGetLock[url]) {
         return projectsDataPromise[url];
       }

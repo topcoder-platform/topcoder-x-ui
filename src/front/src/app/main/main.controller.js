@@ -151,7 +151,7 @@ angular.module('topcoderX')
 
       //private function to get projects.
       $scope.getProjects = function (status) {
-        ProjectService.getProjects(status, false).then(function (response) {
+        ProjectService.getProjects(status, false, 1).then(function (response) {
           $scope.projects = response.data;
           if (!$scope.projects || $scope.projects.length === 0) {
             $scope.showTutorial();

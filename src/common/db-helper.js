@@ -73,6 +73,28 @@ async function scan(model, scanParams) {
 /**
  * Get data collection by scan parameters with paging
  * @param {Object} model The dynamoose model to scan
+ * @param {Object} scanParams The scan parameters object
+ * @param {String} size The size of result
+ * @param {String} lastKey The lastKey param
+ * @returns {Promise<void>}
+ */
+async function scanWithLimit(model, scanParams, size, lastKey) {
+  return await new Promise((resolve, reject) => {
+    const scanMethod = model.scan(scanParams).limit(size);
+    if (lastKey) scanMethod.startAt(lastKey);
+    scanMethod.exec((err, result) => {
+      if (err) {
+        logger.error(`DynamoDB scan error ${err}`);
+        return reject(err);
+      }
+      return resolve(result.count === 0 ? [] : result);
+    });
+  });
+}
+
+/**
+ * Get data collection by scan parameters with paging
+ * @param {Object} model The dynamoose model to scan
  * @param {String} size The size of result
  * @param {String} lastKey The lastKey param
  * @returns {Promise<void>}
@@ -86,6 +108,25 @@ async function scanAll(model, size, lastKey) {
         logger.error(`DynamoDB scan error ${err}`);
         return reject(err);
       }
+      return resolve(result.count === 0 ? [] : result);
+    });
+  });
+}
+
+/**
+ * Get data collection by scan parameters
+ * @param {Object} model The dynamoose model to scan
+ * @param {Object} scanParams The scan parameters object
+ * @returns {Promise<void>}
+ */
+async function scanAllWithParams(model, scanParams) {
+  return await new Promise((resolve, reject) => {
+    model.scan(scanParams).all().exec((err, result) => {
+      if (err) {
+        logger.error(`DynamoDB scan error ${err}`);
+        return reject(err);
+      }
+
       return resolve(result.count === 0 ? [] : result);
     });
   });
@@ -544,6 +585,8 @@ module.exports = {
   scan,
   scanAll,
   scanAllWithSearch,
+  scanWithLimit,
+  scanAllWithParams,
   create,
   update,
   removeById,

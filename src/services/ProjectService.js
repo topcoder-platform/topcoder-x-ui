@@ -235,17 +235,30 @@ async function getAll(query, currentUser) {
   }
   // if show all is checked user must be admin
   if (query.showAll && await securityService.isAdminUser(currentUser.roles)) {
-    let projects = await dbHelper.scan(models.Project, condition);
-    projects = _.map(projects, (project) => {
+    const fetchedProjects = await dbHelper.scanAllWithParams(
+      models.Project, condition);
+    const projects = _.map(fetchedProjects, (project) => {
       if (!project.updatedAt) {
         project.updatedAt = 0;
       }
       return project;
     });
-    for (const project of projects) { // eslint-disable-line
+    const count = projects.length;
+    if (!query.lastKey) {
+      query.lastKey = 0;
+    } else {
+      query.lastKey = parseInt(query.lastKey, 10);
+    }
+    const slicedProjects = _.slice(projects, query.lastKey, query.lastKey + query.perPage);
+    // console.log(projects);
+    for (const project of slicedProjects) { // eslint-disable-line
       project.repoUrls = await dbHelper.populateRepoUrls(project.id);
-    }  
-    return _.orderBy(projects, ['updatedAt', 'title'], ['desc', 'asc']);
+    }
+    const lastKey = query.lastKey + slicedProjects.length;
+    return {
+      lastKey : lastKey < count ? lastKey : undefined,
+      docs: _.orderBy(slicedProjects, ['updatedAt', 'title'], ['desc', 'asc'])
+    };
   }
 
   const filter = {
@@ -260,23 +273,115 @@ async function getAll(query, currentUser) {
     },
   };
 
-  let projects = await dbHelper.scan(models.Project, filter);
-  projects = _.map(projects, (project) => {
+  const fetchedProjects = await dbHelper.scanAllWithParams(
+    models.Project, filter);
+  const projects = _.map(fetchedProjects, (project) => {
     if (!project.updatedAt) {
       project.updatedAt = 0;
     }
     return project;
   });
-  for (const project of projects) { // eslint-disable-line
+  const count = projects.length;
+  if (!query.lastKey) {
+    query.lastKey = 0;
+  } else {
+    query.lastKey = parseInt(query.lastKey, 10);
+  }
+  const slicedProjects = _.slice(projects, query.lastKey, query.lastKey + query.perPage);
+  for (const project of slicedProjects) { // eslint-disable-line
     project.repoUrls = await dbHelper.populateRepoUrls(project.id);
   }
-  return _.orderBy(projects, ['updatedAt', 'title'], ['desc', 'asc']);
+  const lastKey = query.lastKey + slicedProjects.length;
+  return {
+    lastKey : lastKey < count ? lastKey : undefined,
+    docs: _.orderBy(slicedProjects, ['updatedAt', 'title'], ['desc', 'asc'])
+  };
 }
 
 getAll.schema = Joi.object().keys({
   query: Joi.object().keys({
     status: Joi.string().required().allow('active', 'archived').default('active'),
     showAll: Joi.bool().optional().default(false),
+    perPage: Joi.number().integer().min(1).required(),
+    lastKey: Joi.string(),
+  }),
+  currentUser: currentUserSchema,
+});
+
+/**
+ * search projects
+ * @param {Object} query the query filter object
+ * @param {String} currentUser the topcoder current user
+ * @returns {Array} all projects
+ */
+async function search(query, currentUser) {
+  const condition = {
+    archived: 'false',
+  };
+
+  if (query.status === 'archived') {
+    condition.archived = 'true';
+  }
+  // if show all is checked user must be admin
+  if (query.showAll && await securityService.isAdminUser(currentUser.roles)) {
+    const fetchedProjects = await dbHelper.scanAllWithParams(
+      models.Project, condition);
+    let projects = _.map(fetchedProjects, (project) => {
+      if (!project.updatedAt) {
+        project.updatedAt = 0;
+      }
+      return project;
+    });
+    projects = _.filter(projects, project => {
+      return project.title.toLowerCase().indexOf(query.query.toLowerCase()) !== -1;  // eslint-disable-line lodash/prefer-includes
+    });
+    for (const project of projects) { // eslint-disable-line
+      project.repoUrls = await dbHelper.populateRepoUrls(project.id);
+    }  
+    return {
+      lastKey: (fetchedProjects.lastKey ? JSON.stringify(fetchedProjects.lastKey) : undefined), // eslint-disable-line
+      docs: _.orderBy(projects, ['updatedAt', 'title'], ['desc', 'asc'])
+    };
+  }
+
+  const filter = {
+    FilterExpression: '(#owner= :handle or copilot = :handle) AND #archived = :status',
+    ExpressionAttributeNames: {
+      '#owner': 'owner',
+      '#archived': 'archived',
+    },
+    ExpressionAttributeValues: {
+      ':handle': currentUser.handle,
+      ':status': condition.archived,
+    },
+  };
+
+  const fetchedProjects = await dbHelper.scanAllWithParams(
+    models.Project, filter);
+  let projects = _.map(fetchedProjects, (project) => {
+    if (!project.updatedAt) {
+      project.updatedAt = 0;
+    }
+    return project;
+  });
+  projects = _.filter(projects, project => {
+    return project.title.toLowerCase().indexOf(query.query.toLowerCase()) !== -1;  // eslint-disable-line lodash/prefer-includes
+  });
+  for (const project of projects) { // eslint-disable-line
+    project.repoUrls = await dbHelper.populateRepoUrls(project.id);
+  }
+  return {
+    lastKey: (fetchedProjects.lastKey ? JSON.stringify(fetchedProjects.lastKey) : undefined), // eslint-disable-line
+    docs: _.orderBy(projects, ['updatedAt', 'title'], ['desc', 'asc'])
+  }
+}
+
+search.schema = Joi.object().keys({
+  query: Joi.object().keys({
+    status: Joi.string().required().allow('active', 'archived').default('active'),
+    showAll: Joi.bool().optional().default(false),
+    perPage: Joi.number().integer().min(1).required(),
+    query: Joi.string().required(),
   }),
   currentUser: currentUserSchema,
 });
@@ -583,6 +688,7 @@ module.exports = {
   createHook,
   addWikiRules,
   transferOwnerShip,
+  search,
 };
 
 helper.buildService(module.exports);

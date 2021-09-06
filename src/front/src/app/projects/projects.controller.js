@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('topcoderX')
-  .controller('ProjectsController', ['currentUser', '$scope', '$state', 'ProjectService', '$filter', '$rootScope', 'Alert', 'Helper', '$timeout',
-    function (currentUser, $scope, $state, ProjectService, $filter, $rootScope, Alert, Helper, $timeout) {
+  .controller('ProjectsController', ['currentUser', '$scope', '$state', 'ProjectService', '$filter', '$rootScope', 'Alert', 'Helper',
+    function (currentUser, $scope, $state, ProjectService, $filter, $rootScope, Alert, Helper) {
       //Current title
       $scope.title = 'Project Management';
 
@@ -14,6 +14,15 @@ angular.module('topcoderX')
       };
       $scope.state = {
         status: 'active',
+      };
+      $scope.tableConfig = {
+        pageNumber: 1,
+        pageSize: 10,
+        isLoading: false,
+        initialized: false,
+        query: '',
+        lastKey: [],
+        pages: 1
       };
 
       //go to a project detail
@@ -44,13 +53,27 @@ angular.module('topcoderX')
         $scope.state.status = status;
         $scope.isLoaded = false;
         $scope.projects = [];
-        ProjectService.getProjects(status, $scope.filter.showAll).then(function (response) {
+        ProjectService.getProjects(
+          status, $scope.filter.showAll, 
+          $scope.tableConfig.pageSize, $scope.tableConfig.lastKey[$scope.tableConfig.pageNumber],
+          $scope.tableConfig.query).then(function (response) {
+          var config = $scope.tableConfig;
+
+          if (config.query) {
+            config.allItems = response.data.docs;
+            $scope.projects = config.allItems.slice(0, config.pageSize);
+            config.pages = Math.ceil(config.allItems.length / config.pageSize);
+          }
+          else {
+            $scope.projects = response.data.docs;
+          }
+          if (response.data.lastKey) {
+            config.lastKey[config.pageNumber + 1] = response.data.lastKey;
+            if (!config.pages || config.pages <= config.pageNumber) {
+              config.pages = config.pageNumber + 1;
+            }
+          }
           $scope.isLoaded = true;
-          $scope.projects = response.data;
-          $scope.allProjects = angular.copy($scope.projects);
-          $timeout(function () {
-            $scope.init();
-          }, 1000);
         }).catch(function (error) {
           $scope.isLoaded = true;
           if (error.data) {
@@ -59,6 +82,51 @@ angular.module('topcoderX')
             Alert.error('An error occurred while getting project data', $scope);
           }
         });
+      };
+
+      /**
+       * get the number array that shows the pagination bar
+       */
+      $scope.getPageArray = function () {
+        var res = [];
+
+        var pageNo = $scope.tableConfig.pageNumber;
+        var i = pageNo - 5;
+        for (i; i <= pageNo; i++) {
+          if (i > 0) {
+            res.push(i);
+          }
+        }
+        var j = pageNo + 1;
+        for (j; j <= $scope.tableConfig.pages && j <= pageNo + 5; j++) {
+          res.push(j);
+        }
+        return res;
+      };
+      
+      /**
+       * handles the change page click
+       * @param {Number} pageNumber the page number
+       */
+      $scope.changePage = function (pageNumber) {
+        if (pageNumber === 0 || pageNumber > $scope.tableConfig.pages ||
+          (pageNumber === $scope.tableConfig.pages &&
+            $scope.tableConfig.pageNumber === pageNumber)) {
+              return false;
+        }
+        $scope.tableConfig.pageNumber = pageNumber;
+        if ($scope.tableConfig.query && $scope.tableConfig.allItems) {
+          var start = ($scope.tableConfig.pageNumber - 1) * $scope.tableConfig.pageSize - 1;
+          if (pageNumber === 1) {
+            start = 0;
+          }
+          $scope.projects = $scope.tableConfig.allItems.slice(
+            start, $scope.tableConfig.pageSize);
+          $scope.isLoaded = true;
+        }
+        else {
+          $scope.getProjects($scope.state.status);
+        }
       };
 
       $scope.repoType = function (repo) {
@@ -82,31 +150,19 @@ angular.module('topcoderX')
         $scope.getProjects($scope.state.status);
       };
 
-
-      $scope.onSearchChange = function (obj) {
-        $scope.searchText = obj.searchText;
-        if (!obj.searchText || obj.searchText.length === 0) {
-          $scope.getProjects($scope.state.status);
-        }
-
-        if ($scope.allProjects.length > 0) {
-            _searchLocal(obj.searchText);
-        }
-      };
-
       $scope.onSearchIconClicked = function () {
-        if ($scope.allProjects.length > 0 && $scope.searchText) {
-            _searchLocal($scope.searchText);
-        }
+        $scope.tableConfig.pageNumber = 1;
+        $scope.tableConfig.pages = 1;
+        $scope.tableConfig.allItems = [];
+        $scope.getProjects($scope.state.status);
       };
 
-      function _searchLocal(query) {
-        $scope.projects = $scope.allProjects.filter(function(value) {
-          return value['title'].toLowerCase().includes(query.toLowerCase());
-        })
-        $timeout(function () {
-          $('.footable').filter('[data-page="0"]').trigger('click');
-        }, 1000);
-      }
-
+      $scope.onSearchReset = function () {
+        var config = $scope.tableConfig;
+        config.query = '';
+        config.pageNumber = 1;
+        config.pages = 1;
+        config.allItems = [];
+        $scope.getProjects($scope.state.status);
+      };
   }]);
