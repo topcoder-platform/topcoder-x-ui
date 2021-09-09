@@ -202,7 +202,11 @@ async function update(project, currentUser) {
     return item;
   });
   const oldRepositories = await dbHelper.queryRepositoriesByProjectId(dbProject.id);
+  const weebhookIds = {};
   for (const repo of oldRepositories) { // eslint-disable-line
+    if (repo.registeredWebhookId) {
+      weebhookIds[repo.url] = repo.registeredWebhookId;
+    }
     await dbHelper.removeById(models.Repository, repo.id);
   }
   for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
@@ -210,7 +214,8 @@ async function update(project, currentUser) {
       id: helper.generateIdentifier(),
       projectId: dbProject.id,
       url: repoUrl,
-      archived: project.archived
+      archived: project.archived,
+      registeredWebhookId: weebhookIds[repoUrl]
     })
   }
   dbProject.updatedAt = new Date();
@@ -541,6 +546,12 @@ async function createHook(body, currentUser, repoUrl) {
       if (hooks && dbRepo.registeredWebhookId &&
         _.find(hooks, {id: parseInt(dbRepo.registeredWebhookId, 10)})) {
         await client.ProjectHooks.remove(`${repoOwner}/${repoName}`, dbRepo.registeredWebhookId);
+      }
+      for (const currentHook of hooks) { // eslint-disable-line no-restricted-syntax
+        if (currentHook.id !== parseInt(dbRepo.registeredWebhookId, 10) &&
+          currentHook.url === `${config.HOOK_BASE_URL}/webhooks/gitlab`) {
+            await client.ProjectHooks.remove(`${repoOwner}/${repoName}`, currentHook.id);
+          }
       }
       const hook = await client.ProjectHooks.add(`${repoOwner}/${repoName}`,
         `${config.HOOK_BASE_URL}/webhooks/gitlab`, {
