@@ -6,7 +6,7 @@
 'use strict';
 
 angular.module('topcoderX')
-  .factory('ProjectService', ['Helper', '$http', function (Helper, $http) {
+  .factory('ProjectService', ['Helper', '$http', '$rootScope', 'AuthService', function (Helper, $http, $rootScope, AuthService) {
     // object we will return
     var ProjectService = {};
     var projectsDataPromise = {};
@@ -139,6 +139,51 @@ angular.module('topcoderX')
         return response;
       });
     };
+
+    /**
+     * Get associated connect projects that the current user has access to
+     */
+    ProjectService.getConnectProjects = function() {
+      function createProjectRequest(pagingParams) {
+        return $http({
+          method: 'GET',
+          url: $rootScope.appConfig.TC_API_V5_URL + '/projects/',
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + AuthService.AuthService.getTokenV3()
+          },
+          params: {
+            fields: 'id,name,status',
+            sort: 'lastActivityAt desc',
+            perPage: pagingParams.perPage,
+            page: pagingParams.page
+          }
+        });
+      }
+
+      function getAll(getter, perPage, page, prev) {
+        return getter({
+          perPage: perPage,
+          page: page
+        }).then(function (res) {
+          if (res.status === 200) {
+            var data = res.data;
+            if (!data.length) return prev || [];
+            var current = [];
+            if (prev) {
+              current = prev.concat(data);
+            } else {
+              current = data;
+            }
+            return getAll(getter, perPage, 1 + page, current);
+          }
+          return prev || [];
+        });
+      }
+      return getAll(function (params) { return createProjectRequest(params) }, 20, 1).then(function(response) {
+        return response;
+      });
+    }
 
     return ProjectService;
   }]);

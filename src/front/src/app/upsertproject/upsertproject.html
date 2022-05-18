@@ -56,10 +56,11 @@
             <br />
             <br />
             <label class="form-label">Connect ID:</label>
-            <input class="form-control" type="number" ng-model="project.tcDirectId" required />
-            <small class="form-hint">The Topcoder Connect Project ID of the project. You can obtain this through the URL to the
-              project in Topcoder Connect. For example:
-              "https://connect.topcoder.com/projects/16598" - Enter ID "16598"</small>
+            <select ng-options="option.value as option.label for option in connectProjects" ng-model="project.tcDirectId"
+              class="form-control" ng-disabled="loadingConnectProjects" required>
+            </select>
+            <small class="form-hint">Select the Topcoder Connect Project ID of the project. The above list contains all Topcoder Connect Projects
+              you have access to.</small>
             <span ng-show="projectForm.project.tcDirectId.$touched && projectForm.project.tcDirectId.$invalid">The
               TC Connect Project ID is required.</span>
             <br />

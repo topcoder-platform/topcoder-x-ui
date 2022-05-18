@@ -40,6 +40,18 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
     }
 
     $scope.isAdminUser = Helper.isAdminUser(currentUser);
+    $scope.loadingConnectProjects = true;
+    ProjectService.getConnectProjects().then(function (result) {
+      $scope.loadingConnectProjects = false;
+      $scope.connectProjects = result.map(function (p) {
+        return {
+          label: 'ID: ' + p.id + ', NAME: ' + p.name + ', STATUS: ' + p.status,
+          value: p.id
+        }
+      });
+    }).catch(function (error) {
+      Alert.error(error.data.message, $scope);
+    });
 
     // function to add labels to the current project.
     $scope.addLabels = function () {
