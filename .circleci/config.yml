@@ -8,6 +8,9 @@ install_dependency: &install_dependency
     sudo apt install jq
     sudo pip install awscli --upgrade
     sudo pip install docker-compose
+  no_output_timeout: 30m
+
+
 install_deploysuite: &install_deploysuite
   name: Installation of install_deploysuite.
   command: |
@@ -15,6 +18,9 @@ install_deploysuite: &install_deploysuite
     cp ./../buildscript/master_deploy.sh .
     cp ./../buildscript/buildenv.sh .
     cp ./../buildscript/awsconfiguration.sh .
+  no_output_timeout: 30m
+
+
 restore_cache_settings_for_build: &restore_cache_settings_for_build
   key: docker-node-modules-{{ checksum "package-lock.json" }}
 
