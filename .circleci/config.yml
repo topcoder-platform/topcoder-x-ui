@@ -35,7 +35,9 @@ builddeploy_steps: &builddeploy_steps
       - run: *install_dependency
       - run: *install_deploysuite
       - restore_cache: *restore_cache_settings_for_build
-      - run: ./build.sh
+      - run: 
+        command: ./build.sh
+        no_output_timeout: 30m
       - save_cache: *save_cache_settings
       - deploy:
           name: Running MasterScript.
@@ -45,6 +47,7 @@ builddeploy_steps: &builddeploy_steps
             ./buildenv.sh -e $DEPLOY_ENV -b ${DEPLOY_ENV}-${APPNAME}-deployvar
             source buildenvvar
             ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${DEPLOY_ENV}-global-appvar,${DEPLOY_ENV}-${APPNAME}-appvar -i ${APPNAME}
+      
 
 
 jobs:
