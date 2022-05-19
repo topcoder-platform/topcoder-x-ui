@@ -56,9 +56,21 @@
             <br />
             <br />
             <label class="form-label">Connect ID:</label>
-            <select ng-options="option.value as option.label for option in connectProjects" ng-model="project.tcDirectId"
-              class="form-control" ng-disabled="loadingConnectProjects" required>
-            </select>
+            <ui-select ng-model="project.tcDirectId" theme="bootstrap">
+              <ui-select-match placeholder="Select...">
+                {{$select.selected.id}}
+              </ui-select-match>
+              <ui-select-choices repeat="cp.id as cp in connectProjects | filter: $select.search">
+                id: {{cp.id}}, name: {{cp.name}}, status: {{cp.status}}
+                <div ng-if="$index == $select.items.length-1">
+                  <button
+                    class="btn btn-xs btn-success"
+                    style="width: 100%; margin-top: 5px;"
+                    ng-click="fetchConnectProjects($event);"
+                    ng-disabled="loadingConnectProjects">Load more...</button>
+                </div>
+              </ui-select-choices>
+            </ui-select>
             <small class="form-hint">Select the Topcoder Connect Project ID of the project. The above list contains all Topcoder Connect Projects
               you have access to.</small>
             <span ng-show="projectForm.project.tcDirectId.$touched && projectForm.project.tcDirectId.$invalid">The

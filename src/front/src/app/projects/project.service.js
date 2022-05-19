@@ -142,48 +142,25 @@ angular.module('topcoderX')
 
     /**
      * Get associated connect projects that the current user has access to
+     * @param perPage the items to retrieve per page
+     * @param page the page index
      */
-    ProjectService.getConnectProjects = function() {
-      function createProjectRequest(pagingParams) {
-        return $http({
-          method: 'GET',
-          url: $rootScope.appConfig.TC_API_V5_URL + '/projects/',
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + AuthService.AuthService.getTokenV3()
-          },
-          params: {
-            fields: 'id,name,status',
-            sort: 'lastActivityAt desc',
-            perPage: pagingParams.perPage,
-            page: pagingParams.page
-          }
-        });
-      }
-
-      function getAll(getter, perPage, page, prev) {
-        return getter({
+    ProjectService.getConnectProjects = function(perPage, page) {
+      return $http({
+        method: 'GET',
+        url: $rootScope.appConfig.TC_API_V5_URL + '/projects/',
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + AuthService.getTokenV3()
+        },
+        params: {
+          fields: 'id,name,status',
+          sort: 'lastActivityAt desc',
           perPage: perPage,
           page: page
-        }).then(function (res) {
-          if (res.status === 200) {
-            var data = res.data;
-            if (!data.length) return prev || [];
-            var current = [];
-            if (prev) {
-              current = prev.concat(data);
-            } else {
-              current = data;
-            }
-            return getAll(getter, perPage, 1 + page, current);
-          }
-          return prev || [];
-        });
-      }
-      return getAll(function (params) { return createProjectRequest(params) }, 20, 1).then(function(response) {
-        return response;
+        }
       });
-    }
+    };
 
     return ProjectService;
   }]);
