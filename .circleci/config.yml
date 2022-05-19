@@ -20,6 +20,12 @@ install_deploysuite: &install_deploysuite
     cp ./../buildscript/awsconfiguration.sh .
   no_output_timeout: 30m
 
+build_app: &build_app
+  name: Build the app
+  command: |
+    ./build.sh
+  no_output_timeout: 30m
+
 
 restore_cache_settings_for_build: &restore_cache_settings_for_build
   key: docker-node-modules-{{ checksum "package-lock.json" }}
@@ -35,9 +41,7 @@ builddeploy_steps: &builddeploy_steps
       - run: *install_dependency
       - run: *install_deploysuite
       - restore_cache: *restore_cache_settings_for_build
-      - run: 
-        command: ./build.sh
-        no_output_timeout: 30m
+      - run: *build_app
       - save_cache: *save_cache_settings
       - deploy:
           name: Running MasterScript.
