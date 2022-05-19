@@ -30,4 +30,5 @@ require('pace-js');
 require('footable');
 require('jquery-ui-dist/jquery-ui');
 require('angularjs-datepicker');
+require('ui-select');
 window.shortid = require('shortid')

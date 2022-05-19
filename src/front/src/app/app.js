@@ -7,6 +7,7 @@ angular.module('topcoderX', [
   'ngAnimate',
   'ngCookies',
   'ngTouch',
+  'ui.select',
   'ngSanitize',
   'ngResource',
   'ui.router',
