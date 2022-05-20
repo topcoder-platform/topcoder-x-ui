@@ -472,6 +472,35 @@ async function queryOneOrganisation(model, organisation) {
 
 /**
  * Query one active repository
+ * @param {String} url the repository url
+ * @returns {Promise<Object>}
+ */
+async function queryOneRepository(url) {
+  return await new Promise((resolve, reject) => {
+    models.Repository.query({
+      url,
+    })
+    .all()
+    .exec((err, repos) => {
+      if (err) {
+        return reject(err);
+      }
+      if (!repos || repos.length === 0) resolve(null);
+      if (repos.length > 1) {
+        let error = `Repository's url is unique in this version.
+          This Error must be caused by old data in the Repository table.
+          The old version can only guarrentee that the active Repository's url is unique.
+          Please migrate the old Repository table.`;
+        logger.debug(`queryOneRepository. Error. ${error}`);
+        reject(error);
+      }
+      return resolve(repos[0]);
+    });
+  });
+}
+
+/**
+ * Query one active repository
  * @param {Object} model the dynamoose model
  * @param {String} url the repository url
  * @returns {Promise<Object>}
@@ -597,6 +626,7 @@ module.exports = {
   queryOneActiveProject,
   queryOneActiveProjectWithFilter,
   queryOneActiveRepository,
+  queryOneRepository,
   queryOneOrganisation,
   queryOneIssue,
   queryOneUserByType,

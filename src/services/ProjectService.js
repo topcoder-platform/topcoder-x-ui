@@ -82,7 +82,7 @@ async function _validateProjectData(project, repoUrl) {
   }
   if (existsInDatabase) {
     throw new errors.ValidationError(`This repo already has a Topcoder-X project associated with it.
-    Copilot: ${existsInDatabase.copilot}, Owner: ${existsInDatabase.owner}`)
+    Repo: ${repoUrl}, Copilot: ${existsInDatabase.copilot}, Owner: ${existsInDatabase.owner}`)
   }
   const provider = await helper.getProviderType(repoUrl);
   const userRole = project.copilot ? project.copilot : project.owner;
@@ -112,7 +112,78 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
   ) {
     throw new errors.ForbiddenError('You don\'t have access on this project');
   }
+  if (dbProject.archived) {
+    throw new errors.ForbiddenError('You can\'t access on this archived project');
+  }
   return dbProject;
+}
+
+/**
+ * create Repository as well as adding git label, hook, wiki
+ * or
+ * migrate Repository as well as related Issue and CopilotPayment
+ * @param {String} repoUrl the repository url
+ * @param {Object} project the new project
+ * @param {String} currentUser the topcoder current user
+ * @returns {void}
+ * @private
+ */
+async function _createOrMigrateRepository(repoUrl, project, currentUser) {
+  let oldRepo = await dbHelper.queryOneRepository(repoUrl);
+  if (oldRepo) {
+    if (oldRepo.projectId === project.id) {
+      throw new Error(`This error should never occur: the projectId of the repository to be migrate
+        will never equal to the new project id`);
+    }
+    if (oldRepo.archived === false) {
+      throw new Error(`Duplicate active repository should be blocked by _validateProjectData,
+        or a time-sequence cornercase encountered here`);
+    }
+    try {
+      let oldIssues = await models.Issue.query({repoUrl: oldRepo.url});
+      let oldCopilotPaymentPromise = oldIssues.filter(issue => issue.challengeUUID)
+        .map(issue => models.CopilotPayment.query({challengeUUID: issue.challengeUUID})
+          .then(payments => {
+            if (!payments || payments.length === 0) {
+              /* eslint-disable-next-line no-console */
+              console.log(`No CopilotPayment correspond to Issue with challengeUUID ${issue.challengeUUID}.
+                           The corresponding CopilotPayment may have been removed.
+                           Or, there is bug in old version.`);
+              return null;
+            }
+            if (payments.length > 1) {
+              throw new Error(`Duplicate CopilotPayment correspond to one Issue with challengeUUID ${issue.challengeUUID}.
+                               There must be bug in old version`);
+            }
+            return payments[0];
+          }));
+      let oldCopilotPayment = await Promise.all(oldCopilotPaymentPromise).filter(payment => payment);
+
+      await models.Repository.update({id: oldRepo.id}, {projectId: project.id, archived: false});
+      await oldIssues.forEach(issue => models.Issue.update({id: issue.id}, {projectId: project.id}));
+      await oldCopilotPayment.forEach(
+        payment => models.CopilotPayment.update({id: payment.id}, {project: project.id})
+      );
+    }
+    catch (err) {
+      throw new Error(`Update ProjectId for Repository, Issue, CopilotPayment failed. Repo ${repoUrl}. Internal Error: ${err.message}`);
+    }
+  } else {
+    try {
+      await dbHelper.create(models.Repository, {
+        id: helper.generateIdentifier(),
+        projectId: project.id,
+        url: repoUrl,
+        archived: project.archived
+      })
+      await createLabel({projectId: project.id}, currentUser, repoUrl);
+      await createHook({projectId: project.id}, currentUser, repoUrl);
+      await addWikiRules({projectId: project.id}, currentUser, repoUrl);
+    }
+    catch (err) {
+      throw new Error(`Project created. Adding the webhook, issue labels, and wiki rules failed. Repo ${repoUrl}. Internal Error: ${err.message}`);
+    }
+  }
 }
 
 /**
@@ -142,24 +213,16 @@ async function create(project, currentUser) {
   project.copilot = project.copilot ? project.copilot.toLowerCase() : null;
   project.id = helper.generateIdentifier();
 
-  const createdProject = await dbHelper.create(models.Project, project);
-
+  // TODO: The following db operation should/could be moved into one transaction
   for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
-    await dbHelper.create(models.Repository, {
-      id: helper.generateIdentifier(),
-      projectId: project.id,
-      url: repoUrl,
-      archived: project.archived
-    })
     try {
-      await createLabel({projectId: project.id}, currentUser, repoUrl);
-      await createHook({projectId: project.id}, currentUser, repoUrl);
-      await addWikiRules({projectId: project.id}, currentUser, repoUrl);
+      await _createOrMigrateRepository(repoUrl, project, currentUser);
     }
     catch (err) {
-      throw new Error(`Project created. Adding the webhook, issue labels, and wiki rules failed. Repo ${repoUrl}`);
+      throw new Error(`Create or migrate repository failed. Repo ${repoUrl}. Internal Error: ${err.message}`);
     }
   }
+  const createdProject = await dbHelper.create(models.Project, project);
 
   return createdProject;
 }
@@ -178,6 +241,7 @@ async function update(project, currentUser) {
   for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
     await _validateProjectData(project, repoUrl);
   }
+  // TODO: remove the useless code-block
   if (dbProject.archived === 'false' && project.archived === true) {
     // project archived detected.
     const result = {
@@ -201,22 +265,22 @@ async function update(project, currentUser) {
     dbProject[item[0]] = item[1];
     return item;
   });
-  const oldRepositories = await dbHelper.queryRepositoriesByProjectId(dbProject.id);
-  const weebhookIds = {};
-  for (const repo of oldRepositories) { // eslint-disable-line
-    if (repo.registeredWebhookId) {
-      weebhookIds[repo.url] = repo.registeredWebhookId;
-    }
-    await dbHelper.removeById(models.Repository, repo.id);
-  }
+
+  // TODO: move the following logic into one dynamoose transaction
+  const repoUrl2Repo = await dbHelper.queryRepositoriesByProjectId(dbProject.id)
+    .map(repo => { return {[repo.url]: repo}; });
+
   for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
-    await dbHelper.create(models.Repository, {
-      id: helper.generateIdentifier(),
-      projectId: dbProject.id,
-      url: repoUrl,
-      archived: project.archived,
-      registeredWebhookId: weebhookIds[repoUrl]
-    })
+    if (repoUrl in repoUrl2Repo) {
+      await models.Repository.update({id: repoUrl2Repo[repoUrl].id}, {archived: project.archived});
+    } else {
+      try {
+        await _createOrMigrateRepository(repoUrl, project, currentUser);
+      }
+      catch (err) {
+        throw new Error(`Create or migrate repository failed. Repo ${repoUrl}. Internal Error: ${err.message}`);
+      }
+    }
   }
   dbProject.updatedAt = new Date();
   return await dbHelper.update(models.Project, dbProject.id, dbProject);
