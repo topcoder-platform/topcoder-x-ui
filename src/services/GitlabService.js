@@ -262,10 +262,11 @@ getUserIdByUsername.schema = Joi.object().keys({
 /**
  * Refresh the owner user access token if needed
  * @param {Object} gitlabOwner the gitlab owner
+ * @returns {Promise} the promise result of owner user with refreshed token
  */
 async function refreshGitlabUserAccessToken(gitlabOwner) {
-  if (gitlabOwner.accessTokenExpiration && gitlabOwner.accessTokenExpiration.getTime() <=
-    new Date().getTime() + constants.GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION * MS_PER_SECOND) {
+  if (gitlabOwner.accessTokenExpiration && new Date().getTime() > gitlabOwner.accessTokenExpiration.getTime() -
+    (constants.GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION * MS_PER_SECOND)) {
     const refreshTokenResult = await request
       .post('https://gitlab.com/oauth/token')
       .query({
@@ -278,12 +279,13 @@ async function refreshGitlabUserAccessToken(gitlabOwner) {
       .end();
       // save user token data
     const expiresIn = refreshTokenResult.body.expires_in || constants.GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION;
-    await dbHelper.update(User, gitlabOwner.id, {
+    return await dbHelper.update(User, gitlabOwner.id, {
       accessToken: refreshTokenResult.body.access_token,
       accessTokenExpiration: new Date(new Date().getTime() + expiresIn * MS_PER_SECOND),
       refreshToken: refreshTokenResult.body.refresh_token,
     });
   }
+  return gitlabOwner;
 }
 
 refreshGitlabUserAccessToken.schema = Joi.object().keys({

@@ -102,7 +102,9 @@ async function listOwnerUserGroups(req) {
   if (!user || !user.accessToken) {
     throw new errors.UnauthorizedError('You have not setup for Gitlab.');
   }
-  return await GitlabService.listOwnerUserGroups(user.accessToken, req.query.page, req.query.perPage, req.query.getAll);
+  const refreshedUser = await GitlabService.refreshGitlabUserAccessToken(user);
+  return await GitlabService.listOwnerUserGroups(refreshedUser.accessToken, req.query.page,
+    req.query.perPage, req.query.getAll);
 }
 
 /**
@@ -175,7 +177,7 @@ async function addUserToGroupCallback(req, res) {
     throw new errors.NotFoundError('The owner user is not found or not accessible.');
   }
 
-  await GitlabService.refreshGitlabUserAccessToken(ownerUser);
+  const refreshedOwnerUser = await GitlabService.refreshGitlabUserAccessToken(ownerUser);
 
   // exchange code to get normal user token
   const result = await request
@@ -195,7 +197,8 @@ async function addUserToGroupCallback(req, res) {
   const token = result.body.access_token;
 
   // get group name
-  const groupsResult = await GitlabService.listOwnerUserGroups(ownerUser.accessToken, 1, constants.MAX_PER_PAGE, true);
+  const groupsResult = await GitlabService.listOwnerUserGroups(refreshedOwnerUser.accessToken, 1,
+    constants.MAX_PER_PAGE, true);
   const currentGroup = _.find(groupsResult.groups, (item) => { // eslint-disable-line arrow-body-style
     return item.id.toString() === group.groupId.toString();
   });
@@ -203,7 +206,7 @@ async function addUserToGroupCallback(req, res) {
   // add user to group
   const gitlabUser = await GitlabService.addGroupMember(
     group.groupId,
-    ownerUser.accessToken,
+    refreshedOwnerUser.accessToken,
     token,
     group.accessLevel,
     group.expiredAt);
@@ -265,11 +268,12 @@ async function deleteUsersFromTeam(req, res) {
       if (!ownerUser) {
         throw new errors.NotFoundError('The owner user is not found or not accessible.');
       }
-      await GitlabService.refreshGitlabUserAccessToken(ownerUser);
+      const refreshedOwnerUser = await GitlabService.refreshGitlabUserAccessToken(ownerUser);
       const userGroupMappings = await dbHelper.scan(UserGroupMapping, {groupId});
       // eslint-disable-next-line no-restricted-syntax
       for (const userGroupMapItem of userGroupMappings) {
-        await GitlabService.deleteUserFromGitlabGroup(ownerUser.accessToken, groupId, userGroupMapItem.gitlabUserId);
+        await GitlabService.deleteUserFromGitlabGroup(refreshedOwnerUser.accessToken, groupId,
+          userGroupMapItem.gitlabUserId);
         await dbHelper.removeById(UserGroupMapping, userGroupMapItem.id);
       }
     } catch (err) {
