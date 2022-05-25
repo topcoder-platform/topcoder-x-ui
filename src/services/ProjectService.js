@@ -112,7 +112,7 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
   ) {
     throw new errors.ForbiddenError('You don\'t have access on this project');
   }
-  if (dbProject.archived) {
+  if (dbProject.archived === 'true') {
     throw new errors.ForbiddenError('You can\'t access on this archived project');
   }
   return dbProject;
@@ -140,33 +140,21 @@ async function _createOrMigrateRepository(repoUrl, project, currentUser) {
         or a time-sequence cornercase encountered here`);
     }
     try {
-      let oldIssues = await models.Issue.query({repoUrl: oldRepo.url});
-      let oldCopilotPaymentPromise = oldIssues.filter(issue => issue.challengeUUID)
-        .map(issue => models.CopilotPayment.query({challengeUUID: issue.challengeUUID})
-          .then(payments => {
-            if (!payments || payments.length === 0) {
-              /* eslint-disable-next-line no-console */
-              console.log(`No CopilotPayment correspond to Issue with challengeUUID ${issue.challengeUUID}.
-                           The corresponding CopilotPayment may have been removed.
-                           Or, there is bug in old version.`);
-              return null;
-            }
-            if (payments.length > 1) {
-              throw new Error(`Duplicate CopilotPayment correspond to one Issue with challengeUUID ${issue.challengeUUID}.
-                               There must be bug in old version`);
-            }
-            return payments[0];
-          }));
-      let oldCopilotPayment = await Promise.all(oldCopilotPaymentPromise).filter(payment => payment);
+      const oldIssues = await dbHelper.queryIssueIdChallengeUUIDByRepoUrl(repoUrl);
+      const issueIds = oldIssues.map(issue => issue.id);
+      const challengeUUIDs = oldIssues.map(issue => issue.challengeUUID).filter(challengeUUID => challengeUUID);
+      const paymentIds = await Promise.all(
+        challengeUUIDs.map(challengeUUID => dbHelper.queryPaymentIdByChallengeUUID(challengeUUID))
+      );
 
-      await models.Repository.update({id: oldRepo.id}, {projectId: project.id, archived: false});
-      await oldIssues.forEach(issue => models.Issue.update({id: issue.id}, {projectId: project.id}));
-      await oldCopilotPayment.forEach(
-        payment => models.CopilotPayment.update({id: payment.id}, {project: project.id})
+      await dbHelper.update(models.Repository, oldRepo.id, {projectId: project.id, archived: false});
+      await Promise.all(issueIds.map(issueId => dbHelper.update(models.Issue, issueId, {projectId: project.id})));
+      await Promise.all(
+        paymentIds.map(paymentId => dbHelper.update(models.CopilotPayment, paymentId, {project: project.id}))
       );
     }
     catch (err) {
-      throw new Error(`Update ProjectId for Repository, Issue, CopilotPayment failed. Repo ${repoUrl}. Internal Error: ${err.message}`);
+      throw new Error(`Update ProjectId for Repository, Issue, CopilotPayment failed. Repo ${repoUrl}. Internal Error: ${err}`);
     }
   } else {
     try {
@@ -181,7 +169,7 @@ async function _createOrMigrateRepository(repoUrl, project, currentUser) {
       await addWikiRules({projectId: project.id}, currentUser, repoUrl);
     }
     catch (err) {
-      throw new Error(`Project created. Adding the webhook, issue labels, and wiki rules failed. Repo ${repoUrl}. Internal Error: ${err.message}`);
+      throw new Error(`Project created. Adding the webhook, issue labels, and wiki rules failed. Repo ${repoUrl}. Internal Error: ${err}`);
     }
   }
 }
@@ -213,6 +201,8 @@ async function create(project, currentUser) {
   project.copilot = project.copilot ? project.copilot.toLowerCase() : null;
   project.id = helper.generateIdentifier();
 
+  const createdProject = await dbHelper.create(models.Project, project);
+
   // TODO: The following db operation should/could be moved into one transaction
   for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
     try {
@@ -222,7 +212,6 @@ async function create(project, currentUser) {
       throw new Error(`Create or migrate repository failed. Repo ${repoUrl}. Internal Error: ${err.message}`);
     }
   }
-  const createdProject = await dbHelper.create(models.Project, project);
 
   return createdProject;
 }
@@ -267,12 +256,12 @@ async function update(project, currentUser) {
   });
 
   // TODO: move the following logic into one dynamoose transaction
-  const repoUrl2Repo = await dbHelper.queryRepositoriesByProjectId(dbProject.id)
-    .map(repo => { return {[repo.url]: repo}; });
+  const repos = await dbHelper.queryRepositoriesByProjectId(dbProject.id);
 
   for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
-    if (repoUrl in repoUrl2Repo) {
-      await models.Repository.update({id: repoUrl2Repo[repoUrl].id}, {archived: project.archived});
+    if (repos.find(repo => repo.url === repoUrl)) {
+      const repoId = repos.find(repo => repo.url === repoUrl).id
+      await dbHelper.update(models.Repository, repoId, {archived: project.archived});
     } else {
       try {
         await _createOrMigrateRepository(repoUrl, project, currentUser);
@@ -319,7 +308,6 @@ async function getAll(query, currentUser) {
       query.lastKey = parseInt(query.lastKey, 10);
     }
     const slicedProjects = _.slice(projects, query.lastKey, query.lastKey + query.perPage);
-    // console.log(projects);
     for (const project of slicedProjects) { // eslint-disable-line
       project.repoUrls = await dbHelper.populateRepoUrls(project.id);
     }
