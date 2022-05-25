@@ -180,6 +180,43 @@ async function queryOneIssue(model, repositoryId, number, provider) {
 }
 
 /**
+ * Get Issue's id and challengeUUID by repoUrl
+ * @param {String} repoUrl The repo url
+ * @returns {Promise<Object>}
+ */
+async function queryIssueIdChallengeUUIDByRepoUrl(repoUrl) {
+  return await new Promise((resolve, reject) => {
+    models.Issue.scan('repoUrl').eq(repoUrl)
+      .attributes(['id', 'challengeUUID'])
+      .exec((err, result) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(result);
+      });
+  });
+}
+
+
+/**
+ * Get CopilotPayment's id by challengeUUID
+ * @param {String} challengeUUID The challengeUUID
+ * @returns {Promise<String>}
+ */
+async function queryPaymentIdByChallengeUUID(challengeUUID) {
+  return await new Promise((resolve, reject) => {
+    models.CopilotPayment.scan('challengeUUID').eq(challengeUUID)
+      .attributes(['id'])
+      .exec((err, result) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(result.id);
+      });
+  });
+}
+
+/**
  * Get single data by query parameters
  * @param {Object} model The dynamoose model to query
  * @param {String} username The user username
@@ -257,7 +294,7 @@ async function queryOneUserMappingByTCUsername(model, tcusername) {
 async function queryOneActiveProject(model, repoUrl) {
   return await new Promise((resolve, reject) => {
     queryOneActiveRepository(models.Repository, repoUrl).then((repo) => {
-      if (!repo) resolve(null);
+      if (!repo || repo.length === 0) resolve(null);
       else model.queryOne('id').eq(repo.projectId).consistent()
         .exec((err, result) => {
           if (err) {
@@ -509,8 +546,8 @@ async function queryOneActiveRepository(model, url) {
   return await new Promise((resolve, reject) => {
     model.queryOne({
       url,
-      archived: 'false'
     })
+    .filter('archived').eq('false')
     .all()
     .exec((err, result) => {
       if (err) {
@@ -531,8 +568,8 @@ async function queryActiveRepositoriesExcludeByProjectId(url, projectId) {
   return await new Promise((resolve, reject) => {
     models.Repository.query({
       url,
-      archived: 'false'
     })
+    .filter('archived').eq('false')
     .filter('projectId')
     .not().eq(projectId)
     .all()
@@ -609,6 +646,8 @@ async function populateRepoUrls(projectId) {
 }
 
 module.exports = {
+  queryIssueIdChallengeUUIDByRepoUrl,
+  queryPaymentIdByChallengeUUID,
   getById,
   getByKey,
   scan,

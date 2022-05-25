@@ -117,7 +117,7 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
   ) {
     throw new errors.ForbiddenError('You don\'t have access on this project');
   }
-  if (dbProject.archived) {
+  if (dbProject.archived === 'true') {
     throw new errors.ForbiddenError('You can\'t access on this archived project');
   }
   return dbProject;

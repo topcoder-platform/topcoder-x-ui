@@ -86,7 +86,7 @@ async function _ensureEditPermissionAndGetInfo(paymentId, topcoderUser) {
   if (dbPayment.closed === true) {
     throw new Error('Closed payment can not be updated');
   }
-  if (dbProject.archived) {
+  if (dbProject.archived === 'true') {
     throw new errors.ForbiddenError('You can\'t edit this payment in an archived project');
   }
   return dbPayment;
@@ -206,7 +206,7 @@ async function create(topcoderUser, payment) {
   if (dbProject.copilot !== topcoderUser.handle && dbProject.owner !== topcoderUser.handle) {
     throw new errors.ForbiddenError('You do not have permission to edit this payment');
   }
-  if (dbProject.archived) {
+  if (dbProject.archived === 'true') {
     throw new errors.ForbiddenError('You can\'t edit this payment in an archived project');
   }
   payment.username = dbProject.copilot;
