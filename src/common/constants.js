@@ -43,10 +43,10 @@ const GITLAB_MAX_PER_PAGE = Number.MAX_SAFE_INTEGER;
 // the access level can be: 10 - GUEST, 20 - REPORTER, 30 - DEVELOPER, 40 - MASTER, 50 - OWNER
 const GITLAB_DEFAULT_GROUP_ACCESS_LEVEL = 30;
 
-// The Gitlab access token default expiration in seconds
-const GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION = 3600 * 24 * 14;
+// The Gitlab access token default expiration in seconds (2 hours expiration)
+const GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION = 3600 * 2;
 
-// The Gitlab refresh token time in seconds before expiration
+// The Gitlab refresh token time in seconds before expiration (5 minute before expiration)
 const GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION = 300;
 
 const GITHUB_OWNER_CALLBACK_URL = '/api/v1/github/owneruser/callback';
