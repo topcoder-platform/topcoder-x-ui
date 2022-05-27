@@ -150,8 +150,11 @@ async function _createOrMigrateRepository(repoUrl, project, currentUser) {
       await dbHelper.update(models.Repository, oldRepo.id, {projectId: project.id, archived: false});
       await Promise.all(issueIds.map(issueId => dbHelper.update(models.Issue, issueId, {projectId: project.id})));
       await Promise.all(
-        paymentIds.map(paymentId => dbHelper.update(models.CopilotPayment, paymentId, {project: project.id}))
+        paymentIds.filter(paymentId => paymentId)
+          .map(paymentId => dbHelper.update(models.CopilotPayment, paymentId, {project: project.id}))
       );
+
+      await createHook({projectId: project.id}, currentUser, repoUrl);
     }
     catch (err) {
       throw new Error(`Update ProjectId for Repository, Issue, CopilotPayment failed. Repo ${repoUrl}. Internal Error: ${err}`);
