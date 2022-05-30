@@ -263,7 +263,7 @@ async function deleteUsersFromTeam(req, res) {
   // If groupInDB not exists, then just return
   if (groupInDB) {
     try {
-      const ownerUser = await helper.queryOneUserByTypeAndRole(User,
+      const ownerUser = await dbHelper.queryOneUserByTypeAndRole(User,
         groupInDB.ownerUsername, constants.USER_TYPES.GITLAB, constants.USER_ROLES.OWNER);
       if (!ownerUser) {
         throw new errors.NotFoundError('The owner user is not found or not accessible.');
