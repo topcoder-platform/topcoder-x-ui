@@ -26,6 +26,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       archived: false,
       createCopilotPayments: false
     };
+    $scope.connectProjects = [];
     if ($rootScope.project) {
       $scope.title = 'Manage a Project';
       $scope.project = $rootScope.project;
@@ -34,6 +35,15 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       $scope.project.owner = $rootScope.project.owner;
       $scope.project.repoUrl = $rootScope.project.repoUrls.join(',');
       $scope.editing = true;
+      if ($rootScope.project.tcDirectId) {
+        ProjectService.getConnectProject($rootScope.project.tcDirectId).then(function (resp) {
+          var connectProject = {
+            id: resp.data.id,
+            name: resp.data.name
+          };
+          $scope.connectProjects.unshift(connectProject);
+        });
+      }
     } else {
       $scope.title = 'Add a Project';
       $scope.editing = false;
@@ -41,7 +51,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
 
     $scope.isAdminUser = Helper.isAdminUser(currentUser);
     $scope.loadingConnectProjects = true;
-    $scope.connectProjects = [];
+
     $scope.fetchConnectProjects = function($event) {
       if (!$event) {
         $scope.page = 1;
@@ -57,7 +67,10 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       }
       $scope.loadingConnectProjects = true;
       ProjectService.getConnectProjects(20, $scope.page).then(function(resp) {
-        $scope.connectProjects = $scope.connectProjects.concat(resp.data);
+        var projects = resp.data.filter(function (p) {
+          return $rootScope.project && $rootScope.project.tcDirectId ? p.id !== $rootScope.project.tcDirectId : true;
+        });
+        $scope.connectProjects = $scope.connectProjects.concat(projects);
       })['finally'](function() {
         $scope.loadingConnectProjects = false;
       });
