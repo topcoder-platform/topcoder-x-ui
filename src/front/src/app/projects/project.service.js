@@ -154,10 +154,26 @@ angular.module('topcoderX')
           "Authorization": "Bearer " + AuthService.getTokenV3()
         },
         params: {
-          fields: 'id,name,status',
+          fields: 'id,name',
           sort: 'lastActivityAt desc',
           perPage: perPage,
-          page: page
+          page: page,
+          status: 'active'
+        }
+      });
+    };
+
+    /**
+     * Get connect project by id
+     * @param id the id
+     */
+    ProjectService.getConnectProject = function(id) {
+      return $http({
+        method: 'GET',
+        url: $rootScope.appConfig.TC_API_V5_URL + '/projects/' + id,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + AuthService.getTokenV3()
         }
       });
     };

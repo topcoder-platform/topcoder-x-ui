@@ -55,26 +55,26 @@
               project Title is required.</span>
             <br />
             <br />
-            <label class="form-label">Connect ID:</label>
+            <label class="form-label">Connect Project:</label>
             <ui-select ng-model="project.tcDirectId" theme="bootstrap">
               <ui-select-match placeholder="Select...">
-                {{$select.selected.id}}
+                {{$select.selected.name}}
               </ui-select-match>
               <ui-select-choices repeat="cp.id as cp in connectProjects | filter: $select.search">
-                id: {{cp.id}}, name: {{cp.name}}, status: {{cp.status}}
+                <span ng-bind-html="cp.name | highlight: $select.search"></span>
                 <div ng-if="$index == $select.items.length-1">
                   <button
                     class="btn btn-xs btn-success"
-                    style="width: 100%; margin-top: 5px;"
+                    style="width: 100%; margin-top: 10px;"
                     ng-click="fetchConnectProjects($event);"
                     ng-disabled="loadingConnectProjects">Load more...</button>
                 </div>
               </ui-select-choices>
             </ui-select>
-            <small class="form-hint">Select the Topcoder Connect Project ID of the project. The above list contains all Topcoder Connect Projects
+            <small class="form-hint">Select the Topcoder Connect Project to be associated with. The above list contains all Topcoder Connect Projects
               you have access to.</small>
             <span ng-show="projectForm.project.tcDirectId.$touched && projectForm.project.tcDirectId.$invalid">The
-              TC Connect Project ID is required.</span>
+              TC Connect Project is required.</span>
             <br />
             <br />
             <label class="form-label">Repo URLs:</label>
