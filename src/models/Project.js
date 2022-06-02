@@ -25,9 +25,9 @@ const schema = new Schema({
     required: true
   },
   tags: {
-    type: Array,
+    type: String,
     required: true,
-    default: []
+    default: ''
   },
   rocketChatWebhook: {type: String, required: false},
   rocketChatChannelName: {type: String, required: false},
