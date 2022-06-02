@@ -184,7 +184,7 @@ angular.module('topcoderX')
     ProjectService.getTags = function() {
       return $http({
         method: 'GET',
-        url: $rootScope.appConfig.TC_API_V4_URL[$rootScope.appConfig.TOPCODER_ENV] + '/technologies,
+        url: $rootScope.appConfig.TOPCODER_VALUES[$rootScope.appConfig.TOPCODER_ENV].TC_API_V4_URL + '/technologies',
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer " + AuthService.getTokenV3()

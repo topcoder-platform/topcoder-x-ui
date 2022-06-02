@@ -159,13 +159,13 @@ async function _createOrMigrateRepository(repoUrl, project, currentUser) {
       );
 
       await createHook({projectId: project.id}, currentUser, repoUrl);
+
+      const oldProject = await dbHelper.getById(models.Project, oldRepo.projectId);
+      return _.isEqual(oldProject.tags, project.tags) ? [] : challengeUUIDs;
     }
     catch (err) {
       throw new Error(`Update ProjectId for Repository, Issue, CopilotPayment failed. Repo ${repoUrl}. Internal Error: ${err}`);
     }
-
-    const oldProject = await dbHelper.getById(models.Project, oldRepo.projectId);
-    return _.isEqual(oldProject.tags, project.tags) ? [] : challengeUUIDs;
   } else {
     try {
       await dbHelper.create(models.Repository, {
