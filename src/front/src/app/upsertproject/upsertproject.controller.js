@@ -30,6 +30,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
     if ($rootScope.project) {
       $scope.title = 'Manage a Project';
       $scope.project = $rootScope.project;
+      $scope.project.tags = $rootScope.project.tags.split(',');
       $scope.project.repoUrl = $rootScope.project.repoUrls.join(',');
       $scope.editing = true;
       if ($rootScope.project.tcDirectId) {
@@ -52,7 +53,8 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
     $scope.tags = [];
     $scope.fetchTags = function() {
       ProjectService.getTags().then(function (resp) {
-        $scope.tags = resp.data.map(tag => tag.name);
+        const s = new Set(resp.data.result.content.map(function(tag) { return tag.name; }));
+        $scope.tags = Array.from(s).sort();
       });
     }
     $scope.fetchTags();

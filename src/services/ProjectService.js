@@ -212,6 +212,7 @@ async function create(project, currentUser) {
   project.secretWebhookKey = guid.raw();
   project.copilot = project.copilot ? project.copilot.toLowerCase() : null;
   project.id = helper.generateIdentifier();
+  project.tags = project.tags.join(',');
 
   const createdProject = await dbHelper.create(models.Project, project);
 
@@ -221,7 +222,7 @@ async function create(project, currentUser) {
     try {
       const challengeUUIDs = await _createOrMigrateRepository(repoUrl, project, currentUser);
       if (!_.isEmpty(challengeUUIDs)) {
-        challengeUUIDsList.append(challengeUUIDs);
+        challengeUUIDsList.push(challengeUUIDs);
       }
     }
     catch (err) {
@@ -278,6 +279,7 @@ async function update(project, currentUser) {
      */
   project.owner = dbProject.owner;
   project.copilot = project.copilot !== undefined ? project.copilot.toLowerCase() : null;
+  project.tags = project.tags.join(',');
 
   // TODO: move the following logic into one dynamoose transaction
   const repos = await dbHelper.queryRepositoriesByProjectId(project.id);
@@ -289,13 +291,13 @@ async function update(project, currentUser) {
       await dbHelper.update(models.Repository, repoId, {archived: project.archived});
       if (!_.isEqual(dbProject.tags, project.tags)) {
         // NOTE: delay query of challengeUUIDs into topcoder-x-processor
-        challengeUUIDsList.append(repoUrl);
+        challengeUUIDsList.push(repoUrl);
       }
     } else {
       try {
         const challengeUUIDs = await _createOrMigrateRepository(repoUrl, project, currentUser);
         if (!_.isEmpty(challengeUUIDs)) {
-          challengeUUIDsList.append(challengeUUIDs);
+          challengeUUIDsList.push(challengeUUIDs);
         }
       }
       catch (err) {
