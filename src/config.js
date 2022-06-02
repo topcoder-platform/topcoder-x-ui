@@ -84,12 +84,12 @@ module.exports.frontendConfigs = {
   GITHUB_TEAM_URL: process.env.GITHUB_TEAM_URL || 'https://github.com/orgs/',
   GITLAB_GROUP_URL: process.env.GITLAB_GROUP_URL || 'https://gitlab.com/groups/',
   TC_API_V5_URL: process.env.TC_API_V5_URL || 'https://api.topcoder-dev.com/v5',
-  TC_API_V4_URL: {
+  TOPCODER_VALUES: {
     dev: {
-      process.env.TC_API_V4_URL || 'https://api.topcoder-dev.com/v4',
+      TC_API_V4_URL: process.env.TC_API_V4_URL || 'https://api.topcoder-dev.com/v4',
     },
     prod: {
-      process.env.TC_API_V4_URL || 'https://api.topcoder.com/v4',
+      TC_API_V4_URL: process.env.TC_API_V4_URL || 'https://api.topcoder.com/v4',
     },
   },
   TOPCODER_ENV: process.env.TOPCODER_ENV || 'dev',
