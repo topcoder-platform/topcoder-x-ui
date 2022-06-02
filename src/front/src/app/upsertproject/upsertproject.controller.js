@@ -30,9 +30,6 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
     if ($rootScope.project) {
       $scope.title = 'Manage a Project';
       $scope.project = $rootScope.project;
-      $scope.project.id = $rootScope.project.id;
-      $scope.project.copilot = $rootScope.project.copilot;
-      $scope.project.owner = $rootScope.project.owner;
       $scope.project.repoUrl = $rootScope.project.repoUrls.join(',');
       $scope.editing = true;
       if ($rootScope.project.tcDirectId) {
@@ -51,6 +48,14 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
 
     $scope.isAdminUser = Helper.isAdminUser(currentUser);
     $scope.loadingConnectProjects = true;
+
+    $scope.tags = [];
+    $scope.fetchTags = function() {
+      ProjectService.getTags().then(function (resp) {
+        $scope.tags = resp.data.map(tag => tag.name);
+      });
+    }
+    $scope.fetchTags();
 
     $scope.fetchConnectProjects = function($event) {
       if (!$event) {

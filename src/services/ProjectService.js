@@ -31,11 +31,13 @@ const currentUserSchema = Joi.object().keys({
   handle: Joi.string().required(),
   roles: Joi.array().required(),
 });
-const projectSchema = {
+const updateProjectSchema = {
   project: {
     id: Joi.string().required(),
     title: Joi.string().required(),
     tcDirectId: Joi.number().required(),
+    //NOTE: `PATCH /challenges/:challengeId` requires the tags not empty
+    tags: Joi.array().items(Joi.string().required()).min(1).required(),
     repoUrl: Joi.string().required(),
     repoUrls: Joi.array().required(),
     rocketChatWebhook: Joi.string().allow(null),
@@ -57,6 +59,8 @@ const createProjectSchema = {
   project: {
     title: Joi.string().required(),
     tcDirectId: Joi.number().required(),
+    //NOTE: `PATCH /challenges/:challengeId` requires the tags not empty
+    tags: Joi.array().items(Joi.string().required()).min(1).required(),
     repoUrl: Joi.string().required(),
     copilot: Joi.string().allow(null),
     rocketChatWebhook: Joi.string().allow(null),
@@ -125,7 +129,7 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
  * @param {String} repoUrl the repository url
  * @param {Object} project the new project
  * @param {String} currentUser the topcoder current user
- * @returns {void}
+ * @returns {Array} challengeUUIDs
  * @private
  */
 async function _createOrMigrateRepository(repoUrl, project, currentUser) {
@@ -159,6 +163,9 @@ async function _createOrMigrateRepository(repoUrl, project, currentUser) {
     catch (err) {
       throw new Error(`Update ProjectId for Repository, Issue, CopilotPayment failed. Repo ${repoUrl}. Internal Error: ${err}`);
     }
+
+    const oldProject = await dbHelper.getById(models.Project, oldRepo.projectId);
+    return _.isEqual(oldProject.tags, project.tags) ? [] : challengeUUIDs;
   } else {
     try {
       await dbHelper.create(models.Repository, {
@@ -175,6 +182,8 @@ async function _createOrMigrateRepository(repoUrl, project, currentUser) {
       throw new Error(`Project created. Adding the webhook, issue labels, and wiki rules failed. Repo ${repoUrl}. Internal Error: ${err}`);
     }
   }
+
+  return [];
 }
 
 /**
@@ -206,14 +215,30 @@ async function create(project, currentUser) {
 
   const createdProject = await dbHelper.create(models.Project, project);
 
+  let challengeUUIDsList = [];
   // TODO: The following db operation should/could be moved into one transaction
   for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
     try {
-      await _createOrMigrateRepository(repoUrl, project, currentUser);
+      const challengeUUIDs = await _createOrMigrateRepository(repoUrl, project, currentUser);
+      if (!_.isEmpty(challengeUUIDs)) {
+        challengeUUIDsList.append(challengeUUIDs);
+      }
     }
     catch (err) {
       throw new Error(`Create or migrate repository failed. Repo ${repoUrl}. Internal Error: ${err.message}`);
     }
+  }
+
+  // NOTE: Will update challenge tags even if the project is created with archived at this step, currently.
+  if (!_.isEmpty(challengeUUIDsList)) {
+    const projectTagsUpdatedEvent = {
+      event: 'challengeTags.update',
+      data: {
+        challengeUUIDsList,
+        tags: project.tags,
+      },
+    };
+    await kafka.send(JSON.stringify(projectTagsUpdatedEvent));
   }
 
   return createdProject;
@@ -253,32 +278,50 @@ async function update(project, currentUser) {
      */
   project.owner = dbProject.owner;
   project.copilot = project.copilot !== undefined ? project.copilot.toLowerCase() : null;
-  Object.entries(project).map((item) => {
-    dbProject[item[0]] = item[1];
-    return item;
-  });
 
   // TODO: move the following logic into one dynamoose transaction
-  const repos = await dbHelper.queryRepositoriesByProjectId(dbProject.id);
+  const repos = await dbHelper.queryRepositoriesByProjectId(project.id);
 
+  let challengeUUIDsList = [];
   for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
     if (repos.find(repo => repo.url === repoUrl)) {
       const repoId = repos.find(repo => repo.url === repoUrl).id
       await dbHelper.update(models.Repository, repoId, {archived: project.archived});
+      if (!_.isEqual(dbProject.tags, project.tags)) {
+        // NOTE: delay query of challengeUUIDs into topcoder-x-processor
+        challengeUUIDsList.append(repoUrl);
+      }
     } else {
       try {
-        await _createOrMigrateRepository(repoUrl, project, currentUser);
+        const challengeUUIDs = await _createOrMigrateRepository(repoUrl, project, currentUser);
+        if (!_.isEmpty(challengeUUIDs)) {
+          challengeUUIDsList.append(challengeUUIDs);
+        }
       }
       catch (err) {
         throw new Error(`Create or migrate repository failed. Repo ${repoUrl}. Internal Error: ${err.message}`);
       }
     }
   }
-  dbProject.updatedAt = new Date();
-  return await dbHelper.update(models.Project, dbProject.id, dbProject);
+  project.updatedAt = new Date();
+  const updatedProject = await dbHelper.update(models.Project, project.id, project);
+
+  // NOTE: Will update challenge tags even if the project is changed to archived at this step, currently.
+  if (!_.isEmpty(challengeUUIDsList)) {
+    const projectTagsUpdatedEvent = {
+      event: 'challengeTags.update',
+      data: {
+        challengeUUIDsList,
+        tags: project.tags,
+      },
+    };
+    await kafka.send(JSON.stringify(projectTagsUpdatedEvent));
+  }
+
+  return updatedProject;
 }
 
-update.schema = projectSchema;
+update.schema = updateProjectSchema;
 
 /**
  * gets all projects
