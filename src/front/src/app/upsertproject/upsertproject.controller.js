@@ -30,7 +30,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
     if ($rootScope.project) {
       $scope.title = 'Manage a Project';
       $scope.project = $rootScope.project;
-      $scope.project.tags = $rootScope.project.tags.split(',');
+      $scope.project.tags = !!$rootScope.project.tags ? $rootScope.project.tags.split(',') : [];
       $scope.project.repoUrl = $rootScope.project.repoUrls.join(',');
       $scope.editing = true;
       if ($rootScope.project.tcDirectId) {
