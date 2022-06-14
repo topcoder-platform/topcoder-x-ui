@@ -288,6 +288,27 @@ async function queryOneUserMappingByTCUsername(model, tcusername) {
 /**
  * Get single data by query parameters
  * @param {Object} model The dynamoose model to query
+ * @param {String} provider The git provider
+ * @param {String} gitUsername The git username
+ * @returns {Promise<void>}
+ */
+async function queryTCUsernameByGitUsername(model, provider, gitUsername) {
+  return await new Promise((resolve, reject) => {
+    model.queryOne(`${provider}Username`).eq(gitUsername)
+    .all()
+    .exec((err, result) => {
+      if (err) {
+        logger.debug(`queryTCUsernameByGitUsername. Error. ${err}`);
+        return reject(err);
+      }
+      return resolve(result.topcoderUsername);
+    });
+  });
+}
+
+/**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
  * @param {String} repoUrl The repository url
  * @returns {Promise<void>}
  */
@@ -673,6 +694,7 @@ module.exports = {
   queryOneUserGroupMapping,
   queryOneUserTeamMapping,
   queryOneUserMappingByTCUsername,
+  queryTCUsernameByGitUsername,
   queryRepositoriesByProjectId,
   queryRepositoryByProjectIdFilterUrl
 };

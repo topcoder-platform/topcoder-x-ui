@@ -132,7 +132,7 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
 async function recreate(issue, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(issue.projectId, currentUser);
   const provider = await helper.getProviderType(issue.url);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
+  const userRole = await helper.getProjectCopilotOrOwner(dbProject, provider, false);
   const results = issue.url.split('/');
   const index = 1;
   const repoName = results[results.length - index];

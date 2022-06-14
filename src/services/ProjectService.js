@@ -501,7 +501,7 @@ search.schema = Joi.object().keys({
 async function createLabel(body, currentUser, repoUrl) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(repoUrl);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
+  const userRole = await helper.getProjectCopilotOrOwner(dbProject, provider, false);
   const results = repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];
@@ -576,7 +576,7 @@ async function createHook(body, currentUser, repoUrl) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const dbRepo = await dbHelper.queryRepositoryByProjectIdFilterUrl(dbProject.id, repoUrl);
   const provider = await helper.getProviderType(repoUrl);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
+  const userRole = await helper.getProjectCopilotOrOwner(dbProject, provider, false);
   const results = repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];
@@ -702,7 +702,7 @@ createHook.schema = createLabel.schema;
 async function addWikiRules(body, currentUser, repoUrl) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(repoUrl);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, dbProject.copilot !== undefined);
+  const userRole = await helper.getProjectCopilotOrOwner(dbProject, provider, dbProject.copilot !== undefined);
   const results = repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];
