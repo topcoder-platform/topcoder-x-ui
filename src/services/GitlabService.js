@@ -92,6 +92,7 @@ ensureOwnerUser.schema = Joi.object().keys({
 
 /**
  * List groups of owner user.
+ * @param {String} gitUsername the git username
  * @param {String} token the token
  * @param {Number} page the page number (default to be 1). Must be >= 1
  * @param {Number} perPage the page size (default to be constants.GITLAB_DEFAULT_PER_PAGE).
@@ -99,7 +100,8 @@ ensureOwnerUser.schema = Joi.object().keys({
  * @param {Boolean} getAll get all groups
  * @returns {Promise} the promise result
  */
-async function listOwnerUserGroups(token, page = 1, perPage = constants.GITLAB_DEFAULT_PER_PAGE, getAll = false) {
+async function listOwnerUserGroups(gitUsername, token, page = 1, perPage = constants.GITLAB_DEFAULT_PER_PAGE,
+  getAll = false) {
   try {
     const response = await request
       .get(`${config.GITLAB_API_BASE_URL}/api/v4/groups`)
@@ -127,11 +129,12 @@ async function listOwnerUserGroups(token, page = 1, perPage = constants.GITLAB_D
     }
     return result;
   } catch (err) {
-    throw helper.convertGitLabError(err, 'Failed to list user groups');
+    throw await helper.convertGitLabErrorAsync(err, 'Failed to list user groups', gitUsername);
   }
 }
 
 listOwnerUserGroups.schema = Joi.object().keys({
+  gitUsername: Joi.string().required(),
   token: Joi.string().required(),
   page: Joi.number().integer().min(1).optional(),
   perPage: Joi.number().integer().min(1).max(constants.GITLAB_MAX_PER_PAGE)
@@ -176,6 +179,7 @@ getGroupRegistrationUrl.schema = Joi.object().keys({
 
 /**
  * Add group member.
+ * @param {String} gitUsername the git username
  * @param {String} groupId the group id
  * @param {String} ownerUserToken the owner user token
  * @param {String} normalUserToken the normal user token
@@ -183,7 +187,7 @@ getGroupRegistrationUrl.schema = Joi.object().keys({
  * @param {String} expiredAt the expired at params to define how long user joined teams. can be null
  * @returns {Promise} the promise result
  */
-async function addGroupMember(groupId, ownerUserToken, normalUserToken, accessLevel, expiredAt) {
+async function addGroupMember(gitUsername, groupId, ownerUserToken, normalUserToken, accessLevel, expiredAt) { // eslint-disable-line max-params
   let username;
   let userId;
   try {
@@ -219,14 +223,16 @@ async function addGroupMember(groupId, ownerUserToken, normalUserToken, accessLe
       if (err instanceof errors.ApiError) {
         throw err;
       }
-      throw helper.convertGitLabError(
-        err, `Failed to add group member userId=${userId} accessLevel=${accessLevel} expiredAt=${expiredAt}`);
+      throw await helper.convertGitLabErrorAsync(
+        err, `Failed to add group member userId=${userId} accessLevel=${accessLevel} expiredAt=${expiredAt}`,
+        gitUsername);
     }
     return {username, id: userId};
   }
 }
 
 addGroupMember.schema = Joi.object().keys({
+  gitUsername: Joi.string().required(),
   groupId: Joi.string().required(),
   ownerUserToken: Joi.string().required(),
   normalUserToken: Joi.string().required(),
@@ -303,11 +309,12 @@ refreshGitlabUserAccessToken.schema = Joi.object().keys({
 
 /**
  * delete user fromgroup
+ * @param {String} gitUsername the git username
  * @param {String} ownerUserToken the gitlab owner token
  * @param {String} groupId the gitlab group Id
  * @param {String} userId the normal user id
  */
-async function deleteUserFromGitlabGroup(ownerUserToken, groupId, userId) {
+async function deleteUserFromGitlabGroup(gitUsername, ownerUserToken, groupId, userId) {
   try {
     await request
       .del(`${config.GITLAB_API_BASE_URL}/api/v4/groups/${groupId}/members/${userId}`)
@@ -318,12 +325,14 @@ async function deleteUserFromGitlabGroup(ownerUserToken, groupId, userId) {
     // If a user is not found from gitlab, then ignore the error
     // eslint-disable-next-line no-magic-numbers
     if (err.status !== 404) {
-      throw helper.convertGitLabError(err, `Failed to delete user from group, userId is ${userId}, groupId is ${groupId}.`);
+      throw await helper.convertGitLabErrorAsync(
+        err, `Failed to delete user from group, userId is ${userId}, groupId is ${groupId}.`, gitUsername);
     }
   }
 }
 
 deleteUserFromGitlabGroup.schema = Joi.object().keys({
+  gitUsername: Joi.string().required(),
   ownerUserToken: Joi.string().required(),
   groupId: Joi.string().required(),
   userId: Joi.string().required(),

@@ -19,6 +19,8 @@ const bcrypt = require('bcryptjs');
 const moment = require('moment');
 const parseDomain = require('parse-domain');
 const config = require('../config');
+const kafka = require('../utils/kafka');
+const models = require('../models');
 const logger = require('./logger');
 const errors = require('./errors');
 const constants = require('./constants');
@@ -122,6 +124,52 @@ function buildController(controller) {
 
 /**
  * Convert github api error.
+ * @param {String} copilotHandle the copilot handle
+ * @param {String} provider the git provider
+ */
+async function sendTokenExpiredEvent(copilotHandle, provider) {
+  const notificationTokenExpiredEvent = {
+    event: 'notification.tokenExpired',
+    data: {
+      copilotHandle,
+      provider,
+    },
+  };
+  await kafka.send(JSON.stringify(notificationTokenExpiredEvent));
+}
+
+/**
+ * Convert github api error.
+ * @param {Error} err the github api error
+ * @param {String} message the error message
+ * @param {String} gitUsername the git username
+ * @returns {Error} converted error
+ */
+async function convertGitHubErrorAsync(err, message, gitUsername) {
+  if (err.statusCode === 401 && gitUsername) { // eslint-disable-line no-magic-numbers
+    const copilotHandle = await dbHelper.queryTCUsernameByGitUsername(models.GithubUserMapping, 'github', gitUsername);
+    await sendTokenExpiredEvent(copilotHandle, 'Github');
+  }
+  return convertGitHubError(err, message);
+}
+
+/**
+ * Convert gitlab api error.
+ * @param {Error} err the gitlab api error
+ * @param {String} message the error message
+ * @param {String} gitUsername the git username
+ * @returns {Error} converted error
+ */
+async function convertGitLabErrorAsync(err, message, gitUsername) {
+  if (err.statusCode === 401 && gitUsername) { // eslint-disable-line no-magic-numbers
+    const copilotHandle = await dbHelper.queryTCUsernameByGitUsername(models.GitlabUserMapping, 'gitlab', gitUsername);
+    await sendTokenExpiredEvent(copilotHandle, 'Gitlab');
+  }
+  return convertGitLabError(err, message);
+}
+
+/**
+ * Convert github api error.
  * @param {Error} err the github api error
  * @param {String} message the error message
  * @returns {Error} converted error
@@ -209,24 +257,23 @@ async function getProviderType(repoUrl) {
 
 /**
  * gets the git username of copilot/owner for a project
- * @param {Object} models the db models
  * @param {Object} project the db project detail
  * @param {String} provider the git provider
  * @param {Boolean} isCopilot if true, then get copilot, otherwise get owner
  * @returns {Object} the owner/copilot for the project
  */
-async function getProjectCopilotOrOwner(models, project, provider, isCopilot) {
+async function getProjectCopilotOrOwner(project, provider, isCopilot) {
   const userMapping = await dbHelper.queryOneUserMappingByTCUsername(
-    provider === 'github' ? models.GithubUserMapping : models.GitlabUserMapping, 
+    provider === 'github' ? models.GithubUserMapping : models.GitlabUserMapping,
     isCopilot ? project.copilot : project.owner);
 
-  if (!userMapping || 
-    (provider === 'github' && !userMapping.githubUserId) 
+  if (!userMapping ||
+    (provider === 'github' && !userMapping.githubUserId)
     || (provider === 'gitlab' && !userMapping.gitlabUserId)) {
     throw new Error(`Couldn't find ${isCopilot ? 'copilot' : 'owner'} username for '${provider}' for this repository.`);
   }
 
-  let user = await dbHelper.queryOneUserByType(models.User, 
+  let user = await dbHelper.queryOneUserByType(models.User,
       provider === 'github' ? userMapping.githubUsername : // eslint-disable-line no-nested-ternary
       userMapping.gitlabUsername, provider);
 
@@ -270,6 +317,8 @@ module.exports = {
   buildController,
   convertGitHubError,
   convertGitLabError,
+  convertGitHubErrorAsync,
+  convertGitLabErrorAsync,
   ensureExists,
   ensureExistsWithKey,
   generateIdentifier,
