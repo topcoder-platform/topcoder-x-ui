@@ -18,7 +18,7 @@ if (config.DYNAMODB.AWS_ACCESS_KEY_ID) {
 dynamoose.AWS.config.update(dynamooseConfig);
 
 if (config.DYNAMODB.IS_LOCAL === 'true') {
-  dynamoose.local();
+  dynamoose.local(config.DYNAMODB.URL);
 }
 
 dynamoose.setDefaults({

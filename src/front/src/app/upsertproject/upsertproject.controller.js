@@ -26,20 +26,63 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       archived: false,
       createCopilotPayments: false
     };
+    $scope.connectProjects = [];
     if ($rootScope.project) {
       $scope.title = 'Manage a Project';
       $scope.project = $rootScope.project;
-      $scope.project.id = $rootScope.project.id;
-      $scope.project.copilot = $rootScope.project.copilot;
-      $scope.project.owner = $rootScope.project.owner;
+      $scope.project.tags = !!$rootScope.project.tags ? $rootScope.project.tags.split(',') : [];
       $scope.project.repoUrl = $rootScope.project.repoUrls.join(',');
       $scope.editing = true;
+      if ($rootScope.project.tcDirectId) {
+        ProjectService.getConnectProject($rootScope.project.tcDirectId).then(function (resp) {
+          var connectProject = {
+            id: resp.data.id,
+            name: resp.data.name
+          };
+          $scope.connectProjects.unshift(connectProject);
+        });
+      }
     } else {
       $scope.title = 'Add a Project';
       $scope.editing = false;
     }
 
     $scope.isAdminUser = Helper.isAdminUser(currentUser);
+    $scope.loadingConnectProjects = true;
+
+    $scope.tags = [];
+    $scope.fetchTags = function() {
+      ProjectService.getTags().then(function (resp) {
+        const s = new Set(resp.data.result.content.map(function(tag) { return tag.name; }));
+        $scope.tags = Array.from(s).sort();
+      });
+    }
+    $scope.fetchTags();
+
+    $scope.fetchConnectProjects = function($event) {
+      if (!$event) {
+        $scope.page = 1;
+        $scope.connectProjects = [];
+      } else {
+        $event.stopPropagation();
+        $event.preventDefault();
+        $scope.page++;
+      }
+      if ($scope.page === 500) {
+        $scope.loadingConnectProjects = false;
+        return;
+      }
+      $scope.loadingConnectProjects = true;
+      ProjectService.getConnectProjects(20, $scope.page).then(function(resp) {
+        var projects = resp.data.filter(function (p) {
+          return $rootScope.project && $rootScope.project.tcDirectId ? p.id !== $rootScope.project.tcDirectId : true;
+        });
+        $scope.connectProjects = $scope.connectProjects.concat(projects);
+      })['finally'](function() {
+        $scope.loadingConnectProjects = false;
+      });
+    };
+    $scope.fetchConnectProjects();
 
     // function to add labels to the current project.
     $scope.addLabels = function () {

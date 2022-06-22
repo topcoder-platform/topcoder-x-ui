@@ -6,7 +6,7 @@
 'use strict';
 
 angular.module('topcoderX')
-  .factory('ProjectService', ['Helper', '$http', function (Helper, $http) {
+  .factory('ProjectService', ['Helper', '$http', '$rootScope', 'AuthService', function (Helper, $http, $rootScope, AuthService) {
     // object we will return
     var ProjectService = {};
     var projectsDataPromise = {};
@@ -137,6 +137,58 @@ angular.module('topcoderX')
       };
       return $http(req).then(function (response) {
         return response;
+      });
+    };
+
+    /**
+     * Get associated connect projects that the current user has access to
+     * @param perPage the items to retrieve per page
+     * @param page the page index
+     */
+    ProjectService.getConnectProjects = function(perPage, page) {
+      return $http({
+        method: 'GET',
+        url: $rootScope.appConfig.TC_API_V5_URL + '/projects/',
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + AuthService.getTokenV3()
+        },
+        params: {
+          fields: 'id,name',
+          sort: 'lastActivityAt desc',
+          perPage: perPage,
+          page: page,
+          status: 'active'
+        }
+      });
+    };
+
+    /**
+     * Get connect project by id
+     * @param id the id
+     */
+    ProjectService.getConnectProject = function(id) {
+      return $http({
+        method: 'GET',
+        url: $rootScope.appConfig.TC_API_V5_URL + '/projects/' + id,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + AuthService.getTokenV3()
+        }
+      });
+    };
+
+    /**
+     * Get technology tags
+     */
+    ProjectService.getTags = function() {
+      return $http({
+        method: 'GET',
+        url: $rootScope.appConfig.TOPCODER_VALUES[$rootScope.appConfig.TOPCODER_ENV].TC_API_V4_URL + '/technologies',
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + AuthService.getTokenV3()
+        }
       });
     };
 

@@ -35,6 +35,7 @@ The following config parameters are supported, they are defined in `src/config.j
 |AWS_CONNECTION_TIMEOUT | The timeout used to check if the app is healthy. |10000 |
 |TC_LOGIN_URL | TC login url | |
 |DYNAMODB_WAIT_TABLE_FOR_ACTIVE_TIMEOUT | Dynamodb wait for active timeout |10 minutes |
+|TC_API_V5_URL | Topcoder API v5 url for retrieving list of Connect Projects | |
 
 
 ## GitHub OAuth App Setup

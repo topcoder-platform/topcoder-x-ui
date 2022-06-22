@@ -87,6 +87,7 @@
         "superagent-promise": "^1.1.0",
         "typescript": "~2.3.3",
         "uuid": "^3.3.2",
+        "ui-select": "~0.19.8",
         "winston": "^2.3.1",
         "tc-auth-lib": "topcoder-platform/tc-auth-lib#1.0.1"
     },

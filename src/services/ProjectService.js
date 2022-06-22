@@ -31,11 +31,13 @@ const currentUserSchema = Joi.object().keys({
   handle: Joi.string().required(),
   roles: Joi.array().required(),
 });
-const projectSchema = {
+const updateProjectSchema = {
   project: {
     id: Joi.string().required(),
     title: Joi.string().required(),
     tcDirectId: Joi.number().required(),
+    //NOTE: `PATCH /challenges/:challengeId` requires the tags not empty
+    tags: Joi.array().items(Joi.string().required()).min(1).required(),
     repoUrl: Joi.string().required(),
     repoUrls: Joi.array().required(),
     rocketChatWebhook: Joi.string().allow(null),
@@ -57,6 +59,8 @@ const createProjectSchema = {
   project: {
     title: Joi.string().required(),
     tcDirectId: Joi.number().required(),
+    //NOTE: `PATCH /challenges/:challengeId` requires the tags not empty
+    tags: Joi.array().items(Joi.string().required()).min(1).required(),
     repoUrl: Joi.string().required(),
     copilot: Joi.string().allow(null),
     rocketChatWebhook: Joi.string().allow(null),
@@ -82,7 +86,7 @@ async function _validateProjectData(project, repoUrl) {
   }
   if (existsInDatabase) {
     throw new errors.ValidationError(`This repo already has a Topcoder-X project associated with it.
-    Copilot: ${existsInDatabase.copilot}, Owner: ${existsInDatabase.owner}`)
+    Repo: ${repoUrl}, Copilot: ${existsInDatabase.copilot}, Owner: ${existsInDatabase.owner}`)
   }
   const provider = await helper.getProviderType(repoUrl);
   const userRole = project.copilot ? project.copilot : project.owner;
@@ -112,7 +116,74 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
   ) {
     throw new errors.ForbiddenError('You don\'t have access on this project');
   }
+  if (dbProject.archived === 'true') {
+    throw new errors.ForbiddenError('You can\'t access on this archived project');
+  }
   return dbProject;
+}
+
+/**
+ * create Repository as well as adding git label, hook, wiki
+ * or
+ * migrate Repository as well as related Issue and CopilotPayment
+ * @param {String} repoUrl the repository url
+ * @param {Object} project the new project
+ * @param {String} currentUser the topcoder current user
+ * @returns {Array} challengeUUIDs
+ * @private
+ */
+async function _createOrMigrateRepository(repoUrl, project, currentUser) {
+  let oldRepo = await dbHelper.queryOneRepository(repoUrl);
+  if (oldRepo) {
+    if (oldRepo.projectId === project.id) {
+      throw new Error(`This error should never occur: the projectId of the repository to be migrate
+        will never equal to the new project id`);
+    }
+    if (oldRepo.archived === false) {
+      throw new Error(`Duplicate active repository should be blocked by _validateProjectData,
+        or a time-sequence cornercase encountered here`);
+    }
+    try {
+      const oldIssues = await dbHelper.queryIssueIdChallengeUUIDByRepoUrl(repoUrl);
+      const issueIds = oldIssues.map(issue => issue.id);
+      const challengeUUIDs = oldIssues.map(issue => issue.challengeUUID).filter(challengeUUID => challengeUUID);
+      const paymentIds = await Promise.all(
+        challengeUUIDs.map(challengeUUID => dbHelper.queryPaymentIdByChallengeUUID(challengeUUID))
+      );
+
+      await dbHelper.update(models.Repository, oldRepo.id, {projectId: project.id, archived: false});
+      await Promise.all(issueIds.map(issueId => dbHelper.update(models.Issue, issueId, {projectId: project.id})));
+      await Promise.all(
+        paymentIds.filter(paymentId => paymentId)
+          .map(paymentId => dbHelper.update(models.CopilotPayment, paymentId, {project: project.id}))
+      );
+
+      await createHook({projectId: project.id}, currentUser, repoUrl);
+
+      const oldProject = await dbHelper.getById(models.Project, oldRepo.projectId);
+      return _.isEqual(oldProject.tags, project.tags) ? [] : challengeUUIDs;
+    }
+    catch (err) {
+      throw new Error(`Update ProjectId for Repository, Issue, CopilotPayment failed. Repo ${repoUrl}. Internal Error: ${err}`);
+    }
+  } else {
+    try {
+      await dbHelper.create(models.Repository, {
+        id: helper.generateIdentifier(),
+        projectId: project.id,
+        url: repoUrl,
+        archived: project.archived
+      })
+      await createLabel({projectId: project.id}, currentUser, repoUrl);
+      await createHook({projectId: project.id}, currentUser, repoUrl);
+      await addWikiRules({projectId: project.id}, currentUser, repoUrl);
+    }
+    catch (err) {
+      throw new Error(`Project created. Adding the webhook, issue labels, and wiki rules failed. Repo ${repoUrl}. Internal Error: ${err}`);
+    }
+  }
+
+  return [];
 }
 
 /**
@@ -141,24 +212,34 @@ async function create(project, currentUser) {
   project.secretWebhookKey = guid.raw();
   project.copilot = project.copilot ? project.copilot.toLowerCase() : null;
   project.id = helper.generateIdentifier();
+  project.tags = project.tags.join(',');
 
   const createdProject = await dbHelper.create(models.Project, project);
 
+  let challengeUUIDsList = [];
+  // TODO: The following db operation should/could be moved into one transaction
   for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
-    await dbHelper.create(models.Repository, {
-      id: helper.generateIdentifier(),
-      projectId: project.id,
-      url: repoUrl,
-      archived: project.archived
-    })
     try {
-      await createLabel({projectId: project.id}, currentUser, repoUrl);
-      await createHook({projectId: project.id}, currentUser, repoUrl);
-      await addWikiRules({projectId: project.id}, currentUser, repoUrl);
+      const challengeUUIDs = await _createOrMigrateRepository(repoUrl, project, currentUser);
+      if (!_.isEmpty(challengeUUIDs)) {
+        challengeUUIDsList.push(challengeUUIDs);
+      }
     }
     catch (err) {
-      throw new Error(`Project created. Adding the webhook, issue labels, and wiki rules failed. Repo ${repoUrl}`);
+      throw new Error(`Create or migrate repository failed. Repo ${repoUrl}. Internal Error: ${err.message}`);
     }
+  }
+
+  // NOTE: Will update challenge tags even if the project is created with archived at this step, currently.
+  if (!_.isEmpty(challengeUUIDsList)) {
+    const projectTagsUpdatedEvent = {
+      event: 'challengeTags.update',
+      data: {
+        challengeUUIDsList,
+        tags: project.tags,
+      },
+    };
+    await kafka.send(JSON.stringify(projectTagsUpdatedEvent));
   }
 
   return createdProject;
@@ -178,6 +259,7 @@ async function update(project, currentUser) {
   for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
     await _validateProjectData(project, repoUrl);
   }
+  // TODO: remove the useless code-block
   if (dbProject.archived === 'false' && project.archived === true) {
     // project archived detected.
     const result = {
@@ -197,32 +279,51 @@ async function update(project, currentUser) {
      */
   project.owner = dbProject.owner;
   project.copilot = project.copilot !== undefined ? project.copilot.toLowerCase() : null;
-  Object.entries(project).map((item) => {
-    dbProject[item[0]] = item[1];
-    return item;
-  });
-  const oldRepositories = await dbHelper.queryRepositoriesByProjectId(dbProject.id);
-  const weebhookIds = {};
-  for (const repo of oldRepositories) { // eslint-disable-line
-    if (repo.registeredWebhookId) {
-      weebhookIds[repo.url] = repo.registeredWebhookId;
-    }
-    await dbHelper.removeById(models.Repository, repo.id);
-  }
+  project.tags = project.tags.join(',');
+
+  // TODO: move the following logic into one dynamoose transaction
+  const repos = await dbHelper.queryRepositoriesByProjectId(project.id);
+
+  let challengeUUIDsList = [];
   for (const repoUrl of repoUrls) { // eslint-disable-line no-restricted-syntax
-    await dbHelper.create(models.Repository, {
-      id: helper.generateIdentifier(),
-      projectId: dbProject.id,
-      url: repoUrl,
-      archived: project.archived,
-      registeredWebhookId: weebhookIds[repoUrl]
-    })
+    if (repos.find(repo => repo.url === repoUrl)) {
+      const repoId = repos.find(repo => repo.url === repoUrl).id
+      await dbHelper.update(models.Repository, repoId, {archived: project.archived});
+      if (!_.isEqual(dbProject.tags, project.tags)) {
+        // NOTE: delay query of challengeUUIDs into topcoder-x-processor
+        challengeUUIDsList.push(repoUrl);
+      }
+    } else {
+      try {
+        const challengeUUIDs = await _createOrMigrateRepository(repoUrl, project, currentUser);
+        if (!_.isEmpty(challengeUUIDs)) {
+          challengeUUIDsList.push(challengeUUIDs);
+        }
+      }
+      catch (err) {
+        throw new Error(`Create or migrate repository failed. Repo ${repoUrl}. Internal Error: ${err.message}`);
+      }
+    }
   }
-  dbProject.updatedAt = new Date();
-  return await dbHelper.update(models.Project, dbProject.id, dbProject);
+  project.updatedAt = new Date();
+  const updatedProject = await dbHelper.update(models.Project, project.id, project);
+
+  // NOTE: Will update challenge tags even if the project is changed to archived at this step, currently.
+  if (!_.isEmpty(challengeUUIDsList)) {
+    const projectTagsUpdatedEvent = {
+      event: 'challengeTags.update',
+      data: {
+        challengeUUIDsList,
+        tags: project.tags,
+      },
+    };
+    await kafka.send(JSON.stringify(projectTagsUpdatedEvent));
+  }
+
+  return updatedProject;
 }
 
-update.schema = projectSchema;
+update.schema = updateProjectSchema;
 
 /**
  * gets all projects
@@ -255,7 +356,6 @@ async function getAll(query, currentUser) {
       query.lastKey = parseInt(query.lastKey, 10);
     }
     const slicedProjects = _.slice(projects, query.lastKey, query.lastKey + query.perPage);
-    // console.log(projects);
     for (const project of slicedProjects) { // eslint-disable-line
       project.repoUrls = await dbHelper.populateRepoUrls(project.id);
     }
@@ -401,7 +501,7 @@ search.schema = Joi.object().keys({
 async function createLabel(body, currentUser, repoUrl) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(repoUrl);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
+  const userRole = await helper.getProjectCopilotOrOwner(dbProject, provider, false);
   const results = repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];
@@ -476,7 +576,7 @@ async function createHook(body, currentUser, repoUrl) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const dbRepo = await dbHelper.queryRepositoryByProjectIdFilterUrl(dbProject.id, repoUrl);
   const provider = await helper.getProviderType(repoUrl);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
+  const userRole = await helper.getProjectCopilotOrOwner(dbProject, provider, false);
   const results = repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];
@@ -602,7 +702,7 @@ createHook.schema = createLabel.schema;
 async function addWikiRules(body, currentUser, repoUrl) {
   const dbProject = await _ensureEditPermissionAndGetInfo(body.projectId, currentUser);
   const provider = await helper.getProviderType(repoUrl);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, dbProject.copilot !== undefined);
+  const userRole = await helper.getProjectCopilotOrOwner(dbProject, provider, dbProject.copilot !== undefined);
   const results = repoUrl.split('/');
   const index = 1;
   const repoName = results[results.length - index];

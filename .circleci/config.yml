@@ -8,6 +8,9 @@ install_dependency: &install_dependency
     sudo apt install jq
     sudo pip install awscli --upgrade
     sudo pip install docker-compose
+  no_output_timeout: 30m
+
+
 install_deploysuite: &install_deploysuite
   name: Installation of install_deploysuite.
   command: |
@@ -15,6 +18,15 @@ install_deploysuite: &install_deploysuite
     cp ./../buildscript/master_deploy.sh .
     cp ./../buildscript/buildenv.sh .
     cp ./../buildscript/awsconfiguration.sh .
+  no_output_timeout: 30m
+
+build_app: &build_app
+  name: Build the app
+  command: |
+    ./build.sh
+  no_output_timeout: 30m
+
+
 restore_cache_settings_for_build: &restore_cache_settings_for_build
   key: docker-node-modules-{{ checksum "package-lock.json" }}
 
@@ -29,7 +41,7 @@ builddeploy_steps: &builddeploy_steps
       - run: *install_dependency
       - run: *install_deploysuite
       - restore_cache: *restore_cache_settings_for_build
-      - run: ./build.sh
+      - run: *build_app
       - save_cache: *save_cache_settings
       - deploy:
           name: Running MasterScript.
@@ -39,6 +51,7 @@ builddeploy_steps: &builddeploy_steps
             ./buildenv.sh -e $DEPLOY_ENV -b ${DEPLOY_ENV}-${APPNAME}-deployvar
             source buildenvvar
             ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${DEPLOY_ENV}-global-appvar,${DEPLOY_ENV}-${APPNAME}-appvar -i ${APPNAME}
+      
 
 
 jobs:
@@ -66,7 +79,7 @@ workflows:
           context : org-global
           filters:
             branches:
-              only: [develop, "feature/Auth0-RS256-Token"]
+              only: [develop, "issue_443"]
 
       # Production builds are exectuted only on tagged commits to the
       # master branch.

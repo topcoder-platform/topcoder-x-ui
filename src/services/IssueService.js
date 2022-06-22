@@ -117,6 +117,9 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
   ) {
     throw new errors.ForbiddenError('You don\'t have access on this project');
   }
+  if (dbProject.archived === 'true') {
+    throw new errors.ForbiddenError('You can\'t access on this archived project');
+  }
   return dbProject;
 }
 
@@ -129,7 +132,7 @@ async function _ensureEditPermissionAndGetInfo(projectId, currentUser) {
 async function recreate(issue, currentUser) {
   const dbProject = await _ensureEditPermissionAndGetInfo(issue.projectId, currentUser);
   const provider = await helper.getProviderType(issue.url);
-  const userRole = await helper.getProjectCopilotOrOwner(models, dbProject, provider, false);
+  const userRole = await helper.getProjectCopilotOrOwner(dbProject, provider, false);
   const results = issue.url.split('/');
   const index = 1;
   const repoName = results[results.length - index];

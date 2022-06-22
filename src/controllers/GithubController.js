@@ -160,7 +160,7 @@ async function addUserToTeamCallback(req, res) {
   const token = result.body.access_token;
 
   // get team details
-  const teamDetails = await GithubService.getTeamDetails(team.ownerToken, team.teamId);
+  const teamDetails = await GithubService.getTeamDetails(team.ownerUsername, team.ownerToken, team.teamId);
   const organisation = teamDetails.organization.login;
 
   // Add member to organisation
@@ -173,7 +173,8 @@ async function addUserToTeamCallback(req, res) {
 
   // add user to team
   console.log(`adding ${token} to ${team.teamId} with ${team.ownerToken}`); /* eslint-disable-line no-console */
-  const githubUser = await GithubService.addTeamMember(team.teamId, team.ownerToken, token, team.accessLevel);
+  const githubUser = await GithubService.addTeamMember(
+    team.ownerUsername, team.teamId, team.ownerToken, token, team.accessLevel);
   // associate github username with TC username
   const mapping = await dbHelper.queryOneUserMappingByTCUsername(GithubUserMapping, req.session.tcUsername);
 
@@ -247,7 +248,8 @@ async function deleteUsersFromTeam(req, res) {
       });
       // eslint-disable-next-line no-restricted-syntax
       for (const userTeamMapItem of userTeamMappings) {
-        await GithubService.deleteUserFromGithubTeam(token, teamId, githubOrgId, userTeamMapItem.githubUserName);
+        await GithubService.deleteUserFromGithubTeam(
+          teamInDB.ownerUsername, token, teamId, githubOrgId, userTeamMapItem.githubUserName);
         await dbHelper.removeById(UserTeamMapping, userTeamMapItem.id);
       }
     } catch (err) {

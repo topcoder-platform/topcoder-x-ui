@@ -55,13 +55,40 @@
               project Title is required.</span>
             <br />
             <br />
-            <label class="form-label">Connect ID:</label>
-            <input class="form-control" type="number" ng-model="project.tcDirectId" required />
-            <small class="form-hint">The Topcoder Connect Project ID of the project. You can obtain this through the URL to the
-              project in Topcoder Connect. For example:
-              "https://connect.topcoder.com/projects/16598" - Enter ID "16598"</small>
+            <label class="form-label">Connect Project:</label>
+            <ui-select ng-model="project.tcDirectId" theme="bootstrap">
+              <ui-select-match placeholder="Select...">
+                {{$select.selected.name}}
+              </ui-select-match>
+              <ui-select-choices repeat="cp.id as cp in connectProjects | filter: $select.search">
+                <span ng-bind-html="cp.name | highlight: $select.search"></span>
+                <div ng-if="$index == $select.items.length-1">
+                  <button
+                    class="btn btn-xs btn-success"
+                    style="width: 100%; margin-top: 10px;"
+                    ng-click="fetchConnectProjects($event);"
+                    ng-disabled="loadingConnectProjects">Load more...</button>
+                </div>
+              </ui-select-choices>
+            </ui-select>
+            <small class="form-hint">Select the Topcoder Connect Project to be associated with. The above list contains all Topcoder Connect Projects
+              you have access to.</small>
             <span ng-show="projectForm.project.tcDirectId.$touched && projectForm.project.tcDirectId.$invalid">The
-              TC Connect Project ID is required.</span>
+              TC Connect Project is required.</span>
+            <br />
+            <br />
+            <label class="form-label">Tags:</label>
+            <ui-select multiple ng-model="project.tags" theme="bootstrap" close-on-select="false" on-select="$select.selected.sort()">
+              <ui-select-match placeholder="Select...">
+                {{$item}}
+              </ui-select-match>
+              <ui-select-choices repeat="tag in tags | filter: $select.search">
+                {{tag}}
+              </ui-select-choices>
+            </ui-select>
+            <small class="form-hint">Select the Tags to be associated with.</small>
+            <span ng-show="projectForm.project.tags.$touched && projectForm.project.tags.$invalid">The
+              Project/Challenge tags cannot be empty. [PATCH /challenges/:challengeId requires at least one tag]</span>
             <br />
             <br />
             <label class="form-label">Repo URLs:</label>

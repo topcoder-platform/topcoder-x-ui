@@ -180,6 +180,43 @@ async function queryOneIssue(model, repositoryId, number, provider) {
 }
 
 /**
+ * Get Issue's id and challengeUUID by repoUrl
+ * @param {String} repoUrl The repo url
+ * @returns {Promise<Object>}
+ */
+async function queryIssueIdChallengeUUIDByRepoUrl(repoUrl) {
+  return await new Promise((resolve, reject) => {
+    models.Issue.scan('repoUrl').eq(repoUrl)
+      .attributes(['id', 'challengeUUID'])
+      .exec((err, result) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(result);
+      });
+  });
+}
+
+
+/**
+ * Get CopilotPayment's id by challengeUUID
+ * @param {String} challengeUUID The challengeUUID
+ * @returns {Promise<String>}
+ */
+async function queryPaymentIdByChallengeUUID(challengeUUID) {
+  return await new Promise((resolve, reject) => {
+    models.CopilotPayment.scan('challengeUUID').eq(challengeUUID)
+      .attributes(['id'])
+      .exec((err, result) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(result.id);
+      });
+  });
+}
+
+/**
  * Get single data by query parameters
  * @param {Object} model The dynamoose model to query
  * @param {String} username The user username
@@ -251,13 +288,34 @@ async function queryOneUserMappingByTCUsername(model, tcusername) {
 /**
  * Get single data by query parameters
  * @param {Object} model The dynamoose model to query
+ * @param {String} provider The git provider
+ * @param {String} gitUsername The git username
+ * @returns {Promise<void>}
+ */
+async function queryTCUsernameByGitUsername(model, provider, gitUsername) {
+  return await new Promise((resolve, reject) => {
+    model.queryOne(`${provider}Username`).eq(gitUsername)
+    .all()
+    .exec((err, result) => {
+      if (err) {
+        logger.debug(`queryTCUsernameByGitUsername. Error. ${err}`);
+        return reject(err);
+      }
+      return resolve(result.topcoderUsername);
+    });
+  });
+}
+
+/**
+ * Get single data by query parameters
+ * @param {Object} model The dynamoose model to query
  * @param {String} repoUrl The repository url
  * @returns {Promise<void>}
  */
 async function queryOneActiveProject(model, repoUrl) {
   return await new Promise((resolve, reject) => {
     queryOneActiveRepository(models.Repository, repoUrl).then((repo) => {
-      if (!repo) resolve(null);
+      if (!repo || repo.length === 0) resolve(null);
       else model.queryOne('id').eq(repo.projectId).consistent()
         .exec((err, result) => {
           if (err) {
@@ -472,6 +530,35 @@ async function queryOneOrganisation(model, organisation) {
 
 /**
  * Query one active repository
+ * @param {String} url the repository url
+ * @returns {Promise<Object>}
+ */
+async function queryOneRepository(url) {
+  return await new Promise((resolve, reject) => {
+    models.Repository.query({
+      url,
+    })
+    .all()
+    .exec((err, repos) => {
+      if (err) {
+        return reject(err);
+      }
+      if (!repos || repos.length === 0) resolve(null);
+      if (repos.length > 1) {
+        let error = `Repository's url is unique in this version.
+          This Error must be caused by old data in the Repository table.
+          The old version can only guarrentee that the active Repository's url is unique.
+          Please migrate the old Repository table.`;
+        logger.debug(`queryOneRepository. Error. ${error}`);
+        reject(error);
+      }
+      return resolve(repos[0]);
+    });
+  });
+}
+
+/**
+ * Query one active repository
  * @param {Object} model the dynamoose model
  * @param {String} url the repository url
  * @returns {Promise<Object>}
@@ -480,8 +567,8 @@ async function queryOneActiveRepository(model, url) {
   return await new Promise((resolve, reject) => {
     model.queryOne({
       url,
-      archived: 'false'
     })
+    .filter('archived').eq('false')
     .all()
     .exec((err, result) => {
       if (err) {
@@ -502,8 +589,8 @@ async function queryActiveRepositoriesExcludeByProjectId(url, projectId) {
   return await new Promise((resolve, reject) => {
     models.Repository.query({
       url,
-      archived: 'false'
     })
+    .filter('archived').eq('false')
     .filter('projectId')
     .not().eq(projectId)
     .all()
@@ -580,6 +667,8 @@ async function populateRepoUrls(projectId) {
 }
 
 module.exports = {
+  queryIssueIdChallengeUUIDByRepoUrl,
+  queryPaymentIdByChallengeUUID,
   getById,
   getByKey,
   scan,
@@ -597,6 +686,7 @@ module.exports = {
   queryOneActiveProject,
   queryOneActiveProjectWithFilter,
   queryOneActiveRepository,
+  queryOneRepository,
   queryOneOrganisation,
   queryOneIssue,
   queryOneUserByType,
@@ -604,6 +694,7 @@ module.exports = {
   queryOneUserGroupMapping,
   queryOneUserTeamMapping,
   queryOneUserMappingByTCUsername,
+  queryTCUsernameByGitUsername,
   queryRepositoriesByProjectId,
   queryRepositoryByProjectIdFilterUrl
 };
