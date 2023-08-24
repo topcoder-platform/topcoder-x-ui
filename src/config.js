@@ -27,7 +27,7 @@ module.exports = {
   TOPIC: process.env.TOPIC || 'tc-x-events',
   KAFKA_OPTIONS: {
     connectionString: process.env.KAFKA_URL || 'localhost:9092',
-    ssl: {
+    ssl: process.env.KAFKA_DISABLE_SSL ? false : {
       cert: process.env.KAFKA_CLIENT_CERT || fs.readFileSync('./kafka_client.cer'), // eslint-disable-line no-sync
       key: process.env.KAFKA_CLIENT_CERT_KEY || fs.readFileSync('./kafka_client.key'), // eslint-disable-line no-sync
       passphrase: 'secret', // NOTE:* This configuration specifies the private key passphrase used while creating it.

@@ -1,33 +1,34 @@
-'use strict';
+const gulp = require('gulp');
+const { browserify } = require('./browserify');
 
-var gulp = require('gulp');
+const paths = gulp.paths;
 
-var paths = gulp.paths;
+const $ = require('gulp-load-plugins')();
 
-var $ = require('gulp-load-plugins')();
-
-
-gulp.task('inject', ['browserify'], function () {
-
-  var injectStyles = gulp.src([
+const injectFn = () => {
+  const injectStyles = gulp.src([
     paths.tmp + '/serve/{app,components}/**/*.css',
     '!' + paths.tmp + '/serve/app/vendor.css'
   ], { read: false });
 
-  var injectScripts = gulp.src([
+  const injectScripts = gulp.src([
     paths.src + '/{app,components}/**/*.js',
     '!' + paths.src + '/{app,components}/**/*.spec.js',
     '!' + paths.src + '/{app,components}/**/*.mock.js'
   ]).pipe($.angularFilesort());
 
-  var injectOptions = {
+  const injectOptions = {
     ignorePath: [paths.src, paths.tmp + '/serve'],
     addRootSlash: false
   };
-  
+
   return gulp.src(paths.src + '/*.html')
     .pipe($.inject(injectStyles, injectOptions))
     .pipe($.inject(injectScripts, injectOptions))
     .pipe(gulp.dest(paths.tmp + '/serve'));
+}
 
-});
+const inject = gulp.series(browserify, injectFn);
+gulp.task('inject', inject);
+
+module.exports = { inject }

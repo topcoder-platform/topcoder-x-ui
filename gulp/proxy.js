@@ -1,5 +1,3 @@
- /*jshint unused:false */
-
 /***************
 
   This file allow to configure a proxy system plugged into BrowserSync
@@ -13,21 +11,19 @@
 
 ***************/
 
-'use strict';
-
-var httpProxy = require('http-proxy');
-var chalk = require('chalk');
+const httpProxy = require('http-proxy');
+const chalk = require('chalk');
 
 /*
  * Location of your backend server
  */
-var proxyTarget = 'http://server/context/';
+const proxyTarget = 'http://server/context/';
 
-var proxy = httpProxy.createProxyServer({
+const proxy = httpProxy.createProxyServer({
   target: proxyTarget
 });
 
-proxy.on('error', function(error, req, res) {
+proxy.on('error', function (error, req, res) {
   res.writeHead(500, {
     'Content-Type': 'text/plain'
   });

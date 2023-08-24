@@ -43,3 +43,6 @@ Thumbs.db
 
 src/public/
 .tmp
+
+.env
+.envrc

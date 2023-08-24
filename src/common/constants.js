@@ -25,6 +25,7 @@ const SERVICE_ERROR_STATUS = 500;
 // The user roles
 const USER_ROLES = {
   OWNER: 'owner',
+  GUEST: 'guest'
 };
 
 // The user types
@@ -51,9 +52,11 @@ const GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION = 300;
 
 const GITHUB_OWNER_CALLBACK_URL = '/api/v1/github/owneruser/callback';
 const GITLAB_OWNER_CALLBACK_URL = '/api/v1/gitlab/owneruser/callback';
+const GITLAB_GUEST_CALLBACK_URL = '/api/v1/gitlab/guestuser/callback';
 
 const OWNER_USER_LOGIN_SUCCESS_URL = '/#!/app/settings';
 const USER_ADDED_TO_TEAM_SUCCESS_URL = '/#!/members';
+const GUEST_ONBOARDING_COMPLETED_URL = '/#!/app/guest-registration';
 
 const TC_LOGIN_CALLBACK_URL = '/api/v1/tclogin';
 const JWT_V3_NAME = 'v3jwt';
@@ -72,6 +75,8 @@ module.exports = {
   GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION,
   GITHUB_OWNER_CALLBACK_URL,
   GITLAB_OWNER_CALLBACK_URL,
+  GUEST_ONBOARDING_COMPLETED_URL,
+  GITLAB_GUEST_CALLBACK_URL,
   OWNER_USER_LOGIN_SUCCESS_URL,
   USER_ADDED_TO_TEAM_SUCCESS_URL,
   TC_LOGIN_CALLBACK_URL,

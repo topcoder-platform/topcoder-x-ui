@@ -96,6 +96,12 @@ angular.module('topcoderX', [
           data: { pageTitle: 'Project Management' },
           resolve: { auth: authenticate }
         })
+        .state('app.guestRegistration', {
+          url: '/guest-registration?success&error',
+          controller: 'GuestRegistrationController',
+          controllerAs: 'vm',
+          templateUrl: 'app/guest-registration/guest-registration.html',
+        })
         // following code is commented to hide the menu
         // un comment this when pages are developed
         // .state('app.challenges', {

@@ -1,7 +1,7 @@
 // eslint-disable-line max-lines
 const _ = require('lodash');
-const logger = require('./logger');
 const models = require('../models');
+const logger = require('./logger');
 
 /*
  * Copyright (c) 2018 TopCoder, Inc. All rights reserved.

@@ -1,24 +1,21 @@
-var gulp = require('gulp');
+const gulp = require('gulp');
+const browserify = require('browserify');
+const uglify = require('gulp-uglify');
+const buffer = require('vinyl-buffer');
+const source = require('vinyl-source-stream');
+const gutil = require('gulp-util');
+const fs = require('fs');
+const { styles } = require('./styles');
 
-var paths = gulp.paths;
+const browserifyFn = () => {
+  const cssFilePath = gulp.paths.tmp + '/serve/app/bundle.css';
 
-var browserify = require('browserify');
-var uglify = require('gulp-uglify');
-var buffer = require('vinyl-buffer');
-var source = require('vinyl-source-stream');
-var gutil = require('gulp-util');
-var fs = require('fs');
-
-gulp.task('browserify', ['styles'], function () {
-
-  var cssFilePath = paths.tmp + '/serve/app/bundle.css';
-
-  //delete file if exist
+  // Delete file if exists
   if (fs.existsSync(cssFilePath)) {
     fs.unlinkSync(cssFilePath);
   }
 
- return browserify('./src/front/src/index.js')
+  return browserify('./src/front/src/index.js')
     .transform(require('browserify-css'), {
       rootDir: 'src',
       debug: true,
@@ -30,12 +27,16 @@ gulp.task('browserify', ['styles'], function () {
       }
     })
     .bundle()
-    .on('error', function (e) {
-      gutil.log("Browserify Error", gutil.colors.red(e.message))
-    })
-    //Pass desired output filename to vinyl-source-stream
     .pipe(source('bundle.js'))
     .pipe(buffer())
     .pipe(uglify())
-    .pipe(gulp.dest(paths.tmp + '/serve/app'))
-});
+    .on('error', function (e) {
+      gutil.log("Browserify Error", gutil.colors.red(e.message));
+    })
+    .pipe(gulp.dest(gulp.paths.tmp + '/serve/app'));
+};
+
+const _browserify = gulp.series(styles, browserifyFn);
+gulp.task('browserify', _browserify);
+
+module.exports = { browserify: _browserify }

@@ -1,7 +1,4 @@
-
-
 const gulp = require('gulp');
-
 gulp.paths = {
   src: 'src/front/src',
   dist: 'src/public',
@@ -9,8 +6,6 @@ gulp.paths = {
   e2e: 'src/front/e2e',
 };
 
-require('require-dir')('./gulp');
-
-gulp.task('default', ['clean', 'watch'], () => {
-  gulp.start('build');
-});
+const { clean, build } = require('./gulp/build');
+const { watch } = require('./gulp/watch');
+gulp.task('default', gulp.series(clean, watch, build));

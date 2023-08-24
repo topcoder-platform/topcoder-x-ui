@@ -1,10 +1,10 @@
-'use strict';
+const gulp = require('gulp');
+const { inject } = require('./inject');
+const { build } = require('./build');
 
-var gulp = require('gulp');
+const paths = gulp.paths;
 
-var paths = gulp.paths;
-
-gulp.task('watch', ['inject'], function () {
+const watchFn = () => {
   gulp.watch([
     paths.src + '/*.html',
     paths.src + '/*.css',
@@ -13,10 +13,12 @@ gulp.task('watch', ['inject'], function () {
     paths.src + '/{app,components}/**/*.js',
     paths.src + '/{app,components}/**/*.html',
     'package.json'
-  ], ['inject']);
-});
+  ], gulp.series(inject));
+};
+const watch = gulp.series(inject, watchFn);
+gulp.task('watch', watch);
 
-gulp.task('watch:build', ['inject', 'build'], function () {
+const watchBuildFn = () => {
   gulp.watch([
     paths.src + '/*.html',
     paths.src + '/*.css',
@@ -25,5 +27,10 @@ gulp.task('watch:build', ['inject', 'build'], function () {
     paths.src + '/{app,components}/**/*.js',
     paths.src + '/{app,components}/**/*.html',
     'package.json'
-  ], ['inject', 'watch:build']);
-});
+  ], gulp.series(inject, watchBuildFn));
+}
+const watchBuild = gulp.series(inject, build, watchBuildFn)
+gulp.task('watch:build', watchBuild);
+gulp.task('build:watch', watchBuild);
+
+module.exports = { watch, watchBuild }

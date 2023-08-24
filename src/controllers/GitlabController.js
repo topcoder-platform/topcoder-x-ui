@@ -8,6 +8,7 @@
  * @author TCSCODER
  * @version 1.0
  */
+const querystring = require('querystring');
 const _ = require('lodash');
 const superagent = require('superagent');
 const superagentPromise = require('superagent-promise');
@@ -18,6 +19,7 @@ const constants = require('../common/constants');
 const config = require('../config');
 const GitlabService = require('../services/GitlabService');
 const UserService = require('../services/UserService');
+const logger = require('../common/logger');
 const User = require('../models').User;
 const OwnerUserGroup = require('../models').OwnerUserGroup;
 const GitlabUserMapping = require('../models').GitlabUserMapping;
@@ -41,11 +43,14 @@ async function ownerUserLogin(req, res) {
   }
   // redirect to GitLab OAuth
   const callbackUri = `${config.WEBSITE}${constants.GITLAB_OWNER_CALLBACK_URL}`;
-  res.redirect(`https://gitlab.com/oauth/authorize?client_id=${
-    config.GITLAB_CLIENT_ID
-  }&redirect_uri=${
-    encodeURIComponent(callbackUri)
-  }&response_type=code&state=${req.session.state}&scope=api`);
+  const query = querystring.stringify({
+    client_id: config.GITLAB_CLIENT_ID,
+    redirect_uri: querystring.escape(callbackUri),
+    response_type: 'code',
+    state: req.session.state,
+    scope: 'api+read_repository',
+  }, null, null, {encodeURIComponent: (str) => str});
+  res.redirect(`https://gitlab.com/oauth/authorize?${query}`);
 }
 
 /**
@@ -76,8 +81,10 @@ async function ownerUserLoginCallback(req, res) {
   const accessToken = result.body.access_token;
   const refreshToken = result.body.refresh_token;
   const expiresIn = result.body.expires_in || constants.GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION;
+  const expiry = new Date(new Date().getTime() + (expiresIn * MS_PER_SECOND));
   // ensure the user is valid owner user
-  const ownerUser = await GitlabService.ensureOwnerUser(accessToken, topcoderUsername);
+  const ownerUser = await GitlabService.ensureUser(
+    accessToken, refreshToken, expiry, topcoderUsername, constants.USER_ROLES.OWNER);
   // save user token data
   await dbHelper.update(User, ownerUser.id, {
     accessToken,
@@ -215,7 +222,7 @@ async function addUserToGroupCallback(req, res) {
     group.accessLevel,
     group.expiredAt);
   // associate gitlab username with TC username
-  
+
   const mapping = await dbHelper.queryOneUserMappingByTCUsername(GitlabUserMapping, req.session.tcUsername);
   if (mapping) {
     await dbHelper.update(GitlabUserMapping, mapping.id, {
@@ -232,7 +239,7 @@ async function addUserToGroupCallback(req, res) {
   }
   // We get gitlabUser.id and group.groupId and
   // associate github username and teamId
-  const gitlabUserToGroupMapping = await dbHelper.queryOneUserGroupMapping(UserGroupMapping, 
+  const gitlabUserToGroupMapping = await dbHelper.queryOneUserGroupMapping(UserGroupMapping,
     group.groupId,
     gitlabUser.id);
 
@@ -248,6 +255,76 @@ async function addUserToGroupCallback(req, res) {
   res.redirect(`${constants.USER_ADDED_TO_TEAM_SUCCESS_URL}/gitlab/${currentGroup.full_path.replace('/', '@!2F')}`);
 }
 
+/**
+ * Gitlab guest user login
+ * @param {Object} req the request
+ * @param {Object} res the response
+ */
+async function guestUserLogin(req, res) {
+  // generate an identifier if not present,
+  // the identifier is used as OAuth state
+  if (!req.session.state) {
+    req.session.state = helper.generateIdentifier();
+  }
+  // redirect to GitLab OAuth
+  const callbackUri = `${config.WEBSITE}${constants.GITLAB_GUEST_CALLBACK_URL}`;
+  const query = querystring.stringify({
+    client_id: config.GITLAB_CLIENT_ID,
+    redirect_uri: querystring.escape(callbackUri),
+    response_type: 'code',
+    state: req.session.state,
+    scope: 'api+write_repository',
+  }, null, null, {encodeURIComponent: (str) => str});
+  res.redirect(`https://gitlab.com/oauth/authorize?${query}`);
+}
+
+/**
+ * Guest user callback, to be added to
+ * @param {Object} req the request
+ * @param {Object} res the response
+ */
+async function guestUserCallback(req, res) {
+  try {
+    if (req.query.error_description) {
+      throw new errors.ForbiddenError(req.query.error_description.replace(/\+/g, ' '));
+    }
+    if (!req.session.state || req.query.state !== req.session.state) {
+      throw new errors.ForbiddenError('Invalid state.');
+    }
+    const code = req.query.code;
+    if (!code) {
+      throw new errors.ValidationError('Missing code.');
+    }
+
+    // exchange code to get guest user token
+    const result = await request
+      .post('https://gitlab.com/oauth/token')
+      .query({
+        client_id: config.GITLAB_CLIENT_ID,
+        client_secret: config.GITLAB_CLIENT_SECRET,
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: `${config.WEBSITE}/api/${config.API_VERSION}/gitlab/guestuser/callback`,
+      })
+      .end();
+    // Throw error if github access token was not returned (ex. invalid code)
+    if (!result.body.access_token) {
+      throw new errors.UnauthorizedError('Gitlab authorization failed.', result.body.error_description);
+    }
+    const {access_token: accessToken, refresh_token: refreshToken} = result.body;
+    const expiresIn = result.body.expires_in || constants.GITLAB_ACCESS_TOKEN_DEFAULT_EXPIRATION;
+    const expiry = new Date(new Date().getTime() + (expiresIn * MS_PER_SECOND));
+    logger.debug(`[GitlabController#guestUserCallback] payload: ${JSON.stringify(result.body)}`);
+
+    // Create/update user mapping
+    await GitlabService.ensureUser(accessToken, refreshToken, expiry, constants.USER_ROLES.GUEST);
+
+    // redirect to success page
+    res.redirect(`${constants.GUEST_ONBOARDING_COMPLETED_URL}?success=true`);
+  } catch (err) {
+    res.redirect(`${constants.GUEST_ONBOARDING_COMPLETED_URL}?success=false&error=${err.toString()}`);
+  }
+}
 
 /**
  * Delete users from a group.
@@ -294,6 +371,8 @@ module.exports = {
   getGroupRegistrationUrl,
   addUserToGroup,
   addUserToGroupCallback,
+  guestUserLogin,
+  guestUserCallback,
   deleteUsersFromTeam,
 };
 

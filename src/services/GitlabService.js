@@ -27,30 +27,49 @@ const request = superagentPromise(superagent, Promise);
 const MS_PER_SECOND = 1000;
 
 /**
- * Ensure the owner user is in database.
- * @param {String} token the access token of owner user
- * @param {String} topcoderUsername the topcoder handle of owner user
- * @returns {Promise} the promise result of found owner user
+ * Get user profile.
+ * @param {string} token User token
+ * @returns {Promise<Object>} the promise result of user profile
  */
-async function ensureOwnerUser(token, topcoderUsername) {
-  let userProfile;
+async function getUserProfile(token) {
   try {
     // get current user name
-    userProfile = await request
+    const userProfile = await request
       .get(`${config.GITLAB_API_BASE_URL}/api/v4/user`)
       .set('Authorization', `Bearer ${token}`)
       .end()
       .then((res) => res.body);
+    if (!userProfile) {
+      throw new errors.UnauthorizedError('Can not get user from the access token.');
+    }
+    return userProfile;
   } catch (err) {
-    throw helper.convertGitLabError(err, 'Failed to ensure valid owner user.');
+    if (!(err instanceof errors.UnauthorizedError)) {
+      throw helper.convertGitLabError(err, 'Failed to ensure valid owner user.');
+    }
+    throw err;
   }
-  if (!userProfile) {
-    throw new errors.UnauthorizedError('Can not get user from the access token.');
-  }
-  const user = await dbHelper.queryOneUserByTypeAndRole(User, 
+}
+
+getUserProfile.schema = Joi.object().keys({
+  token: Joi.string().required(),
+});
+
+/**
+ * Ensure the owner user is in database.
+ * @param {String} token the access token of owner user
+ * @param {Date} expiryTime the expiry time of owner user
+ * @param {String} refreshToken the refresh token of owner user
+ * @param {String} topcoderUsername the topcoder handle of owner user
+ * @param {String} userRole the role of user
+ * @returns {Promise} the promise result of found owner user
+ */
+async function ensureUser(token, expiryTime, refreshToken, topcoderUsername, userRole) {
+  const userProfile = await getUserProfile(token);
+  const user = await dbHelper.queryOneUserByTypeAndRole(User,
     userProfile.username,
     constants.USER_TYPES.GITLAB,
-    constants.USER_ROLES.OWNER);
+    userRole);
 
   const userMapping = await dbHelper.queryOneUserMappingByTCUsername(GitlabUserMapping, topcoderUsername);
   if (!userMapping) {
@@ -70,11 +89,13 @@ async function ensureOwnerUser(token, topcoderUsername) {
   if (!user) {
     return await dbHelper.create(User, {
       id: helper.generateIdentifier(),
-      role: constants.USER_ROLES.OWNER,
+      role: userRole,
       type: constants.USER_TYPES.GITLAB,
       userProviderId: userProfile.id,
       username: userProfile.username,
       accessToken: token,
+      accessTokenExpiration: expiryTime,
+      refreshToken,
     });
   }
   // save user token data
@@ -82,12 +103,17 @@ async function ensureOwnerUser(token, topcoderUsername) {
     userProviderId: userProfile.id,
     username: userProfile.username,
     accessToken: token,
+    accessTokenExpiration: expiryTime,
+    refreshToken,
   });
 }
 
-ensureOwnerUser.schema = Joi.object().keys({
+ensureUser.schema = Joi.object().keys({
   token: Joi.string().required(),
+  expiryTime: Joi.date().required(),
+  refreshToken: Joi.string().required(),
   topcoderUsername: Joi.string().required(),
+  userRole: Joi.string().required(),
 });
 
 /**
@@ -162,7 +188,7 @@ async function getGroupRegistrationUrl(ownerUsername, groupId, accessLevel, expi
     groupId,
     identifier,
     accessLevel,
-    expiredAt
+    expiredAt,
   });
 
   // construct URL
@@ -174,7 +200,7 @@ getGroupRegistrationUrl.schema = Joi.object().keys({
   ownerUsername: Joi.string().required(),
   groupId: Joi.string().required(),
   accessLevel: Joi.string().required(),
-  expiredAt: Joi.string()
+  expiredAt: Joi.string(),
 });
 
 /**
@@ -204,7 +230,7 @@ async function addGroupMember(gitUsername, groupId, ownerUserToken, normalUserTo
 
     let body = `user_id=${userId}&access_level=${accessLevel}`;
     if (expiredAt && helper.isValidGitlabExpiresDate(expiredAt)) {
-      body = body + `&expires_at=${expiredAt}`;
+      body += `&expires_at=${expiredAt}`;
     }
     // add user to group
     await request
@@ -237,7 +263,7 @@ addGroupMember.schema = Joi.object().keys({
   ownerUserToken: Joi.string().required(),
   normalUserToken: Joi.string().required(),
   accessLevel: Joi.string().required(),
-  expiredAt: Joi.string()
+  expiredAt: Joi.string(),
 });
 
 /**
@@ -339,7 +365,8 @@ deleteUserFromGitlabGroup.schema = Joi.object().keys({
 });
 
 module.exports = {
-  ensureOwnerUser,
+  getUserProfile,
+  ensureUser,
   listOwnerUserGroups,
   getGroupRegistrationUrl,
   addGroupMember,
