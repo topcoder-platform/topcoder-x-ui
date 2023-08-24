@@ -36,7 +36,7 @@ const browserifyFn = () => {
     .pipe(gulp.dest(gulp.paths.tmp + '/serve/app'));
 };
 
-const _browserify = gulp.series(styles, browserifyFn);
-gulp.task('browserify', _browserify);
+const browserify = gulp.series(styles, browserifyFn);
+gulp.task('browserify', browserify);
 
-module.exports = { browserify: _browserify }
+module.exports = { browserify }
