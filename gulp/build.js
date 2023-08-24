@@ -9,7 +9,7 @@ const $ = require('gulp-load-plugins')({
   pattern: ['gulp-*', 'uglify-save-license', 'del']
 });
 
-const partialsFn = () => {
+const partials = () => {
   return gulp.src([
     paths.src + '/{app,components}/**/*.html',
     paths.tmp + '/{app,components}/**/*.html'
@@ -25,9 +25,9 @@ const partialsFn = () => {
     }))
     .pipe(gulp.dest(paths.tmp + '/partials/'));
 }
-gulp.task('partials', partialsFn);
+gulp.task('partials', partials);
 
-const html = () => {
+const htmlFn = () => {
   return new Promise(async (resolve, reject) => {
     const partialsInjectFile = gulp.src(paths.tmp + '/partials/templateCacheHtml.js', { read: false });
     const partialsInjectOptions = {
@@ -58,7 +58,8 @@ const html = () => {
       .on('error', reject);
   });
 }
-gulp.task('html', gulp.series(inject, partialsFn, html));
+const html = gulp.series(inject, partials, htmlFn);
+gulp.task('html', htmlFn);
 
 const images = () => {
   return gulp.src(paths.src + '/assets/images/**/*')
