@@ -1,5 +1,5 @@
 # Use the base image with Node.js
-FROM node:14
+FROM node:20
 
 # Copy the current directory into the Docker image
 COPY . /topcoder-x-ui
@@ -8,9 +8,8 @@ COPY . /topcoder-x-ui
 WORKDIR /topcoder-x-ui
 
 # Install the dependencies from package.json
-RUN npm config set unsafe-perm true
 RUN git config --global url."https://git@".insteadOf git://
-RUN npm install
+RUN npm install --legacy-peer-deps
 RUN npm run build
 #RUN npm test
 

@@ -7,8 +7,8 @@
     "private": true,
     "main": "src/app.js",
     "engines": {
-        "node": "14",
-        "npm": "6"
+        "node": "20",
+        "npm": "9"
     },
     "scripts": {
         "start": "node -r esm src/app.js",
