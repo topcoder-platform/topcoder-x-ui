@@ -20,7 +20,8 @@ const partialsFn = () => {
       quotes: true
     }))
     .pipe($.angularTemplatecache('templateCacheHtml.js', {
-      module: 'topcoderX'
+      module: 'topcoderX',
+      root: 'app',
     }))
     .pipe(gulp.dest(paths.tmp + '/partials/'));
 }
