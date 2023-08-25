@@ -84,7 +84,7 @@ async function ownerUserLoginCallback(req, res) {
   const expiry = new Date(new Date().getTime() + (expiresIn * MS_PER_SECOND));
   // ensure the user is valid owner user
   const ownerUser = await GitlabService.ensureUser(
-    accessToken, refreshToken, expiry, topcoderUsername, constants.USER_ROLES.OWNER);
+    accessToken, expiry, refreshToken, topcoderUsername, constants.USER_ROLES.OWNER);
   // save user token data
   await dbHelper.update(User, ownerUser.id, {
     accessToken,
@@ -317,7 +317,8 @@ async function guestUserCallback(req, res) {
     logger.debug(`[GitlabController#guestUserCallback] payload: ${JSON.stringify(result.body)}`);
 
     // Create/update user mapping
-    await GitlabService.ensureUser(accessToken, refreshToken, expiry, constants.USER_ROLES.GUEST);
+    await GitlabService.ensureUser(
+      accessToken, expiry, refreshToken, req.currentUser.handle, constants.USER_ROLES.GUEST);
 
     // redirect to success page
     res.redirect(`${constants.GUEST_ONBOARDING_COMPLETED_URL}?success=true`);

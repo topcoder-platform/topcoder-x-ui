@@ -58,13 +58,13 @@ getUserProfile.schema = Joi.object().keys({
 /**
  * Ensure the owner user is in database.
  * @param {String} token the access token of owner user
- * @param {Date} expiryTime the expiry time of owner user
+ * @param {Date} accessTokenExpiration the access token expiration of owner user
  * @param {String} refreshToken the refresh token of owner user
  * @param {String} topcoderUsername the topcoder handle of owner user
  * @param {String} userRole the role of user
  * @returns {Promise} the promise result of found owner user
  */
-async function ensureUser(token, expiryTime, refreshToken, topcoderUsername, userRole) {
+async function ensureUser(token, accessTokenExpiration, refreshToken, topcoderUsername, userRole) {
   const userProfile = await getUserProfile(token);
   const user = await dbHelper.queryOneUserByTypeAndRole(User,
     userProfile.username,
@@ -94,7 +94,7 @@ async function ensureUser(token, expiryTime, refreshToken, topcoderUsername, use
       userProviderId: userProfile.id,
       username: userProfile.username,
       accessToken: token,
-      accessTokenExpiration: expiryTime,
+      accessTokenExpiration,
       refreshToken,
     });
   }
@@ -103,14 +103,14 @@ async function ensureUser(token, expiryTime, refreshToken, topcoderUsername, use
     userProviderId: userProfile.id,
     username: userProfile.username,
     accessToken: token,
-    accessTokenExpiration: expiryTime,
+    accessTokenExpiration,
     refreshToken,
   });
 }
 
 ensureUser.schema = Joi.object().keys({
   token: Joi.string().required(),
-  expiryTime: Joi.date().required(),
+  accessTokenExpiration: Joi.date().required(),
   refreshToken: Joi.string().required(),
   topcoderUsername: Joi.string().required(),
   userRole: Joi.string().required(),
