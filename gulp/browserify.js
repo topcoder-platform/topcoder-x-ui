@@ -3,7 +3,8 @@ const browserify = require('browserify');
 const uglify = require('gulp-uglify');
 const buffer = require('vinyl-buffer');
 const source = require('vinyl-source-stream');
-const gutil = require('gulp-util');
+const colors = require('ansi-colors')
+const log = require('fancy-log')
 const fs = require('fs');
 const { styles } = require('./styles');
 
@@ -31,7 +32,7 @@ const browserifyFn = () => {
     .pipe(buffer())
     .pipe(uglify())
     .on('error', function (e) {
-      gutil.log("Browserify Error", gutil.colors.red(e.message));
+      log.error("Browserify Error", colors.red(e.message));
     })
     .pipe(gulp.dest(gulp.paths.tmp + '/serve/app'));
 };

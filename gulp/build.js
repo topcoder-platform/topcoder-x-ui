@@ -14,16 +14,17 @@ const partials = () => {
     paths.src + '/{app,components}/**/*.html',
     paths.tmp + '/{app,components}/**/*.html'
   ])
-    .pipe($.minifyHtml({
-      empty: true,
-      spare: true,
-      quotes: true
+    .pipe($.htmlmin({
+      removeEmptyAttributes: true,
+      removeAttributeQuotes: true,
+      processConditionalComments: true,
+      collapseWhitespace: true,
     }))
     .pipe($.angularTemplatecache('templateCacheHtml.js', {
       module: 'topcoderX',
       root: 'app',
     }))
-    .pipe(gulp.dest(paths.tmp + '/partials/'));
+    .pipe(gulp.dest(paths.tmp + '/partials/'))
 }
 gulp.task('partials', partials);
 
@@ -40,17 +41,17 @@ const htmlFn = () => {
     return gulp.src(paths.tmp + '/serve/*.html')
       .pipe($.inject(partialsInjectFile, partialsInjectOptions))
       .pipe($.useref())
-      .pipe(rev())
+      .pipe(gulpIf('!**/*.html', rev()))
       .pipe(gulpIf('**/*.js', $.ngAnnotate()))
       .pipe(gulpIf('**/*.js', $.uglify()))
       .pipe(gulpIf('**/*.css', $.replace(/\.?\.?\/node_modules\/\w+-?\/?\w+\/fonts\/?/g, '../fonts/')))
       .pipe(gulpIf('**/*.css', $.csso()))
       .pipe($.revReplace())
-      .pipe(gulpIf('**/*.html', $.minifyHtml({
-        empty: true,
-        spare: true,
-        quotes: true,
-        conditionals: true
+      .pipe(gulpIf('**/*.html', $.htmlmin({
+        removeEmptyAttributes: true,
+        removeAttributeQuotes: true,
+        processConditionalComments: true,
+        collapseWhitespace: true,
       })))
       .pipe(gulp.dest(paths.dist + '/'))
       .pipe($.size({ title: paths.dist + '/', showFiles: true }))
@@ -59,7 +60,7 @@ const htmlFn = () => {
   });
 }
 const html = gulp.series(inject, partials, htmlFn);
-gulp.task('html', htmlFn);
+gulp.task('html', html);
 
 const images = () => {
   return gulp.src(paths.src + '/assets/images/**/*')
@@ -106,9 +107,7 @@ const lint = () => {
     .src(['src/**/*.js', '!src/front/e2e/**/*.js', '!src/public/**', '!gulp/**', '!node_modules/**'])
     // eslint() attaches the lint output to the "eslint" property
     // of the file object so it can be used by other modules.
-    .pipe(eslint({
-      fix: true
-    }))
+    .pipe(eslint({ fix: true }))
     // eslint.format() outputs the lint results to the console.
     // Alternatively use eslint.formatEach() (see Docs).
     .pipe(eslint.format())
