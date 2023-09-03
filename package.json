@@ -144,7 +144,7 @@
         "jasmine-core": "^2.5.2",
         "jshint": "~2.9.4",
         "jshint-stylish": "~1.0.0",
-        "mocha": "^6.2.0",
+        "mocha": "^10.2.0",
         "natives": "^1.1.6",
         "protractor": "^6.0.0",
         "require-dir": "~0.3.2",
