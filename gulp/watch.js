@@ -27,7 +27,7 @@ const watchBuildFn = () => {
     paths.src + '/{app,components}/**/*.js',
     paths.src + '/{app,components}/**/*.html',
     'package.json'
-  ], gulp.series(inject, watchBuildFn));
+  ], gulp.series(inject, build));
 }
 const watchBuild = gulp.series(inject, build, watchBuildFn)
 gulp.task('watch:build', watchBuild);

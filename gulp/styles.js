@@ -4,7 +4,7 @@ const paths = gulp.paths;
 
 const $ = require('gulp-load-plugins')();
 
-const styles = () => {
+const styles = () => new Promise(async (resolve, reject) => {
   var lessOptions = {
     paths: [
       'node_modules',
@@ -30,7 +30,8 @@ const styles = () => {
     addRootSlash: false
   };
 
-  const indexFilter = $.filter('index.less', { restore: true });
+  const filter = (await import('gulp-filter')).default;
+  const indexFilter = filter('index.less', { restore: true });
 
   return gulp.src([
     paths.src + '/app/index.less',
@@ -45,7 +46,9 @@ const styles = () => {
       console.error(err.toString());
       this.emit('end');
     })
-    .pipe(gulp.dest(paths.tmp + '/serve/app/'));
-}
+    .pipe(gulp.dest(paths.tmp + '/serve/app/'))
+    .on('finish', resolve)
+    .on('error', reject);
+});
 
 module.exports = { styles }

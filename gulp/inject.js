@@ -1,11 +1,11 @@
 const gulp = require('gulp');
-const { browserify } = require('./browserify');
+const { esbuild } = require('./esbuild');
 
 const paths = gulp.paths;
 
 const $ = require('gulp-load-plugins')();
 
-const injectFn = () => {
+const inject = () => {
   const injectStyles = gulp.src([
     paths.tmp + '/serve/{app,components}/**/*.css',
     '!' + paths.tmp + '/serve/app/vendor.css'
@@ -28,7 +28,7 @@ const injectFn = () => {
     .pipe(gulp.dest(paths.tmp + '/serve'));
 }
 
-const inject = gulp.series(browserify, injectFn);
-gulp.task('inject', inject);
+const injectTask = gulp.series(esbuild, inject);
+gulp.task('inject', injectTask);
 
-module.exports = { inject }
+module.exports = { inject: injectTask }

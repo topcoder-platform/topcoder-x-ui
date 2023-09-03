@@ -22,13 +22,13 @@ const partials = () => {
     }))
     .pipe($.angularTemplatecache('templateCacheHtml.js', {
       module: 'topcoderX',
-      root: 'app',
+      transformUrl: url => url.replace(/^\/+/, '')
     }))
     .pipe(gulp.dest(paths.tmp + '/partials/'))
 }
 gulp.task('partials', partials);
 
-const htmlFn = () => {
+const html = () => {
   return new Promise(async (resolve, reject) => {
     const partialsInjectFile = gulp.src(paths.tmp + '/partials/templateCacheHtml.js', { read: false });
     const partialsInjectOptions = {
@@ -59,8 +59,8 @@ const htmlFn = () => {
       .on('error', reject);
   });
 }
-const html = gulp.series(inject, partials, htmlFn);
-gulp.task('html', html);
+const htmlTask = gulp.series(inject, partials, html);
+gulp.task('html', htmlTask);
 
 const images = () => {
   return gulp.src(paths.src + '/assets/images/**/*')
@@ -68,16 +68,19 @@ const images = () => {
 }
 gulp.task('images', images);
 
-const fonts = () => {
+const fonts = () => new Promise(async (resolve, reject) => {
+  const filter = (await import('gulp-filter')).default;
   return gulp.src([
     "node_modules/bootstrap/dist/fonts/*.{eot,svg,ttf,woff,woff2}",
     "node_modules/footable/css/fonts/*.{eot,svg,ttf,woff,woff2}"
   ])
-    .pipe($.filter('**/*.{eot,svg,ttf,woff,woff2}'))
+    .pipe(filter('**/*.{eot,svg,ttf,woff,woff2}'))
     .pipe($.flatten())
     .pipe(gulp.dest(paths.dist + '/fonts/'))
-    .pipe(gulp.dest(paths.dist + '/styles/fonts/'));
-}
+    .pipe(gulp.dest(paths.dist + '/styles/fonts/'))
+    .on('finish', resolve)
+    .on('error', reject);
+});
 gulp.task('fonts', fonts);
 
 const fontAwesome = () => {
@@ -92,11 +95,10 @@ const misc = () => {
 }
 gulp.task('misc', misc);
 
-const cleanFn = (done) => {
+const clean = (done) => {
   $.del([paths.dist + '/', paths.tmp + '/', paths.src + '/app/config.js'], done);
 }
-const clean = gulp.series(cleanFn);
-gulp.task('clean', cleanFn);
+gulp.task('clean', clean);
 
 const lint = () => {
   // ESLint ignores files with "node_modules" paths.
@@ -117,7 +119,7 @@ const lint = () => {
 }
 gulp.task('lint', lint);
 
-const build = gulp.series(lint, html, images, fonts, fontAwesome, misc);
+const build = gulp.series(lint, htmlTask, images, fonts, fontAwesome, misc);
 gulp.task('build', build);
 
 module.exports = { clean, build };
