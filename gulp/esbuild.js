@@ -5,12 +5,11 @@ const log = require('fancy-log')
 const fs = require('fs');
 const { styles } = require('./styles');
 
-const gulpEsbuild = createGulpEsbuild({
-  incremental: true,
-  piping: true,
-})
-
 const esbuild = () => {
+  const gulpEsbuild = createGulpEsbuild({
+    piping: true,
+  })
+
   const cssFilePath = gulp.paths.tmp + '/serve/app/bundle.css';
 
   // Delete file if exists
