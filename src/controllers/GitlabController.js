@@ -112,9 +112,8 @@ async function listOwnerUserGroups(req) {
   if (!user || !user.accessToken) {
     throw new errors.UnauthorizedError('You have not setup for Gitlab.');
   }
-  const refreshedUser = await GitlabService.refreshGitlabUserAccessToken(user);
-  return await GitlabService.listOwnerUserGroups(refreshedUser.username, refreshedUser.accessToken, req.query.page,
-    req.query.perPage, req.query.getAll);
+  const gitlabService = await GitlabService.create(user);
+  return await gitlabService.listOwnerUserGroups(req.query.page, req.query.perPage, req.query.getAll);
 }
 
 /**
@@ -127,8 +126,8 @@ async function getGroupRegistrationUrl(req) {
   if (!user || !user.accessToken) {
     throw new errors.UnauthorizedError('You have not setup for Gitlab.');
   }
-  return await GitlabService.getGroupRegistrationUrl(
-    user.username,
+  const gitlabService = await GitlabService.create(user);
+  return await gitlabService.getGroupRegistrationUrl(
     req.params.id,
     req.params.accessLevel,
     req.params.expiredAt);
@@ -173,21 +172,6 @@ async function addUserToGroupCallback(req, res) {
   if (!code) {
     throw new errors.ValidationError('Missing code.');
   }
-  const group = await helper.ensureExistsWithKey(OwnerUserGroup, 'identifier', identifier, 'OwnerUserGroup');
-
-  if (!group) {
-    throw new errors.NotFoundError('The group is not found or not accessible.');
-  }
-
-  // get owner user
-  const ownerUser = await dbHelper.queryOneUserByTypeAndRole(User,
-    group.ownerUsername, constants.USER_TYPES.GITLAB, constants.USER_ROLES.OWNER);
-
-  if (!ownerUser) {
-    throw new errors.NotFoundError('The owner user is not found or not accessible.');
-  }
-
-  const refreshedOwnerUser = await GitlabService.refreshGitlabUserAccessToken(ownerUser);
 
   // exchange code to get normal user token
   const result = await request
@@ -200,25 +184,45 @@ async function addUserToGroupCallback(req, res) {
       redirect_uri: `${config.WEBSITE}/api/${config.API_VERSION}/gitlab/normaluser/callback`,
     })
     .end();
-  // Throw error if github access token was not returned (ex. invalid code)
+
+  // Throw error if gitlab access token was not returned (ex. invalid code)
   if (!result.body.access_token) {
     throw new errors.UnauthorizedError('Gitlab authorization failed.', result.body.error_description);
   }
-  const token = result.body.access_token;
+
+  // Ensure that the group exists and belongs to an owner user
+  const group = await helper.ensureExistsWithKey(OwnerUserGroup, 'identifier', identifier, 'OwnerUserGroup');
+  if (!group) {
+    throw new errors.NotFoundError('The group is not found or not accessible.');
+  }
+
+  // get owner user
+  const ownerUser = await dbHelper.queryOneUserByTypeAndRole(
+    User,
+    group.ownerUsername,
+    constants.USER_TYPES.GITLAB,
+    constants.USER_ROLES.OWNER);
+  if (!ownerUser) {
+    throw new errors.NotFoundError('The owner user is not found or not accessible.');
+  }
+
+  // create gitlab service for owner user
+  const ownerGitlabService = await GitlabService.create(ownerUser);
 
   // get group name
-  const groupsResult = await GitlabService.listOwnerUserGroups(refreshedOwnerUser.username,
-    refreshedOwnerUser.accessToken, 1, constants.MAX_PER_PAGE, true);
+  const groupsResult = await ownerGitlabService.listOwnerUserGroups(1, constants.MAX_PER_PAGE, true);
   const currentGroup = _.find(groupsResult.groups, (item) => { // eslint-disable-line arrow-body-style
     return item.id.toString() === group.groupId.toString();
   });
 
+  const token = result.body.access_token;
+  const userGitlabClient = await GitlabService.getClientWithAccessToken(token);
+  const userInfo = await userGitlabClient.Users.showCurrentUser();
+
   // add user to group
-  const gitlabUser = await GitlabService.addGroupMember(
-    refreshedOwnerUser.username,
+  const gitlabUser = await ownerGitlabService.addGroupMember(
     group.groupId,
-    refreshedOwnerUser.accessToken,
-    token,
+    userInfo,
     group.accessLevel,
     group.expiredAt);
   // associate gitlab username with TC username
@@ -350,12 +354,11 @@ async function deleteUsersFromTeam(req, res) {
       if (!ownerUser) {
         throw new errors.NotFoundError('The owner user is not found or not accessible.');
       }
-      const refreshedOwnerUser = await GitlabService.refreshGitlabUserAccessToken(ownerUser);
+      const gitlabService = await GitlabService.create(ownerUser);
       const userGroupMappings = await dbHelper.scan(UserGroupMapping, {groupId});
       // eslint-disable-next-line no-restricted-syntax
       for (const userGroupMapItem of userGroupMappings) {
-        await GitlabService.deleteUserFromGitlabGroup(refreshedOwnerUser.username,
-          refreshedOwnerUser.accessToken, groupId, userGroupMapItem.gitlabUserId);
+        await gitlabService.deleteUserFromGitlabGroup(groupId, userGroupMapItem.gitlabUserId);
         await dbHelper.removeById(UserGroupMapping, userGroupMapItem.id);
       }
     } catch (err) {

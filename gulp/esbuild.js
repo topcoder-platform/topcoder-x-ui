@@ -30,8 +30,7 @@ const esbuild = () => {
         '.woff': 'file',
         '.woff2': 'file',
         '.ttf': 'file',
-        '.svg': 'file',
-        '.css': 'file'
+        '.svg': 'file'
       }
     }))
     .on('error', function (e) {

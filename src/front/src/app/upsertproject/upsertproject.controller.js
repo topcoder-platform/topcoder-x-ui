@@ -124,11 +124,13 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       if (tutorial) {
         $window.localStorage.removeItem('tutorial');
       }
-      if ($scope.project.copilot === '') {
-        $scope.project.copilot = null;
+      const project = Object.assign({}, $scope.project);
+      if (project.copilot === '') {
+        project.copilot = null;
       }
+      project.repoUrls = project.repoUrl.split(',');
       if ($scope.editing) {
-        ProjectService.update($scope.project).then(function () {
+        ProjectService.update(project).then(function () {
           Alert.info('Project Updated Successfully', $scope);
           setTimeout(function() {
             $state.go('app.projects');
@@ -140,7 +142,7 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
           }, 3000);
         });
       } else {
-        ProjectService.create($scope.project).then(function () {
+        ProjectService.create(project).then(function () {
           Alert.info('Project has been added successfully, and Topcoder X issue labels, webhook, and wiki rules have been added to the repository', $scope);
           setTimeout(function() {
             $state.go('app.projects');

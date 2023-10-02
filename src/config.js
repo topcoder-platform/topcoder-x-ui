@@ -19,8 +19,14 @@ module.exports = {
   GITLAB_CLIENT_ID: process.env.GITLAB_CLIENT_ID,
   GITLAB_CLIENT_SECRET: process.env.GITLAB_CLIENT_SECRET,
 
+  SSL_CONFIG: !process.env.ENABLE_SERVER_SSL ? {} : {
+    key: process.env.SSL_KEY || fs.readFileSync('./ssl/server.key'), // eslint-disable-line no-sync
+    cert: process.env.SSL_CERT || fs.readFileSync('./ssl/server.crt'), // eslint-disable-line no-sync
+    ca: process.env.SSL_CA || fs.readFileSync('./ssl/ca_root.crt'), // eslint-disable-line no-sync
+  },
+
   // used as base to construct various URLs
-  WEBSITE: process.env.WEBSITE || 'http://topcoderx.topcoder-dev.com',
+  WEBSITE: process.env.WEBSITE || 'https://topcoderx.topcoder-dev.com',
   GITLAB_API_BASE_URL: process.env.GITLAB_API_BASE_URL || 'https://gitlab.com',
 
   // kafka configuration
@@ -33,7 +39,7 @@ module.exports = {
       passphrase: 'secret', // NOTE:* This configuration specifies the private key passphrase used while creating it.
     },
   },
-  HOOK_BASE_URL: process.env.HOOK_BASE_URL || 'http://topcoderx.topcoder-dev.com',
+  HOOK_BASE_URL: process.env.HOOK_BASE_URL || 'https://topcoderx.topcoder-dev.com',
   TOPCODER_ENV: process.env.TOPCODER_ENV || 'dev',
   LABELS: process.env.LABELS || [
     {name: 'tcx_OpenForPickup', color: '428BCA'},
@@ -64,7 +70,8 @@ module.exports = {
       TC_LOGIN_URL: process.env.TC_LOGIN_URL || 'https://accounts.topcoder.com/member',
     },
   },
-  DYNAMODB_WAIT_TABLE_FOR_ACTIVE_TIMEOUT: process.env.DYNAMODB_WAIT_TABLE_FOR_ACTIVE_TIMEOUT || 1000 * 60 * 10 // eslint-disable-line no-magic-numbers
+  DYNAMODB_WAIT_TABLE_FOR_ACTIVE_TIMEOUT: process.env.DYNAMODB_WAIT_TABLE_FOR_ACTIVE_TIMEOUT || 1000 * 60 * 10, // eslint-disable-line no-magic-numbers
+  GITLAB_REFRESH_TOKEN_BEFORE_EXPIRATION: 300,
 };
 
 module.exports.frontendConfigs = {

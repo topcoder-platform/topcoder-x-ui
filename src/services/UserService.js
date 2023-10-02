@@ -33,7 +33,7 @@ async function getUserSetting(handle) {
   const setting = {
     github: false,
     gitlab: false,
-    expired: {}
+    expired: {},
   };
 
   if (!githubMapping && !gitlabMapping) {
@@ -52,15 +52,16 @@ async function getUserSetting(handle) {
   if (gitlabMapping && gitlabMapping.gitlabUsername) {
     const gitlab = await dbHelper.queryOneUserByType(
       User, gitlabMapping.gitlabUsername, constants.USER_TYPES.GITLAB);
-    if (!_.isNil(gitlab)) {
-      users.push(gitlab);
+    const gitlabService = await GitlabService.create(gitlab);
+    if (!_.isNil(gitlabService.user)) {
+      users.push(gitlabService.user);
     }
   }
 
   _.forEach(constants.USER_TYPES, (item) => {
     setting[item] = !!users.find((i) => i.type === item && i.accessToken);
     if (setting[item]) {
-      setting['expired'][item] = !!users.find((i) =>
+      setting.expired[item] = !!users.find((i) =>
         i.type === item && i.accessTokenExpiration && i.accessTokenExpiration <= new Date().getTime());
     }
   });
@@ -70,8 +71,6 @@ async function getUserSetting(handle) {
 getUserSetting.schema = Joi.object().keys({
   handle: Joi.string().required(),
 });
-
-
 
 /**
  * revoke user setting
@@ -102,9 +101,8 @@ async function revokeUserSetting(handle, provider) {
 
 revokeUserSetting.schema = Joi.object().keys({
   handle: Joi.string().required(),
-  provider: Joi.string().required()
+  provider: Joi.string().required(),
 });
-
 
 
 /**
@@ -135,7 +133,7 @@ async function getAccessTokenByHandle(handle, provider) {
     provider === 'github' ? GithubUserMapping : GitlabUserMapping, handle.toLowerCase());
   let gitUserName;
   if (mapping) {
-    gitUserName = provider === constants.USER_TYPES.GITHUB ? 'githubUsername' :   //eslint-disable-line no-nested-ternary
+    gitUserName = provider === constants.USER_TYPES.GITHUB ? 'githubUsername' : // eslint-disable-line no-nested-ternary
       'gitlabUsername';
     return await dbHelper.queryOneUserByType(User, mapping[gitUserName], provider);
   }
@@ -148,7 +146,6 @@ getUserToken.schema = Joi.object().keys({
 });
 
 
-
 const searchSchema = {
   criteria: Joi.object().keys({
     sortBy: Joi.string().valid('topcoderUsername', 'githubUsername', 'gitlabUsername').required(),
@@ -157,7 +154,7 @@ const searchSchema = {
     perPage: Joi.number().integer().min(1).required(),
     query: Joi.string(),
     gitlabLastKey: Joi.string(),
-    githubLastKey: Joi.string()
+    githubLastKey: Joi.string(),
   }).required(),
 };
 
@@ -193,8 +190,7 @@ async function search(criteria) {
       GitlabUserMapping,
       'topcoderUsername',
       criteria.query);
-  }
-  else {
+  } else {
     githubUserMappings = await dbHelper.scanAll(
       GithubUserMapping,
       criteria.perPage / 2, // eslint-disable-line
@@ -211,15 +207,14 @@ async function search(criteria) {
   const uniqueTcUsernames = _.uniq(tcUsernames);
   const docs = await Promise.all(_.map(uniqueTcUsernames, async (tcUsername) => {
     const mapping = {
-      topcoderUsername: tcUsername
+      topcoderUsername: tcUsername,
     };
     const githubMapping = _.find(githubUserMappings, (object) => object.topcoderUsername === tcUsername); // eslint-disable-line lodash/matches-prop-shorthand
     const gitlabMapping = _.find(gitlabUserMappings, (object) => object.topcoderUsername === tcUsername); // eslint-disable-line lodash/matches-prop-shorthand
     if (githubMapping) {
       mapping.githubUsername = githubMapping.githubUsername;
       mapping.githubUserId = githubMapping.githubUserId;
-    }
-    else {
+    } else {
       const dbGithubMapping = await dbHelper.queryOneUserMappingByTCUsername(GithubUserMapping, tcUsername);
       if (dbGithubMapping) {
         mapping.githubUsername = dbGithubMapping.githubUsername;
@@ -229,8 +224,7 @@ async function search(criteria) {
     if (gitlabMapping) {
       mapping.gitlabUsername = gitlabMapping.gitlabUsername;
       mapping.gitlabUserId = gitlabMapping.gitlabUserId;
-    }
-    else {
+    } else {
       const dbGitlabMapping = await dbHelper.queryOneUserMappingByTCUsername(GitlabUserMapping, tcUsername);
       if (dbGitlabMapping) {
         mapping.gitlabUsername = dbGitlabMapping.gitlabUsername;
@@ -241,7 +235,7 @@ async function search(criteria) {
   }));
 
   const result = {
-    lastKey : {
+    lastKey: {
       githubLastKey: githubUserMappings.lastKey ? JSON.stringify(githubUserMappings.lastKey) : undefined, // eslint-disable-line
       gitlabLastKey: gitlabUserMappings.lastKey ? JSON.stringify(gitlabUserMappings.lastKey) : undefined // eslint-disable-line
     },
@@ -262,42 +256,39 @@ async function create(userMapping) {
     const existGithubMapping = await dbHelper.queryOneUserMappingByTCUsername(
       GithubUserMapping, userMapping.topcoderUsername);
     if (existGithubMapping) {
-      return { error: true, exist: true, provider: 'Github' };
+      return {error: true, exist: true, provider: 'Github'};
     }
-    else {
-      const githubUserId = await GithubService.getUserIdByUsername(userMapping.githubUsername);
-      const mappingToSave = {
-        id: helper.generateIdentifier(),
-        topcoderUsername: userMapping.topcoderUsername,
-        githubUsername: userMapping.githubUsername,
-        githubUserId
-      };
-      await dbHelper.create(GithubUserMapping, mappingToSave);
-    }
+
+    const githubUserId = await GithubService.getUserIdByUsername(userMapping.githubUsername);
+    const mappingToSave = {
+      id: helper.generateIdentifier(),
+      topcoderUsername: userMapping.topcoderUsername,
+      githubUsername: userMapping.githubUsername,
+      githubUserId,
+    };
+    await dbHelper.create(GithubUserMapping, mappingToSave);
   }
   if (userMapping.gitlabUsername) {
     const existGitlabMapping = await dbHelper.queryOneUserMappingByTCUsername(
       GitlabUserMapping, userMapping.topcoderUsername);
     if (existGitlabMapping) {
-      return { error: true, exist: true, provider: 'Gitlab' };
+      return {error: true, exist: true, provider: 'Gitlab'};
     }
-    else {
-      const gitlabUserId = await GitlabService.getUserIdByUsername(userMapping.gitlabUsername);
-      const mappingToSave = {
-        id: helper.generateIdentifier(),
-        topcoderUsername: userMapping.topcoderUsername,
-        gitlabUsername: userMapping.gitlabUsername,
-        gitlabUserId
-      };
-      await dbHelper.create(GitlabUserMapping, mappingToSave);
-    }
+
+    const gitlabUserId = await GitlabService.getUserIdByUsername(userMapping.gitlabUsername);
+    const mappingToSave = {
+      id: helper.generateIdentifier(),
+      topcoderUsername: userMapping.topcoderUsername,
+      gitlabUsername: userMapping.gitlabUsername,
+      gitlabUserId,
+    };
+    await dbHelper.create(GitlabUserMapping, mappingToSave);
   }
 
   return {success: true};
 }
 
 create.schema = createUserMappingSchema;
-
 
 
 /**
@@ -315,48 +306,39 @@ async function update(userMapping) {
     const mappingToSave = {
       topcoderUsername: userMapping.topcoderUsername,
       githubUsername: userMapping.githubUsername,
-      githubUserId
+      githubUserId,
     };
     if (existGithubMapping) {
       mappingToSave.id = existGithubMapping.id;
       await dbHelper.update(GithubUserMapping, existGithubMapping.id, mappingToSave);
-    }
-    else {
+    } else {
       mappingToSave.id = helper.generateIdentifier();
       await dbHelper.create(GithubUserMapping, mappingToSave);
     }
-  }
-  else {
-    if (existGithubMapping) {
-      await dbHelper.removeById(GithubUserMapping, existGithubMapping.id);
-    }
+  } else if (existGithubMapping) {
+    await dbHelper.removeById(GithubUserMapping, existGithubMapping.id);
   }
   if (userMapping.gitlabUsername) {
     const gitlabUserId = await GitlabService.getUserIdByUsername(userMapping.gitlabUsername);
     const mappingToSave = {
       topcoderUsername: userMapping.topcoderUsername,
       gitlabUsername: userMapping.gitlabUsername,
-      gitlabUserId
+      gitlabUserId,
     };
     if (existGitlabMapping) {
       mappingToSave.id = existGitlabMapping.id;
       await dbHelper.update(GitlabUserMapping, existGitlabMapping.id, mappingToSave);
-    }
-    else {
+    } else {
       mappingToSave.id = helper.generateIdentifier();
       await dbHelper.create(GitlabUserMapping, mappingToSave);
     }
-  }
-  else {
-    if (existGitlabMapping) {
-      await dbHelper.removeById(GitlabUserMapping, existGitlabMapping.id);
-    }
+  } else if (existGitlabMapping) {
+    await dbHelper.removeById(GitlabUserMapping, existGitlabMapping.id);
   }
   return {success: true};
 }
 
 update.schema = createUserMappingSchema;
-
 
 
 /**

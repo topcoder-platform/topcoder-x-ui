@@ -11,9 +11,9 @@
         "npm": ">=9"
     },
     "scripts": {
-        "start": "node -r esm src/app.js",
+        "start": "node src/app.js",
         "serve": "./node_modules/.bin/concurrently \"npm run start:be\" \"npm run start:fe\"",
-        "start:be": "nodemon -r esm src/app.js",
+        "start:be": "nodemon src/app.js",
         "start:fe": "gulp build:watch",
         "build": "gulp build",
         "test": "node ./node_modules/mocha/bin/mocha --recursive --timeout 999999 --colors tests/*.test.js --bail",
@@ -28,6 +28,7 @@
         "migrate-repo-url": "node scripts/migrate-repo-url.js"
     },
     "dependencies": {
+        "@gitbeaker/rest": "^39.16.0",
         "angular": "~1.8.0",
         "angular-animate": "~1.7.4",
         "angular-clipboard": "~1.2.1",
@@ -57,7 +58,6 @@
         "cors": "^2.8.4",
         "debug": "~2.6.3",
         "dynamoose": "^1.1.0",
-        "esm": "^3.2.25",
         "express": "^4.15.4",
         "express-jwt": "^5.3.0",
         "express-session": "^1.15.5",
@@ -120,9 +120,11 @@
         "gulp-awspublish": "^7.1.0",
         "gulp-babel": "^8.0.0",
         "gulp-consolidate": "^0.2.0",
+        "gulp-cssimport": "^7.0.0",
         "gulp-csso": "^4.0.1",
         "gulp-esbuild": "^0.11.2",
         "gulp-eslint": "^6.0.0",
+        "gulp-eslint-new": "^1.8.4",
         "gulp-filter": "^8.0.0",
         "gulp-flatten": "^0.4.0",
         "gulp-htmlmin": "^5.0.1",

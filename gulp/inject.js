@@ -1,4 +1,5 @@
 const gulp = require('gulp');
+const gulpIf = require('gulp-if');
 const { esbuild } = require('./esbuild');
 
 const paths = gulp.paths;
@@ -25,6 +26,7 @@ const inject = () => {
   return gulp.src(paths.src + '/*.html')
     .pipe($.inject(injectStyles, injectOptions))
     .pipe($.inject(injectScripts, injectOptions))
+    .pipe(gulpIf('**/*.css', $.cssimport()))
     .pipe(gulp.dest(paths.tmp + '/serve'));
 }
 

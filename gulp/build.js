@@ -1,5 +1,5 @@
 const gulp = require('gulp');
-const eslint = require('gulp-eslint');
+const eslint = require('gulp-eslint-new');
 const gulpIf = require('gulp-if');
 const { inject } = require('./inject')
 
@@ -46,6 +46,7 @@ const html = () => {
       .pipe(gulpIf('**/*.js', $.uglify()))
       .pipe(gulpIf('**/*.css', $.replace(/\.?\.?\/node_modules\/\w+-?\/?\w+\/fonts\/?/g, '../fonts/')))
       .pipe(gulpIf('**/*.css', $.csso()))
+      .pipe(gulpIf('**/*.css', $.cssimport()))
       .pipe($.revReplace())
       .pipe(gulpIf('**/*.html', $.htmlmin({
         removeEmptyAttributes: true,

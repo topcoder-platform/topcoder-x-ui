@@ -4,13 +4,18 @@
     "mocha": true
   },
   "parserOptions": {
-    "ecmaVersion": 8,
+    "ecmaVersion": "latest",
     "sourceType": "module",
     "ecmaFeatures": {
       "experimentalObjectRestSpread": true
     }
   },
   "rules": {
-    "lodash/prefer-invoke-map": 0
+    "lodash/prefer-invoke-map": 0,
+    "import/no-unresolved": 0,
+    "max-params": 0,
+    "max-lines": 0,
+    "max-statements": 0,
+    "valid-jsdoc": 0
   }
 }
