@@ -52,8 +52,8 @@ async function getUserSetting(handle) {
   if (gitlabMapping && gitlabMapping.gitlabUsername) {
     const gitlab = await dbHelper.queryOneUserByType(
       User, gitlabMapping.gitlabUsername, constants.USER_TYPES.GITLAB);
-    const gitlabService = await GitlabService.create(gitlab);
-    if (!_.isNil(gitlabService.user)) {
+      if (!_.isNil(gitlab)) {
+      const gitlabService = await GitlabService.create(gitlab);
       users.push(gitlabService.user);
     }
   }
