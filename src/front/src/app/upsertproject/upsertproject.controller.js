@@ -128,7 +128,9 @@ angular.module('topcoderX').controller('ProjectController', ['currentUser', '$sc
       if (project.copilot === '') {
         project.copilot = null;
       }
-      project.repoUrls = project.repoUrl.split(',');
+      // project.repoUrls = project.repoUrl.split(',');
+      const _project = Object.assign({}, project);
+      delete _project.repoUrls;
       if ($scope.editing) {
         ProjectService.update(project).then(function () {
           Alert.info('Project Updated Successfully', $scope);
