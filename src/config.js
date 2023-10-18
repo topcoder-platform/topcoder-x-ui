@@ -94,9 +94,11 @@ module.exports.frontendConfigs = {
   TOPCODER_VALUES: {
     dev: {
       TC_API_V4_URL: process.env.TC_API_V4_URL || 'https://api.topcoder-dev.com/v4',
+      TC_API_V5_URL: process.env.TC_API_V5_URL || 'https://api.topcoder-dev.com/v5',
     },
     prod: {
       TC_API_V4_URL: process.env.TC_API_V4_URL || 'https://api.topcoder.com/v4',
+      TC_API_V5_URL: process.env.TC_API_V5_URL || 'https://api.topcoder.com/v5',
     },
   },
   TOPCODER_ENV: process.env.TOPCODER_ENV || 'dev',

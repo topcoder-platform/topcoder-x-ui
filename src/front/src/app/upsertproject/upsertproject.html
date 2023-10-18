@@ -78,12 +78,14 @@
             <br />
             <br />
             <label class="form-label">Tags:</label>
-            <ui-select multiple ng-model="project.tags" theme="bootstrap" close-on-select="false" on-select="$select.selected.sort()">
+            <ui-select multiple ng-model="project.tags" theme="bootstrap" close-on-select="false">
               <ui-select-match placeholder="Select...">
-                {{$item}}
+                {{$item.name}}
               </ui-select-match>
-              <ui-select-choices repeat="tag in tags | filter: $select.search">
-                {{tag}}
+              <ui-select-choices repeat="tag in tags"
+                refresh="searchTags($select.search)"
+                refresh-delay="0">
+                {{tag.name}}
               </ui-select-choices>
             </ui-select>
             <small class="form-hint">Select the Tags to be associated with.</small>

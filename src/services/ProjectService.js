@@ -37,7 +37,12 @@ const updateProjectSchema = {
     title: Joi.string().required(),
     tcDirectId: Joi.number().required(),
     //NOTE: `PATCH /challenges/:challengeId` requires the tags not empty
-    tags: Joi.array().items(Joi.string().required()).min(1).required(),
+    tags: Joi.array().items(
+      Joi.object().keys({
+        id: Joi.string().required(),
+        name: Joi.string().required(),
+      })
+    ).min(1).required(),
     repoUrl: Joi.string().required(),
     repoUrls: Joi.array().required(),
     rocketChatWebhook: Joi.string().allow(null),
@@ -60,7 +65,12 @@ const createProjectSchema = {
     title: Joi.string().required(),
     tcDirectId: Joi.number().required(),
     //NOTE: `PATCH /challenges/:challengeId` requires the tags not empty
-    tags: Joi.array().items(Joi.string().required()).min(1).required(),
+    tags: Joi.array().items(
+      Joi.object().keys({
+        id: Joi.string().required(),
+        name: Joi.string().required(),
+      })
+    ).min(1).required(),
     repoUrl: Joi.string().required(),
     copilot: Joi.string().allow(null),
     rocketChatWebhook: Joi.string().allow(null),
@@ -212,7 +222,6 @@ async function create(project, currentUser) {
   project.secretWebhookKey = guid.raw();
   project.copilot = project.copilot ? project.copilot.toLowerCase() : null;
   project.id = helper.generateIdentifier();
-  project.tags = project.tags.join(',');
 
   const createdProject = await dbHelper.create(models.Project, project);
 
@@ -279,7 +288,6 @@ async function update(project, currentUser) {
      */
   project.owner = dbProject.owner;
   project.copilot = project.copilot !== undefined ? project.copilot.toLowerCase() : null;
-  project.tags = project.tags.join(',');
 
   // TODO: move the following logic into one dynamoose transaction
   const repos = await dbHelper.queryRepositoriesByProjectId(project.id);
@@ -442,7 +450,7 @@ async function search(query, currentUser) {
     });
     for (const project of projects) { // eslint-disable-line
       project.repoUrls = await dbHelper.populateRepoUrls(project.id);
-    }  
+    }
     return {
       lastKey: (fetchedProjects.lastKey ? JSON.stringify(fetchedProjects.lastKey) : undefined), // eslint-disable-line
       docs: _.orderBy(projects, ['updatedAt', 'title'], ['desc', 'asc'])

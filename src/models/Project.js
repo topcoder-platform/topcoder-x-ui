@@ -22,12 +22,36 @@ const schema = new Schema({
   title: {type: String, required: true},
   tcDirectId: {
     type: Number,
-    required: true
+    required: true,
   },
   tags: {
-    type: String,
+    type: 'list',
+    list: [{
+      type: 'map',
+      map: {
+        id: {type: String, required: true},
+        name: {type: String, required: true},
+      },
+    }],
     required: true,
-    default: ''
+    default: [],
+    fromDynamo(value) {
+      if (value.S) {
+        return value.S;
+      }
+      if (value.L) {
+        return value.L.map((item) => {
+          if (item.M && item.M.name && item.M.id) {
+            return {
+              id: item.M.id.S,
+              name: item.M.name.S,
+            };
+          }
+          return null;
+        });
+      }
+      return [];
+    },
   },
   rocketChatWebhook: {type: String, required: false},
   rocketChatChannelName: {type: String, required: false},
@@ -40,7 +64,7 @@ const schema = new Schema({
     default: Date.now,
   },
   createCopilotPayments: {type: String, required: false},
-  isConnect: {type: Boolean, required: false, default: true}
+  isConnect: {type: Boolean, required: false, default: true},
 });
 
 module.exports = schema;
