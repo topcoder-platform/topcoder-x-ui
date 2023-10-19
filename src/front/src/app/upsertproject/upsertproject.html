@@ -77,7 +77,7 @@
               TC Connect Project is required.</span>
             <br />
             <br />
-            <label class="form-label">Tags:</label>
+            <label class="form-label">Skills:</label>
             <ui-select multiple ng-model="project.tags" theme="bootstrap" close-on-select="false">
               <ui-select-match placeholder="Select...">
                 {{$item.name}}
@@ -88,9 +88,9 @@
                 {{tag.name}}
               </ui-select-choices>
             </ui-select>
-            <small class="form-hint">Select the Tags to be associated with.</small>
+            <small class="form-hint">Select the skills to be associated with.</small>
             <span ng-show="projectForm.project.tags.$touched && projectForm.project.tags.$invalid">The
-              Project/Challenge tags cannot be empty. [PATCH /challenges/:challengeId requires at least one tag]</span>
+              Project/Challenge skills cannot be empty. [PATCH /challenges/:challengeId requires at least one skill]</span>
             <br />
             <br />
             <label class="form-label">Repo URLs:</label>

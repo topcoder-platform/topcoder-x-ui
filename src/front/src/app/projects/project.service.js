@@ -185,7 +185,7 @@ angular.module('topcoderX')
       }
       return $http({
         method: 'GET',
-        url: $rootScope.appConfig.TOPCODER_VALUES[$rootScope.appConfig.TOPCODER_ENV].TC_API_V5_URL + '/emsi-skills/skills/auto-complete',
+        url: $rootScope.appConfig.TOPCODER_VALUES[$rootScope.appConfig.TOPCODER_ENV].TC_API_V5_URL + '/standardized-sills/skills/autocomplete',
         params: {
           term: searchQuery,
         },
