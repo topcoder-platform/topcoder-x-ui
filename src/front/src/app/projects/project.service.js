@@ -185,7 +185,7 @@ angular.module('topcoderX')
       }
       return $http({
         method: 'GET',
-        url: $rootScope.appConfig.TOPCODER_VALUES[$rootScope.appConfig.TOPCODER_ENV].TC_API_V5_URL + '/standardized-sills/skills/autocomplete',
+        url: $rootScope.appConfig.TOPCODER_VALUES[$rootScope.appConfig.TOPCODER_ENV].TC_API_V5_URL + '/standardized-skills/skills/autocomplete',
         params: {
           term: searchQuery,
         },
@@ -193,6 +193,10 @@ angular.module('topcoderX')
           'Content-Type': 'application/json',
           Authorization: 'Bearer ' + AuthService.getTokenV3(),
         },
+      })
+      .then((response) => {
+        response.data = response.data.map((item) => ({id: item.id, name: item.name}));
+        return response;
       });
     };
     return ProjectService;
