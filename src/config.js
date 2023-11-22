@@ -9,7 +9,7 @@ const fs = require('fs');
  * @version 1.0
  */
 module.exports = {
-  PORT: process.env.PORT || 443, // eslint-disable-line no-magic-numbers
+  PORT: process.env.PORT || 80, // eslint-disable-line no-magic-numbers
   API_VERSION: process.env.API_VERSION || 'v1',
   LOG_LEVEL: process.env.LOG_LEVEL || 'debug',
   SESSION_SECRET: process.env.SESSION_SECRET || 'kjsdfkj34857',
