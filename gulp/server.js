@@ -1,26 +1,24 @@
-'use strict';
+const gulp = require('gulp');
 
-var gulp = require('gulp');
+const paths = gulp.paths;
 
-var paths = gulp.paths;
+const util = require('util');
 
-var util = require('util');
-
-var browserSync = require('browser-sync');
-
-var middleware = require('./proxy');
+const browserSync = require('browser-sync').create(); // Import browser-sync
+const middleware = require('./proxy');
+const { inject } = require('./inject');
 
 function browserSyncInit(baseDir, files, browser) {
   browser = browser === undefined ? 'default' : browser;
 
-  var routes = null;
+  const routes = null;
   if (baseDir === paths.src || (util.isArray(baseDir) && baseDir.indexOf(paths.src) !== -1)) {
     routes = {
       '/node_modules': 'node_modules'
     };
   }
 
-  browserSync.instance = browserSync.init(files, {
+  browserSync.init({
     startPath: '/',
     server: {
       baseDir: baseDir,
@@ -32,30 +30,32 @@ function browserSyncInit(baseDir, files, browser) {
     open: 'external',
     port: 80
   });
+
+  // Watch files and reload on change
+  gulp.watch([
+    paths.tmp + '/serve/{app,components}/**/*.css',
+    paths.src + '/{app,components}/**/*.js',
+    paths.src + 'src/assets/images/**/*',
+    paths.tmp + '/serve/*.html',
+    paths.tmp + '/serve/{app,components}/**/*.html',
+    paths.src + '/{app,components}/**/*.html'
+  ]).on('change', browserSync.reload);
 }
 
-gulp.task('serve', ['build','watch'], function () {
-  browserSyncInit([
-    paths.tmp + '/serve',
-    paths.src
-  ], [
-      paths.tmp + '/serve/{app,components}/**/*.css',
-      paths.src + '/{app,components}/**/*.js',
-      paths.src + 'src/assets/images/**/*',
-      paths.tmp + '/serve/*.html',
-      paths.tmp + '/serve/{app,components}/**/*.html',
-      paths.src + '/{app,components}/**/*.html'
-    ]);
-});
+const serveFn = () => browserSyncInit([paths.tmp + '/serve', paths.src]);
+const serve = gulp.series('build', 'watch', serveFn);
+gulp.task('serve', serve);
 
-gulp.task('serve:dist', ['build'], function () {
-  browserSyncInit(paths.dist);
-});
+const serveDistFn = () => browserSyncInit(paths.dist);
+const serveDist = gulp.series('build', serveDistFn);
+gulp.task('serve:dist', serveDist);
 
-gulp.task('serve:e2e', ['inject'], function () {
-  browserSyncInit([paths.tmp + '/serve', paths.src], null, []);
-});
+const serveE2eFn = () => browserSyncInit([paths.tmp + '/serve', paths.src], null, []);
+const serveE2e = gulp.series(inject, serveE2eFn);
+gulp.task('serve:e2e', serveE2e);
 
-gulp.task('serve:e2e-dist', ['build'], function () {
-  browserSyncInit(paths.dist, null, []);
-});
+const serveE2eDistFn = () => browserSyncInit(paths.dist, null, []);
+const serveE2eDist = gulp.series('build', serveE2eDistFn);
+gulp.task('serve:e2e-dist', serveE2eDist);
+
+module.exports = { serve, serveDist, serveE2e, serveE2eDist }

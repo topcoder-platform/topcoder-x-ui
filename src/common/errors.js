@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2017 TopCoder, Inc. All rights reserved.
  */
+const _ = require('lodash');
 
 /**
  * Define errors.
@@ -61,6 +62,31 @@ class ServiceUnavailable extends ApiError {
   }
 }
 
+
+/**
+ * Handle GitLab error.
+ *
+ * @param {Object} err - The error object.
+ * @param {string} message - The error message.
+ * @param {string} copilotHandle - The copilot handle.
+ * @param {string} repoPath - The repository path.
+ * @returns {Object} - The processed error object.
+ */
+function handleGitLabError(err, message) {
+  let resMsg = `${message}: ${err.message}.`;
+  const detail = _.get(err, 'response.body') || _.get(err, 'cause.response.body');
+  if (detail) {
+    resMsg += ` Response Body: ${JSON.stringify(detail)}`;
+  }
+  const apiError = new ApiError(
+    err.status || _.get(err, 'response.status', 500),
+    resMsg,
+    'gitlab',
+  );
+  return apiError;
+}
+
+
 module.exports = {
   ApiError,
   ValidationError,
@@ -68,4 +94,5 @@ module.exports = {
   UnauthorizedError,
   ForbiddenError,
   ServiceUnavailable,
+  handleGitLabError,
 };

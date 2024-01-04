@@ -1,7 +1,7 @@
 // eslint-disable-line max-lines
 const _ = require('lodash');
-const logger = require('./logger');
 const models = require('../models');
+const logger = require('./logger');
 
 /*
  * Copyright (c) 2018 TopCoder, Inc. All rights reserved.
@@ -20,14 +20,15 @@ const models = require('../models');
  */
 async function getById(model, id) {
   return await new Promise((resolve, reject) => {
-    model.queryOne('id').eq(id).consistent().all().exec((err, result) => {
-      if (err) {
-        logger.error(`DynamoDB getById error ${err}`);
-        reject(err);
-      }
+    model.queryOne('id').eq(id).consistent().all()
+      .exec((err, result) => {
+        if (err) {
+          logger.error(`DynamoDB getById error ${err}`);
+          reject(err);
+        }
 
-      return resolve(result);
-    });
+        return resolve(result);
+      });
   });
 }
 
@@ -81,7 +82,9 @@ async function scan(model, scanParams) {
 async function scanWithLimit(model, scanParams, size, lastKey) {
   return await new Promise((resolve, reject) => {
     const scanMethod = model.scan(scanParams).limit(size);
-    if (lastKey) scanMethod.startAt(lastKey);
+    if (lastKey) {
+      scanMethod.startAt(lastKey);
+    }
     scanMethod.exec((err, result) => {
       if (err) {
         logger.error(`DynamoDB scan error ${err}`);
@@ -102,7 +105,9 @@ async function scanWithLimit(model, scanParams, size, lastKey) {
 async function scanAll(model, size, lastKey) {
   return await new Promise((resolve, reject) => {
     const scanMethod = model.scan({}).limit(size);
-    if (lastKey) scanMethod.startAt(lastKey);
+    if (lastKey) {
+      scanMethod.startAt(lastKey);
+    }
     scanMethod.exec((err, result) => {
       if (err) {
         logger.error(`DynamoDB scan error ${err}`);
@@ -161,21 +166,21 @@ async function scanAllWithSearch(model, containsKey, contains) {
  * @returns {Promise<void>}
  */
 async function queryOneIssue(model, repositoryId, number, provider) {
-
   return await new Promise((resolve, reject) => {
-
     model.query('repositoryId').eq(repositoryId)
-    .where('number').eq(number)
-    .filter('provider').eq(provider)
-    .all()
-    .exec((err, result) => {
-      if (err) {
-        logger.debug(`queryOne. Error. ${err}`);
-        return reject(err);
-      }
+      .where('number')
+      .eq(number)
+      .filter('provider')
+      .eq(provider)
+      .all()
+      .exec((err, result) => {
+        if (err) {
+          logger.debug(`queryOne. Error. ${err}`);
+          return reject(err);
+        }
 
-      return resolve(result.count === 0 ? null : result[0]);
-    });
+        return resolve(result.count === 0 ? null : result[0]);
+      });
   });
 }
 
@@ -226,16 +231,16 @@ async function queryPaymentIdByChallengeUUID(challengeUUID) {
 async function queryOneUserByType(model, username, type) {
   return await new Promise((resolve, reject) => {
     model.query('username').eq(username)
-    .where('type')
-    .eq(type)
-    .all()
-    .exec((err, result) => {
-      if (err || !result) {
-        logger.debug(`queryOneUserByType. Error. ${err}`);
-        return reject(err);
-      }
-      return resolve(result.count === 0 ? null : result[0]);
-    });
+      .where('type')
+      .eq(type)
+      .all()
+      .exec((err, result) => {
+        if (err || !result) {
+          logger.debug(`queryOneUserByType. Error. ${err}`);
+          return reject(err);
+        }
+        return resolve(result.count === 0 ? null : result[0]);
+      });
   });
 }
 
@@ -250,18 +255,18 @@ async function queryOneUserByType(model, username, type) {
 async function queryOneUserByTypeAndRole(model, username, type, role) {
   return await new Promise((resolve, reject) => {
     model.query('username').eq(username)
-    .where('type')
-    .eq(type)
-    .filter('role')
-    .eq(role)
-    .all()
-    .exec((err, result) => {
-      if (err || !result) {
-        logger.debug(`queryOneUserByTypeAndRole. Error. ${err}`);
-        return reject(err);
-      }
-      return resolve(result.count === 0 ? null : result[0]);
-    });
+      .where('type')
+      .eq(type)
+      .filter('role')
+      .eq(role)
+      .all()
+      .exec((err, result) => {
+        if (err || !result) {
+          logger.debug(`queryOneUserByTypeAndRole. Error. ${err}`);
+          return reject(err);
+        }
+        return resolve(result.count === 0 ? null : result[0]);
+      });
   });
 }
 
@@ -274,14 +279,14 @@ async function queryOneUserByTypeAndRole(model, username, type, role) {
 async function queryOneUserMappingByTCUsername(model, tcusername) {
   return await new Promise((resolve, reject) => {
     model.queryOne('topcoderUsername').eq(tcusername)
-    .all()
-    .exec((err, result) => {
-      if (err) {
-        logger.debug(`queryOneUserMappingByTCUsername. Error. ${err}`);
-        return reject(err);
-      }
-      return resolve(result);
-    });
+      .all()
+      .exec((err, result) => {
+        if (err) {
+          logger.debug(`queryOneUserMappingByTCUsername. Error. ${err}`);
+          return reject(err);
+        }
+        return resolve(result);
+      });
   });
 }
 
@@ -295,14 +300,14 @@ async function queryOneUserMappingByTCUsername(model, tcusername) {
 async function queryTCUsernameByGitUsername(model, provider, gitUsername) {
   return await new Promise((resolve, reject) => {
     model.queryOne(`${provider}Username`).eq(gitUsername)
-    .all()
-    .exec((err, result) => {
-      if (err) {
-        logger.debug(`queryTCUsernameByGitUsername. Error. ${err}`);
-        return reject(err);
-      }
-      return resolve(result.topcoderUsername);
-    });
+      .all()
+      .exec((err, result) => {
+        if (err) {
+          logger.debug(`queryTCUsernameByGitUsername. Error. ${err}`);
+          return reject(err);
+        }
+        return resolve(result.topcoderUsername);
+      });
   });
 }
 
@@ -315,15 +320,18 @@ async function queryTCUsernameByGitUsername(model, provider, gitUsername) {
 async function queryOneActiveProject(model, repoUrl) {
   return await new Promise((resolve, reject) => {
     queryOneActiveRepository(models.Repository, repoUrl).then((repo) => {
-      if (!repo || repo.length === 0) resolve(null);
-      else model.queryOne('id').eq(repo.projectId).consistent()
-        .exec((err, result) => {
-          if (err) {
-            logger.debug(`queryOneActiveProject. Error. ${err}`);
-            return reject(err);
-          }
-          return resolve(result);
-        });
+      if (!repo || repo.length === 0) {
+        resolve(null);
+      } else {
+        model.queryOne('id').eq(repo.projectId).consistent()
+          .exec((err, result) => {
+            if (err) {
+              logger.debug(`queryOneActiveProject. Error. ${err}`);
+              return reject(err);
+            }
+            return resolve(result);
+          });
+      }
     });
   });
 }
@@ -338,18 +346,18 @@ async function queryOneActiveProject(model, repoUrl) {
 async function queryOneActiveCopilotPayment(model, project, username) {
   return await new Promise((resolve, reject) => {
     model.query('project').eq(project)
-    .where('username')
-    .eq(username)
-    .filter('closed')
-    .eq('false')
-    .all()
-    .exec((err, result) => {
-      if (err || !result) {
-        logger.debug(`queryOneActiveCopilotPayment. Error. ${err}`);
-        return reject(err);
-      }
-      return resolve(result.count === 0 ? null : result[0]);
-    });
+      .where('username')
+      .eq(username)
+      .filter('closed')
+      .eq('false')
+      .all()
+      .exec((err, result) => {
+        if (err || !result) {
+          logger.debug(`queryOneActiveCopilotPayment. Error. ${err}`);
+          return reject(err);
+        }
+        return resolve(result.count === 0 ? null : result[0]);
+      });
   });
 }
 
@@ -363,16 +371,16 @@ async function queryOneActiveCopilotPayment(model, project, username) {
 async function queryOneUserGroupMapping(model, groupId, gitlabUserId) {
   return await new Promise((resolve, reject) => {
     model.query('groupId').eq(groupId)
-    .where('gitlabUserId')
-    .eq(gitlabUserId.toString())
-    .all()
-    .exec((err, result) => {
-      if (err || !result) {
-        logger.debug(`queryOneUserGroupMapping. Error. ${err}`);
-        return reject(err);
-      }
-      return resolve(result.count === 0 ? null : result[0]);
-    });
+      .where('gitlabUserId')
+      .eq(gitlabUserId.toString())
+      .all()
+      .exec((err, result) => {
+        if (err || !result) {
+          logger.debug(`queryOneUserGroupMapping. Error. ${err}`);
+          return reject(err);
+        }
+        return resolve(result.count === 0 ? null : result[0]);
+      });
   });
 }
 
@@ -387,18 +395,18 @@ async function queryOneUserGroupMapping(model, groupId, gitlabUserId) {
 async function queryOneUserTeamMapping(model, teamId, githubUserName, githubOrgId) {
   return await new Promise((resolve, reject) => {
     model.query('teamId').eq(teamId)
-    .where('githubUserName')
-    .eq(githubUserName)
-    .filter('githubOrgId')
-    .eq(githubOrgId)
-    .all()
-    .exec((err, result) => {
-      if (err || !result) {
-        logger.debug(`queryOneUserTeamMapping. Error. ${err}`);
-        return reject(err);
-      }
-      return resolve(result.count === 0 ? null : result[0]);
-    });
+      .where('githubUserName')
+      .eq(githubUserName)
+      .filter('githubOrgId')
+      .eq(githubOrgId)
+      .all()
+      .exec((err, result) => {
+        if (err || !result) {
+          logger.debug(`queryOneUserTeamMapping. Error. ${err}`);
+          return reject(err);
+        }
+        return resolve(result.count === 0 ? null : result[0]);
+      });
   });
 }
 
@@ -412,15 +420,18 @@ async function queryOneUserTeamMapping(model, teamId, githubUserName, githubOrgI
 async function queryOneActiveProjectWithFilter(model, repoUrl, projectIdToFilter) {
   return await new Promise((resolve, reject) => {
     queryActiveRepositoriesExcludeByProjectId(models.Repository, repoUrl, projectIdToFilter).then((repos) => {
-      if (!repos || repos.length === 0) resolve(null);
-      else model.queryOne('id').eq(repos[0].projectId).consistent()
-        .exec((err, result) => {
-          if (err) {
-            logger.debug(`queryOneActiveProjectWithFilter. Error. ${err}`);
-            return reject(err);
-          }
-          return resolve(result);
-        });
+      if (!repos || repos.length === 0) {
+        resolve(null);
+      } else {
+        model.queryOne('id').eq(repos[0].projectId).consistent()
+          .exec((err, result) => {
+            if (err) {
+              logger.debug(`queryOneActiveProjectWithFilter. Error. ${err}`);
+              return reject(err);
+            }
+            return resolve(result);
+          });
+      }
     });
   });
 }
@@ -517,14 +528,14 @@ async function removeUser(Model, username, type) {
 async function queryOneOrganisation(model, organisation) {
   return await new Promise((resolve, reject) => {
     model.queryOne('name').eq(organisation)
-    .all()
-    .exec((err, result) => {
-      if (err) {
-        logger.debug(`queryOneOrganisation. Error. ${err}`);
-        return reject(err);
-      }
-      return resolve(result);
-    });
+      .all()
+      .exec((err, result) => {
+        if (err) {
+          logger.debug(`queryOneOrganisation. Error. ${err}`);
+          return reject(err);
+        }
+        return resolve(result);
+      });
   });
 }
 
@@ -538,22 +549,24 @@ async function queryOneRepository(url) {
     models.Repository.query({
       url,
     })
-    .all()
-    .exec((err, repos) => {
-      if (err) {
-        return reject(err);
-      }
-      if (!repos || repos.length === 0) resolve(null);
-      if (repos.length > 1) {
-        let error = `Repository's url is unique in this version.
+      .all()
+      .exec((err, repos) => {
+        if (err) {
+          return reject(err);
+        }
+        if (!repos || repos.length === 0) {
+          resolve(null);
+        }
+        if (repos.length > 1) {
+          const error = `Repository's url is unique in this version.
           This Error must be caused by old data in the Repository table.
           The old version can only guarrentee that the active Repository's url is unique.
           Please migrate the old Repository table.`;
-        logger.debug(`queryOneRepository. Error. ${error}`);
-        reject(error);
-      }
-      return resolve(repos[0]);
-    });
+          logger.debug(`queryOneRepository. Error. ${error}`);
+          reject(error);
+        }
+        return resolve(repos[0]);
+      });
   });
 }
 
@@ -568,14 +581,14 @@ async function queryOneActiveRepository(model, url) {
     model.queryOne({
       url,
     })
-    .filter('archived').eq('false')
-    .all()
-    .exec((err, result) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(result);
-    });
+      .filter('archived').eq('false')
+      .all()
+      .exec((err, result) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(result);
+      });
   });
 }
 
@@ -590,16 +603,17 @@ async function queryActiveRepositoriesExcludeByProjectId(url, projectId) {
     models.Repository.query({
       url,
     })
-    .filter('archived').eq('false')
-    .filter('projectId')
-    .not().eq(projectId)
-    .all()
-    .exec((err, result) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(result);
-    });
+      .filter('archived').eq('false')
+      .filter('projectId')
+      .not()
+      .eq(projectId)
+      .all()
+      .exec((err, result) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(result);
+      });
   });
 }
 
@@ -611,15 +625,15 @@ async function queryActiveRepositoriesExcludeByProjectId(url, projectId) {
 async function queryRepositoriesByProjectId(projectId) {
   return await new Promise((resolve, reject) => {
     models.Repository.query({
-      projectId
+      projectId,
     })
-    .all()
-    .exec((err, result) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(result);
-    });
+      .all()
+      .exec((err, result) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(result);
+      });
   });
 }
 
@@ -632,17 +646,17 @@ async function queryRepositoriesByProjectId(projectId) {
 async function queryRepositoryByProjectIdFilterUrl(projectId, url) {
   return await new Promise((resolve, reject) => {
     models.Repository.query({
-      projectId
+      projectId,
     })
-    .filter('url')
-    .eq(url)
-    .all()
-    .exec((err, result) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(result.count === 0 ? null : result[0]);
-    });
+      .filter('url')
+      .eq(url)
+      .all()
+      .exec((err, result) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(result.count === 0 ? null : result[0]);
+      });
   });
 }
 
@@ -654,16 +668,65 @@ async function queryRepositoryByProjectIdFilterUrl(projectId, url) {
 async function populateRepoUrls(projectId) {
   return await new Promise((resolve, reject) => {
     models.Repository.query({
-      projectId
+      projectId,
     })
-    .all()
-    .exec((err, result) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(_.map(result, 'url'));
-    });
+      .all()
+      .exec((err, result) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(_.map(result, 'url'));
+      });
   });
+}
+
+
+/**
+ * Acquire lock on user to prevent concurrent updates
+ * @param {String} userId ID of the user
+ * @param {String} lockId ID of the lock
+ * @param {Number} ttl Time to live (in milliseconds)
+ * @returns {Promise<Object>} The lock object
+ */
+async function acquireLockOnUser(userId, lockId, ttl) {
+  const lockExpiration = Date.now() + ttl;
+  return await new Promise(async (resolve) => {
+    try {
+      const res = await models.User.update(
+        {id: userId},
+        {lockId, lockExpiration},
+        {
+          condition: 'attribute_not_exists(lockId) OR (lockExpiration < :lockExpiration)',
+          conditionValues: {lockExpiration: new Date()},
+          returnValues: 'ALL_NEW',
+        },
+      );
+      return resolve(res);
+    } catch (err) {
+      if (err.code === 'ConditionalCheckFailedException') {
+        return resolve(null);
+      }
+      throw err;
+    }
+  });
+}
+
+/**
+ * Release lock on user
+ * @param {String} id ID of the user
+ * @param {String} lockId ID of the lock
+ * @returns {Promise<Object>} The lock object
+ */
+async function releaseLockOnUser(id, lockId) {
+  const user = await models.User.update(
+    {id},
+    {lockId: null, lockExpiration: null},
+    {
+      condition: 'lockId = :lockId',
+      conditionValues: {lockId},
+    },
+  );
+  return user;
 }
 
 module.exports = {
@@ -696,5 +759,7 @@ module.exports = {
   queryOneUserMappingByTCUsername,
   queryTCUsernameByGitUsername,
   queryRepositoriesByProjectId,
-  queryRepositoryByProjectIdFilterUrl
+  queryRepositoryByProjectIdFilterUrl,
+  acquireLockOnUser,
+  releaseLockOnUser,
 };

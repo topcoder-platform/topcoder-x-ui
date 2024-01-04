@@ -3,7 +3,7 @@
  *
  * This is a service to access the backend api.
  */
-'use strict';
+
 
 angular.module('topcoderX')
   .factory('ProjectService', ['Helper', '$http', '$rootScope', 'AuthService', function (Helper, $http, $rootScope, AuthService) {
@@ -17,9 +17,7 @@ angular.module('topcoderX')
      * @param project  the project to be created
      */
     ProjectService.create = function (project) {
-      return $http.post(Helper.baseUrl + '/api/v1/projects', project).then(function (response) {
-        return response;
-      });
+      return $http.post(Helper.baseUrl + '/api/v1/projects', project);
     };
 
     /**
@@ -27,7 +25,7 @@ angular.module('topcoderX')
      */
     ProjectService.getProjects = function (status, showAll, perPage, lastKey, query) {
       var url = Helper.baseUrl + '/api/v1/projects?status=' + status + '&showAll=' + showAll + '&perPage=' + perPage +
-        (lastKey ? '&lastKey=' + lastKey : '' );
+        (lastKey ? '&lastKey=' + lastKey : '');
       if (query) {
         url = Helper.baseUrl + '/api/v1/projects/search?status=' + status + '&showAll=' + showAll + '&perPage=' + perPage +
            '&query=' + query;
@@ -63,7 +61,7 @@ angular.module('topcoderX')
     ProjectService.getUserToken = function (username, tokenType) {
       return $http.get(Helper.baseUrl + '/api/v1/users/accessToken?username=' + username + '&tokenType=' + tokenType).then(function (response) {
         return response;
-      })
+      });
     };
 
     /**
@@ -145,21 +143,21 @@ angular.module('topcoderX')
      * @param perPage the items to retrieve per page
      * @param page the page index
      */
-    ProjectService.getConnectProjects = function(perPage, page) {
+    ProjectService.getConnectProjects = function (perPage, page) {
       return $http({
         method: 'GET',
         url: $rootScope.appConfig.TC_API_V5_URL + '/projects/',
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + AuthService.getTokenV3()
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + AuthService.getTokenV3(),
         },
         params: {
           fields: 'id,name',
           sort: 'lastActivityAt desc',
-          perPage: perPage,
-          page: page,
-          status: 'active'
-        }
+          perPage,
+          page,
+          status: 'active',
+        },
       });
     };
 
@@ -167,30 +165,39 @@ angular.module('topcoderX')
      * Get connect project by id
      * @param id the id
      */
-    ProjectService.getConnectProject = function(id) {
+    ProjectService.getConnectProject = function (id) {
       return $http({
         method: 'GET',
         url: $rootScope.appConfig.TC_API_V5_URL + '/projects/' + id,
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + AuthService.getTokenV3()
-        }
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + AuthService.getTokenV3(),
+        },
       });
     };
 
     /**
      * Get technology tags
      */
-    ProjectService.getTags = function() {
+    ProjectService.searchTags = function (searchQuery) {
+      if (!searchQuery || searchQuery.length === 0) {
+        return Promise.resolve({data: []});
+      }
       return $http({
         method: 'GET',
-        url: $rootScope.appConfig.TOPCODER_VALUES[$rootScope.appConfig.TOPCODER_ENV].TC_API_V4_URL + '/technologies',
+        url: $rootScope.appConfig.TOPCODER_VALUES[$rootScope.appConfig.TOPCODER_ENV].TC_API_V5_URL + '/standardized-skills/skills/autocomplete',
+        params: {
+          term: searchQuery,
+        },
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + AuthService.getTokenV3()
-        }
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + AuthService.getTokenV3(),
+        },
+      })
+      .then((response) => {
+        response.data = response.data.map((item) => ({id: item.id, name: item.name}));
+        return response;
       });
     };
-
     return ProjectService;
   }]);

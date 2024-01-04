@@ -1,13 +1,10 @@
-'use strict';
+const gulp = require('gulp');
 
-var gulp = require('gulp');
+const paths = gulp.paths;
 
-var paths = gulp.paths;
+const $ = require('gulp-load-plugins')();
 
-var $ = require('gulp-load-plugins')();
-
-gulp.task('styles', function () {
-
+const styles = () => new Promise(async (resolve, reject) => {
   var lessOptions = {
     paths: [
       'node_modules',
@@ -23,7 +20,7 @@ gulp.task('styles', function () {
   ], { read: false });
 
   var injectOptions = {
-    transform: function(filePath) {
+    transform: function (filePath) {
       filePath = filePath.replace(paths.src + '/app/', '');
       filePath = filePath.replace(paths.src + '/components/', '../components/');
       return '@import \'' + filePath + '\';';
@@ -33,7 +30,8 @@ gulp.task('styles', function () {
     addRootSlash: false
   };
 
-  var indexFilter = $.filter('index.less');
+  const filter = (await import('gulp-filter')).default;
+  const indexFilter = filter('index.less', { restore: true });
 
   return gulp.src([
     paths.src + '/app/index.less',
@@ -41,13 +39,16 @@ gulp.task('styles', function () {
   ])
     .pipe(indexFilter)
     .pipe($.inject(injectFiles, injectOptions))
-    .pipe(indexFilter.restore())
-    .pipe($.less())
-
-  .pipe($.autoprefixer())
+    .pipe(indexFilter.restore)
+    .pipe($.less(lessOptions))
+    .pipe($.autoprefixer())
     .on('error', function handleError(err) {
       console.error(err.toString());
       this.emit('end');
     })
-    .pipe(gulp.dest(paths.tmp + '/serve/app/'));
+    .pipe(gulp.dest(paths.tmp + '/serve/app/'))
+    .on('finish', resolve)
+    .on('error', reject);
 });
+
+module.exports = { styles }

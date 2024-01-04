@@ -115,6 +115,23 @@ module.exports = {
       allowAnonymous: true,
     },
   },
+  '/gitlab/guestuser/login': {
+    get: {
+      controller: 'GitlabController',
+      method: 'guestUserLogin',
+      allowAnonymous: false,
+      allowNormalUser: true,
+      tcLogin: true,
+    },
+  },
+  '/gitlab/guestuser/callback': {
+    get: {
+      controller: 'GitlabController',
+      method: 'guestUserCallback',
+      allowAnonymous: false,
+      allowNormalUser: true,
+    },
+  },
   '/tclogin': {
     get: {
       controller: 'TCUserController',
@@ -211,8 +228,8 @@ module.exports = {
     },
     delete: {
       controller: 'UserController',
-      method: 'revokeUserSetting'
-    }
+      method: 'revokeUserSetting',
+    },
   },
   '/users/accessToken': {
     get: {
@@ -236,8 +253,8 @@ module.exports = {
   '/issues/recreate': {
     post: {
       controller: 'IssueController',
-      method: 'recreate'
-    }
+      method: 'recreate',
+    },
   },
   '/appConfig': {
     get: {

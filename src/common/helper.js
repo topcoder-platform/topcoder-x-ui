@@ -158,7 +158,7 @@ async function convertGitHubErrorAsync(err, message, gitUsername) {
  * @param {Error} err the gitlab api error
  * @param {String} message the error message
  * @param {String} gitUsername the git username
- * @returns {Error} converted error
+ * @returns {Promise<Error>} converted error
  */
 async function convertGitLabErrorAsync(err, message, gitUsername) {
   if (err.statusCode === 401 && gitUsername) { // eslint-disable-line no-magic-numbers
@@ -248,7 +248,7 @@ async function ensureExistsWithKey(Model, key, value, modelName) {
  */
 async function getProviderType(repoUrl) {
   const parsedDomain = await parseDomain(repoUrl);
-  if (!parsedDomain || !parsedDomain.domain || 
+  if (!parsedDomain || !parsedDomain.domain ||
     (parsedDomain.domain !== 'github' && parsedDomain.domain !== 'gitlab')) {
     throw new ValidationError('Invalid git repo url');
   }

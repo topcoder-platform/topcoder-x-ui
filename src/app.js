@@ -9,28 +9,29 @@
  * @version 1.0
  */
 const Path = require('path');
+const https = require('https');
 const _ = require('lodash');
 const cors = require('cors');
 const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const decodeToken = require('tc-auth-lib').decodeToken;
 // const secure = require('ssl-express-www');
+const {decodeToken} = require('./utils/tc-auth');
 const config = require('./config');
 const routes = require('./routes');
 const logger = require('./common/logger');
 const errors = require('./common/errors');
 const constants = require('./common/constants');
 const {getAppHealth} = require('./controllers/AppHealthController');
-global.atob  = require('atob');
+global.atob = require('atob');
 
 const app = express();
 app.use(cors());
 // app.use(secure);
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({ secret: config.SESSION_SECRET, resave: false, saveUninitialized: true }));
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(session({secret: config.SESSION_SECRET, resave: false, saveUninitialized: true}));
 app.use(cookieParser());
 
 // Load routes
@@ -119,14 +120,14 @@ app.use((err, req, res, next) => {
   let resultErr = err;
   if (err.isJoi) {
     resultErr = new errors.ValidationError('Invalid request parameters',
-      _.map(err.details, (detail) => ({ message: detail.message, path: detail.path })));
+      _.map(err.details, (detail) => ({message: detail.message, path: detail.path})));
   }
   // from express-jwt
   if (err.name === 'UnauthorizedError') {
     err.statusCode = 401; // eslint-disable-line no-magic-numbers
   }
 
-  const resObj = { message: resultErr.message };
+  const resObj = {message: resultErr.message};
   if (resultErr.code) {
     resObj.code = resultErr.code;
   }
@@ -153,6 +154,7 @@ process.on('unhandledRejection', (err) => {
 const ignoreConfigLog = [
   'cert',
   'key',
+  'ca',
   'AWS_ACCESS_KEY_ID',
   'AWS_SECRET_ACCESS_KEY',
   'AUTH0_CLIENT_ID',
@@ -160,7 +162,7 @@ const ignoreConfigLog = [
   'GITHUB_CLIENT_ID',
   'GITHUB_CLIENT_SECRET',
   'GITLAB_CLIENT_ID',
-  'GITLAB_CLIENT_SECRET'
+  'GITLAB_CLIENT_SECRET',
 ];
 /**
  * Print configs to logger
@@ -194,7 +196,14 @@ dumpConfigs(config, 0);
 logger.debug('--- End of List of Configurations ---');
 
 const port = config.PORT;
-app.listen(port, '0.0.0.0');
-logger.info('Topcoder X server listening on port %d', port);
+if (process.env.ENABLE_SERVER_SSL) {
+  https
+    .createServer(config.SSL_CONFIG, app)
+    .listen(port, () => {
+      logger.info('Topcoder X server listening on port %d', port);
+    });
+} else {
+  app.listen(port, '0.0.0.0');
+}
 
 module.exports = app;

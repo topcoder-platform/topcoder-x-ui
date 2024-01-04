@@ -71,7 +71,7 @@ async function ownerUserLoginCallback(req, res) {
     .end();
   const token = result.body.access_token;
   // ensure the user is valid owner user
-  const ownerUser = await GithubService.ensureOwnerUser(token, topcoderUsername);
+  const ownerUser = await GithubService.ensureUser(token, topcoderUsername, constants.USER_ROLES.OWNER);
   // store access token to session
   req.session.ownerUserAccessToken = token;
   req.session.ownerUsername = ownerUser.username;

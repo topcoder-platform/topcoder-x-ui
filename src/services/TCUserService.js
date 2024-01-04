@@ -9,9 +9,9 @@
  * @version 1.0
  */
 const Joi = require('joi');
-const decodeToken = require('tc-auth-lib').decodeToken;
 const errors = require('../common/errors');
 const helper = require('../common/helper');
+const {decodeToken} = require('../utils/tc-auth');
 const GithubUserMapping = require('../models').GithubUserMapping;
 const GitlabUserMapping = require('../models').GitlabUserMapping;
 
@@ -44,9 +44,7 @@ async function getUserMapping(query) {
   if (query.githubUsername) {
     return await helper.ensureExists(GithubUserMapping, query, 'GithubUserMapping');
   }
-  else {
-    return await helper.ensureExists(GitlabUserMapping, query, 'GitlabUserMapping');
-  }
+  return await helper.ensureExists(GitlabUserMapping, query, 'GitlabUserMapping');
 }
 
 getUserMapping.schema = Joi.object().keys({

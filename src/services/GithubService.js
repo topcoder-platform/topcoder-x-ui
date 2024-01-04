@@ -12,6 +12,8 @@
 const GitHub = require('github-api');
 const Joi = require('joi');
 const _ = require('lodash');
+const superagent = require('superagent');
+const superagentPromise = require('superagent-promise');
 const config = require('../config');
 const constants = require('../common/constants');
 const helper = require('../common/helper');
@@ -21,8 +23,6 @@ const GithubUserMapping = require('../models').GithubUserMapping;
 const OwnerUserTeam = require('../models').OwnerUserTeam;
 const Organisation = require('../models').Organisation;
 const errors = require('../common/errors');
-const superagent = require('superagent');
-const superagentPromise = require('superagent-promise');
 
 const request = superagentPromise(superagent, Promise);
 
@@ -30,9 +30,10 @@ const request = superagentPromise(superagent, Promise);
  * Ensure the owner user is in database.
  * @param {String} token the access token of owner user
  * @param {String} topcoderUsername the topcoder handle of owner user
+ * @param {String} userRole the role of the user
  * @returns {Promise} the promise result of found owner user
  */
-async function ensureOwnerUser(token, topcoderUsername) {
+async function ensureUser(token, topcoderUsername, userRole) {
   let userProfile;
   try {
     const github = new GitHub({token});
@@ -44,7 +45,7 @@ async function ensureOwnerUser(token, topcoderUsername) {
   const user = await dbHelper.queryOneUserByTypeAndRole(User,
     userProfile.login,
     constants.USER_TYPES.GITHUB,
-    constants.USER_ROLES.OWNER);
+    userRole);
 
   const userMapping = await dbHelper.queryOneUserMappingByTCUsername(GithubUserMapping, topcoderUsername);
   if (!userMapping) {
@@ -63,7 +64,7 @@ async function ensureOwnerUser(token, topcoderUsername) {
   if (!user) {
     return await dbHelper.create(User, {
       id: helper.generateIdentifier(),
-      role: constants.USER_ROLES.OWNER,
+      role: userRole,
       type: constants.USER_TYPES.GITHUB,
       userProviderId: userProfile.id,
       username: userProfile.login,
@@ -78,7 +79,7 @@ async function ensureOwnerUser(token, topcoderUsername) {
   });
 }
 
-ensureOwnerUser.schema = Joi.object().keys({
+ensureUser.schema = Joi.object().keys({
   token: Joi.string().required(),
   topcoderUsername: Joi.string().required(),
 });
@@ -247,7 +248,7 @@ async function addOrganisationMember(organisation, normalUserToken) {
   try {
     const dbOrganisation = await dbHelper.queryOneOrganisation(Organisation, organisation);
     if (!dbOrganisation) {
-      console.log(`Personal access token not found for organisation ${organisation}.`);  /* eslint-disable-line no-console */
+      console.log(`Personal access token not found for organisation ${organisation}.`); /* eslint-disable-line no-console */
       return {};
     }
     const githubNormalUser = new GitHub({
@@ -280,7 +281,7 @@ async function addOrganisationMember(organisation, normalUserToken) {
 
 addOrganisationMember.schema = Joi.object().keys({
   organisation: Joi.string().required(),
-  normalUserToken: Joi.string().required()
+  normalUserToken: Joi.string().required(),
 });
 
 /**
@@ -316,7 +317,7 @@ async function acceptOrganisationInvitation(organisation, normalUserToken) {
 
 acceptOrganisationInvitation.schema = Joi.object().keys({
   organisation: Joi.string().required(),
-  normalUserToken: Joi.string().required()
+  normalUserToken: Joi.string().required(),
 });
 
 /**
@@ -409,7 +410,7 @@ deleteUserFromGithubTeam.schema = Joi.object().keys({
 });
 
 module.exports = {
-  ensureOwnerUser,
+  ensureUser,
   listOwnerUserTeams,
   getTeamRegistrationUrl,
   addTeamMember,
@@ -417,7 +418,7 @@ module.exports = {
   getTeamDetails,
   deleteUserFromGithubTeam,
   addOrganisationMember,
-  acceptOrganisationInvitation
+  acceptOrganisationInvitation,
 };
 
 helper.buildService(module.exports);

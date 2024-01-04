@@ -16,11 +16,11 @@ const schema = new Schema({
   },
   userProviderId: {
     type: Number,
-    required: true
+    required: true,
   },
   userProviderIdStr: {
     type: String,
-    required: false
+    required: false,
   },
   username: {
     type: String,
@@ -35,17 +35,19 @@ const schema = new Schema({
   role: {
     type: String,
     required: true,
-    enum: _.values(constants.USER_ROLES)
+    enum: _.values(constants.USER_ROLES),
   },
   type: {
     type: String,
     required: true,
-    enum: _.values(constants.USER_TYPES)
+    enum: _.values(constants.USER_TYPES),
   },
   // gitlab token data
   accessToken: {type: String, required: false},
   accessTokenExpiration: {type: Date, required: false},
   refreshToken: {type: String, required: false},
+  lockId: {type: String, required: false},
+  lockExpiration: {type: Date, required: false},
 });
 
 module.exports = schema;
